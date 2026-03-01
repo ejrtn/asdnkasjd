@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>복용 알람 - Cloud9 Care</title>
+<link rel="stylesheet" href="/static/common.css">
+<link rel="stylesheet" href="/static/chatbot.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-left">☁️ Cloud9 Care</div>
+  <div class="header-right">
+    <input class="search" placeholder="search">
+    <button>Button</button>
+    <button>➕</button>
+    <div class="user-menu">
+      <button class="user-menu-btn" id="user-menu-btn">👤</button>
+      <div class="user-dropdown" id="user-dropdown">
+        <a href="/signup">회원가입</a>
+        <a href="/login">로그인</a>
+        <a href="/mypage">마이페이지</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <button onclick="location.href='/dashboard'">대시보드</button>
+    <button onclick="location.href='/guide'">생활 안내 가이드</button>
+    <button onclick="location.href='/alarm'">복용 알람</button>
+    <button onclick="location.href='/upload'">처방전 및 약물</button>
+    <div class="sidebar-footer">
+      <button onclick="location.href='/mypage'">👤 마이페이지</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-title">복용 알람</div>
+    <div class="flex">
+      <div class="column box">
+        <h4>현재 복용 중인 약물</h4>
+        <div class="card">약물 이름 1 <div class="toggle"></div></div>
+        <div class="card">약물 이름 2 <div class="toggle"></div></div>
+        <div class="card">약물 이름 3 <div class="toggle"></div></div>
+      </div>
+      <div class="column box">
+        <h4>약물 상세 정보</h4>
+        <div class="big-box"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<button id="chatbot-button" class="chatbot-button">🤖</button>
+<div id="chatbot-container" class="chatbot-container">
+  <div class="chatbot-header">
+    <h3>💬 챗봇</h3>
+    <div class="chatbot-header-buttons">
+      <button id="chatbot-tts" class="chatbot-tts">🔊</button>
+      <button id="chatbot-end" class="chatbot-end">🗑️</button>
+      <button id="chatbot-close" class="chatbot-close">×</button>
+    </div>
+  </div>
+  <div id="chatbot-messages" class="chatbot-messages"></div>
+  <div class="chatbot-input">
+    <input id="chatbot-input" type="text" placeholder="메시지 입력...">
+    <button id="chatbot-send" class="chatbot-send">➤</button>
+  </div>
+</div>
+
+<script src="/static/common.js"></script>
+<script src="/static/chatbot.js"></script>
+</body>
+</html>
