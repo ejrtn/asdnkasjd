@@ -5,6 +5,9 @@ const chatbot = {
   messages: [],
 };
 
+let isSpeaking = false;
+const synthesis = window.speechSynthesis;
+
 // 챗봇 초기화
 function initChatbot() {
   const button = document.getElementById('chatbot-button');
@@ -215,10 +218,20 @@ async function endChat() {
   alert('챗이 종료되었습니다.');
 }
 
-// 마지막 AI 답변 읽어주기 (TTS)
+// TTS 토글 (최신 답변만 읽기)
 function readLastMessage() {
-  // 마지막 assistant 메시지 찾기
-  const assistantMessages = chatbot.messages.filter(msg => msg.role === 'assistant');
+  const ttsBtn = document.getElementById('chatbot-tts');
+  
+  if (isSpeaking) {
+    synthesis.cancel();
+    isSpeaking = false;
+    ttsBtn.textContent = '🔊';
+    ttsBtn.style.background = 'none';
+    return;
+  }
+
+  // 최신 챗봇 답변만 읽기
+  const assistantMessages = chatbot.messages.filter(m => m.role === 'assistant');
   
   if (assistantMessages.length === 0) {
     alert('읽어줄 메시지가 없습니다.');
@@ -227,20 +240,28 @@ function readLastMessage() {
 
   const lastMessage = assistantMessages[assistantMessages.length - 1].content;
 
-  // Web Speech API 사용
-  if ('speechSynthesis' in window) {
-    // 이전 음성 중지
-    window.speechSynthesis.cancel();
+  isSpeaking = true;
+  ttsBtn.textContent = '⏹';
+  ttsBtn.style.background = 'rgba(255, 255, 255, 0.2)';
 
-    const utterance = new SpeechSynthesisUtterance(lastMessage);
-    utterance.lang = 'ko-KR'; // 한국어
-    utterance.rate = 1.0; // 속도
-    utterance.pitch = 1.0; // 음정
-    
-    window.speechSynthesis.speak(utterance);
-  } else {
-    alert('이 브라우저는 음성 읽기를 지원하지 않습니다.');
-  }
+  const utterance = new SpeechSynthesisUtterance(lastMessage);
+  utterance.lang = 'ko-KR';
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  
+  utterance.onend = () => {
+    isSpeaking = false;
+    ttsBtn.textContent = '🔊';
+    ttsBtn.style.background = 'none';
+  };
+  
+  utterance.onerror = () => {
+    isSpeaking = false;
+    ttsBtn.textContent = '🔊';
+    ttsBtn.style.background = 'none';
+  };
+  
+  synthesis.speak(utterance);
 }
 
 // 페이지 로드 시 초기화
