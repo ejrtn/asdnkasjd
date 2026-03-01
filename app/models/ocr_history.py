@@ -12,7 +12,8 @@ class OCRHistory(models.Model):
     raw_text = fields.TextField()
     inference_metadata = fields.JSONField(null=True)  # 분석 소요 시간, 모델 버전 등
     created_at = fields.DatetimeField(auto_now_add=True)
-    upload = fields.ForeignKeyField("models.Upload", related_name="ocr_histories")  # 어떤 이미지에서 읽었는가
+    front_upload = fields.OneToOneField("models.Upload", related_name="ocr_histories_front")
+    back_upload = fields.OneToOneField("models.Upload", related_name="ocr_histories_back")
     user = fields.ForeignKeyField("models.User", related_name="ocr_histories")
 
     class Meta:

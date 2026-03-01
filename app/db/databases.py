@@ -4,6 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from app.core import config
 from app.core.config import Env
+from app.utils.default_data import DefaultData
 
 TORTOISE_APP_MODELS = [
     "aerich.models",
@@ -93,6 +94,10 @@ def initialize_tortoise(app: FastAPI) -> None:
                 # 5. 스키마 새로 생성
                 await Tortoise.generate_schemas(safe=False)
                 print("Database schemas re-generated successfully.")
+
+                # --- [추가된 부분: 초기 데이터 실행] ---
+                default_data = DefaultData()
+                await default_data.create_default_data()
 
             finally:
                 # 6. 외래 키 체크 다시 활성화
