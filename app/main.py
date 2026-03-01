@@ -70,4 +70,20 @@ async def read_guide(request: Request):
     return templates.TemplateResponse("guide.html", {"request": request})
 
 
+@app.get("/alarm", response_class=HTMLResponse)
+async def read_alarm(request: Request):
+    """
+    복용 알람 페이지를 반환합니다.
+    """
+    return templates.TemplateResponse("alarm.html", {"request": request})
+
+
+@app.get("/prescription-upload", response_class=HTMLResponse)
+async def read_prescription_upload(request: Request):
+    """
+    처방전 및 약물 업로드 페이지를 반환합니다.
+    """
+    return templates.TemplateResponse("prescription_upload.html", {"request": request})
+
+
 app.include_router(api_v1_router)

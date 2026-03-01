@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Cloud9 Care - 처방전 및 약물 업로드</title>
+    <link rel="stylesheet" href="/static/chatbot.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: #f7f7f7;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            height: 64px;
+            border-bottom: 1px solid #ccc;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-left {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .search {
+            border: 1px solid #aaa;
+            border-radius: 20px;
+            padding: 4px 10px;
+        }
+
+        /* 사용자 메뉴 드롭다운 */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background: #f5f5f5;
+        }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            display: flex;
+            height: calc(100vh - 64px);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 220px;
+            border-right: 1px solid #ccc;
+            background: #fff;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar button {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #333;
+            background: #fff;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        /* ===== MAIN ===== */
+        .main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            border: 1px solid #999;
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        .big-box {
+            height: 200px;
+            border: 1px solid #999;
+            margin-bottom: 10px;
+        }
+
+        /* ===== MODAL MOCK ===== */
+        .modal {
+            border: 1px solid #666;
+            padding: 12px;
+            background: #f1f1f1;
+        }
+
+        .modal button {
+            margin-top: 8px;
+        }
+
+        /* ===== UPLOAD POPUP MODAL ===== */
+        .upload-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-overlay.show {
+            display: flex;
+        }
+
+        .upload-modal {
+            background: #fff;
+            width: 500px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        .upload-modal h3 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .drop-zone {
+            border: 2px dashed #007bff;
+            border-radius: 12px;
+            padding: 40px 20px;
+            background: #f8fbff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            background: #eef5ff;
+            border-color: #0056b3;
+            transform: scale(1.02);
+        }
+
+        .drop-zone-icon {
+            font-size: 3rem;
+            color: #007bff;
+        }
+
+        .drop-zone-text {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .upload-modal-footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-close {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-upload-submit {
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        #hidden-file-input {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">☁️ Cloud9 Care</div>
+        <div class="header-right">
+            <input class="search" placeholder="search">
+            <button>Button</button>
+            <button>➕</button>
+            <div class="user-menu">
+                <button class="user-menu-btn" id="user-menu-btn">👤</button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="/signup">회원가입</a>
+                    <a href="/login">로그인</a>
+                    <a href="/mypage">마이페이지</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="/"><button>대시보드</button></a>
+            <a href="/guide"><button>생활 안내 가이드</button></a>
+            <button>복용 알람</button>
+            <button style="background: #eef5ff; border-color: #007bff; font-weight: bold;">처방전 및 약물</button>
+
+            <div class="sidebar-footer">
+                <a href="/mypage"><button>👤 마이페이지</button></a>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- ================= 처방전 / 약봉투 ================= -->
+            <section class="upload">
+                <div>
+                    <div class="page-title">처방전 / 약봉투</div>
+
+                    <div class="flex">
+                        <div class="column">
+                            <div class="big-box"></div>
+                            <select>
+                                <option>JPG</option>
+                                <option>PNG</option>
+                                <option>PDF</option>
+                            </select>
+                            <button class="open-upload-btn" data-type="prescription">업로드</button>
+                        </div>
+
+                        <div class="column">
+                            <div class="box">
+                                <h4>분석 결과</h4>
+                                <p>✔ 타이레놀 (0.94)</p>
+                                <p>✔ 게보린 (0.72)</p>
+                                <p>✔ 판콜 (0.61)</p>
+                            </div>
+
+                            <div class="modal">
+                                다음 약을 현재 복용 약물에 연동하시겠습니까?
+                                <br>
+                                <button>네, 연동하겠습니다</button>
+                                <button>아니오</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div style="margin-top: 40px;">
+                    <div class="page-title">복용약 이미지</div>
+
+                    <div class="flex">
+                        <div class="column">
+                            <div class="big-box"></div>
+                            <select>
+                                <option>JPG</option>
+                                <option>PNG</option>
+                                <option>PDF</option>
+                            </select>
+                            <button class="open-upload-btn" data-type="medication">업로드</button>
+                        </div>
+
+                        <div class="column">
+                            <div class="box">
+                                <h4>분석 결과</h4>
+                                <p>✔ 타이레놀 (0.94)</p>
+                                <p>✔ 게보린 (0.72)</p>
+                                <p>✔ 판콜 (0.61)</p>
+                            </div>
+
+                            <div class="modal">
+                                다음 약을 현재 복용 약물에 연동하시겠습니까?
+                                <br>
+                                <button>네, 연동하겠습니다</button>
+                                <button>아니오</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 파일 업로드 팝업 -->
+    <div class="upload-overlay" id="upload-overlay">
+        <div class="upload-modal">
+            <h3 id="upload-modal-title">파일 업로드</h3>
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-icon">📁</div>
+                <div class="drop-zone-text">여기에 파일을 끌어다 놓거나 클릭하세요</div>
+                <div class="drop-zone-subtext">지원 형식: JPG, PNG, PDF (최대 10MB)</div>
+                <input type="file" id="hidden-file-input" accept="image/jpeg, image/png, application/pdf">
+            </div>
+            <div class="file-info" id="file-info">
+                <strong>선택된 파일:</strong> <span id="selected-file-name"></span>
+            </div>
+            <div class="upload-modal-footer">
+                <button class="btn-close" id="close-upload-modal">닫기</button>
+                <button class="btn-upload-submit" id="submit-upload">업로드 시작</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 챗봇 플로팅 버튼 -->
+    <button id="chatbot-button" class="chatbot-button">🤖</button>
+
+    <!-- 챗봇 창 -->
+    <div id="chatbot-container" class="chatbot-container">
+        <div class="chatbot-header">
+            <h3>💬 Cloud9 Care 챗봇</h3>
+            <div class="chatbot-header-buttons">
+                <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
+                <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
+                <button id="chatbot-close" class="chatbot-close">×</button>
+            </div>
+        </div>
+
+        <div id="chatbot-messages" class="chatbot-messages">
+            <!-- 메시지가 여기에 동적으로 추가됩니다 -->
+        </div>
+
+        <div class="chatbot-input">
+            <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
+            <button id="chatbot-send" class="chatbot-send">➤</button>
+        </div>
+    </div>
+
+    <script src="/static/chatbot.js"></script>
+    <script>
+        // 사용자 메뉴 드롭다운 토글
+        document.getElementById('user-menu-btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.getElementById('user-dropdown').classList.toggle('show');
+        });
+
+        // 외부 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // 파일 업로드 팝업 로직
+        const uploadOverlay = document.getElementById('upload-overlay');
+        const uploadModalTitle = document.getElementById('upload-modal-title');
+        const dropZone = document.getElementById('drop-zone');
+        const hiddenFileInput = document.getElementById('hidden-file-input');
+        const fileInfo = document.getElementById('file-info');
+        const selectedFileName = document.getElementById('selected-file-name');
+        const closeUploadModal = document.getElementById('close-upload-modal');
+
+        let currentUploadType = '';
+
+        // 업로드 버튼 클릭 시 팝업 열기
+        document.querySelectorAll('.open-upload-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentUploadType = btn.getAttribute('data-type');
+                uploadModalTitle.textContent = currentUploadType === 'prescription' ? '처방전 / 약봉투 업로드' : '복용약 이미지 업로드';
+                uploadOverlay.classList.add('show');
+                resetUpload();
+            });
+        });
+
+        // 팝업 닫기
+        closeUploadModal.addEventListener('click', () => {
+            uploadOverlay.classList.remove('show');
+        });
+
+        uploadOverlay.addEventListener('click', (e) => {
+            if (e.target === uploadOverlay) {
+                uploadOverlay.classList.remove('show');
+            }
+        });
+
+        // 드래그 앤 드롭 핸들러
+        dropZone.addEventListener('click', () => {
+            hiddenFileInput.click();
+        });
+
+        hiddenFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                selectedFileName.textContent = file.name;
+                fileInfo.classList.add('show');
+            }
+        }
+
+        function resetUpload() {
+            hiddenFileInput.value = '';
+            fileInfo.classList.remove('show');
+            selectedFileName.textContent = '';
+        }
+
+        document.getElementById('submit-upload').addEventListener('click', () => {
+            if (hiddenFileInput.files.length > 0 || selectedFileName.textContent) {
+                alert('파일이 선택되었습니다: ' + (hiddenFileInput.files[0]?.name || selectedFileName.textContent) + '\n서버로 업로드를 시뮬레이션합니다.');
+                uploadOverlay.classList.remove('show');
+            } else {
+                alert('업로드할 파일을 선택해 주세요.');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

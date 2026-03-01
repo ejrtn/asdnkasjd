@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Cloud9 Care</title>
+  <title>Cloud9 Care - Dashboard</title>
   <link rel="stylesheet" href="/static/chatbot.css">
 
   <style>
@@ -92,14 +92,6 @@
       background: #f5f5f5;
     }
 
-    .user-dropdown a:first-child {
-      border-radius: 8px 8px 0 0;
-    }
-
-    .user-dropdown a:last-child {
-      border-radius: 0 0 8px 8px;
-    }
-
     /* ===== LAYOUT ===== */
     .container {
       display: flex;
@@ -125,6 +117,11 @@
       width: 100%;
     }
 
+    .sidebar a {
+      text-decoration: none;
+      color: inherit;
+    }
+
     .sidebar-footer {
       margin-top: auto;
     }
@@ -141,6 +138,8 @@
       height: 260px;
       border: 1px solid #999;
       margin-bottom: 20px;
+      background: #eef2ff;
+      border-radius: 12px;
     }
 
     .card-grid {
@@ -150,188 +149,45 @@
     }
 
     .card {
-      border: 1px solid #999;
-      padding: 12px;
-      height: 160px;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      height: auto;
+      min-height: 160px;
       background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
     }
 
     .card h4 {
-      margin-bottom: 8px;
-      font-size: 14px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: #1e293b;
+      font-weight: 700;
     }
 
     .card p {
       font-size: 13px;
-      color: #555;
-    }
-
-    .page {
-      margin-bottom: 80px;
+      color: #64748b;
+      line-height: 1.6;
     }
 
     .page-title {
       font-size: 22px;
       margin-bottom: 20px;
+      font-weight: bold;
     }
 
-    .box {
-      border: 1px solid #999;
-      background: #fff;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .flex {
-      display: flex;
-      gap: 20px;
-    }
-
-    .column {
-      flex: 1;
-    }
-
-    .big-box {
-      height: 200px;
-      border: 1px solid #999;
-      margin-bottom: 10px;
-    }
-
-    /* ===== CARD ===== */
-    .card {
-      border: 1px solid #999;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    /* ===== TOGGLE ===== */
-    .toggle {
-      width: 40px;
-      height: 20px;
-      border: 1px solid #666;
-      border-radius: 10px;
-    }
-
-    /* ===== MODAL MOCK ===== */
-    .modal {
-      border: 1px solid #666;
-      padding: 12px;
-      background: #f1f1f1;
-    }
-
-    .modal button {
-      margin-top: 8px;
-    }
-
-    .dashboard {
-      display: none;
-    }
-
-    .dashboard.open {
-      display: block;
-    }
-
-    .guide {
-      display: none;
-    }
-
-    .guide.open {
-      display: block;
-    }
-
-    .alarm {
-      display: none;
-    }
-
-    .alarm.open {
-      display: block;
-    }
-
-    .upload {
-      display: none;
-    }
-
-    .upload.open {
-      display: block;
-    }
-
-    /* ===== GUIDE STYLES FROM GUIDE.HTML ===== */
+    /* GLASSMORPHISM (Keeping from HEAD) */
     .glassmorphism {
       background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08);
-    }
-
-    .section-card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .section-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
-    }
-
-    .progress-bar-fill {
-      transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
-    }
-
-    .accordion-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease-out;
-    }
-
-    .accordion-active .accordion-content {
-      max-height: 500px;
-    }
-
-    .accordion-icon {
-      transition: transform 0.3s ease;
-    }
-
-    .accordion-active .accordion-icon {
-      transform: rotate(180deg);
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .bg-blue-500 {
-      background-color: #3b82f6;
-    }
-
-    .bg-blue-400 {
-      background-color: #60a5fa;
-    }
-
-    .bg-amber-400 {
-      background-color: #fbbf24;
-    }
-
-    .bg-indigo-400 {
-      background-color: #818cf8;
-    }
-
-    .bg-rose-500 {
-      background-color: #f43f5e;
-    }
-
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: .5;
-      }
     }
   </style>
 </head>
@@ -358,26 +214,38 @@
 
   <div class="container">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (Using User's Link Model) -->
     <aside class="sidebar">
-      <button class="dashboard-btn">대시보드</button>
-      <button class="guide-btn">생활 안내 가이드</button>
-      <button class="alarm-btn">복용 알람</button>
-      <button class="upload-btn">처방전 및 약물</button>
+      <a href="/">
+        <button class="dashboard-btn"
+          style="background: #eef2ff; border-color: #4f46e5; font-weight: bold;">대시보드</button>
+      </a>
+      <a href="/guide">
+        <button class="guide-btn">생활 안내 가이드</button>
+      </a>
+      <a href="/alarm">
+        <button class="alarm-btn">복용 알람</button>
+      </a>
+      <a href="/prescription-upload">
+        <button class="upload-btn">처방전 및 약물</button>
+      </a>
 
       <div class="sidebar-footer">
-        <button>👤 마이페이지</button>
+        <a href="/mypage">
+          <button>👤 마이페이지</button>
+        </a>
       </div>
     </aside>
 
     <!-- MAIN -->
     <main class="main">
 
-      <section class="dashboard open">
+      <section class="dashboard">
+        <h2 class="page-title">대시보드</h2>
         <!-- 큰 배너 -->
         <div class="banner"></div>
 
-        <!-- 카드 영역 -->
+        <!-- 카드 영역 (Preserving HEAD structure) -->
         <div class="card-grid">
           <div class="card">
             <h4>[ AI 맞춤 건강 요약 배너 ]</h4>
@@ -403,526 +271,49 @@
         </div>
       </section>
 
-      <!-- ================= 생활 안내 가이드 ================= -->
-      <section class="guide">
-        <div class="page-title" style="display: flex; justify-content: space-between; align-items: center;">
-          생활 안내 가이드
-          <button id="tts-btn"
-            style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px;">
-            <span id="tts-icon">📢</span> <span id="tts-text">가이드 읽어주기</span>
-          </button>
-        </div>
-
-        <div class="flex">
-          <!-- Left Column: Health Profile -->
-          <div class="column box glassmorphism" style="border-radius: 20px;">
-            <h4 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-              <span
-                style="background: #3b82f6; color: white; padding: 4px; border-radius: 4px; font-size: 12px;">📈</span>
-              나의 건강 요약
-            </h4>
-
-            <div
-              style="background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid #eee; margin-bottom: 15px; padding: 15px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                <span style="width: 4px; height: 16px; background: #60a5fa; border-radius: 2px;"></span>
-                <strong>보유 질환</strong>
-              </div>
-              <div id="chronic-disease-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-            </div>
-
-            <div
-              style="background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid #eee; margin-bottom: 15px; padding: 15px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                <span style="width: 4px; height: 16px; background: #fbbf24; border-radius: 2px;"></span>
-                <strong>보유 알레르기</strong>
-              </div>
-              <div id="allergy-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-            </div>
-
-            <div
-              style="background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid #eee; margin-bottom: 15px; padding: 15px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                <span style="width: 4px; height: 16px; background: #818cf8; border-radius: 2px;"></span>
-                <strong>현재 복용 약</strong>
-              </div>
-              <div id="medication-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-
-            <button id="update-btn"
-              style="width: 100%; padding: 12px; background: linear-gradient(to right, #4f46e5, #3b82f6); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-              🔄 가이드 새로고침
-            </button>
-          </div>
-
-          <!-- Right Column: AI Guide -->
-          <div class="column">
-            <div id="guide-container" class="box glassmorphism"
-              style="border-radius: 20px; min-height: 400px; padding: 20px;">
-              <div id="guide-skeleton" class="animate-pulse" style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="height: 24px; background: #eee; border-radius: 4px; width: 30%;"></div>
-                <div style="height: 100px; background: #eee; border-radius: 8px;"></div>
-                <div style="height: 150px; background: #eee; border-radius: 8px;"></div>
-              </div>
-
-              <div id="guide-sections" class="hidden" style="display: flex; flex-direction: column; gap: 16px;">
-                <!-- Section 1 -->
-                <div id="section-1" class="section-card"
-                  style="padding: 20px; border-radius: 16px; border-left: 6px solid #3b82f6; background: rgba(255,255,255,0.8);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h4 style="font-size: 16px; font-weight: bold;">1) 복약 안전성 및 주의사항</h4>
-                    <span id="safety-status-tag"
-                      style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;"></span>
-                  </div>
-                  <p id="safety-content" style="font-size: 14px; color: #444; margin-bottom: 15px;"></p>
-                  <div style="background: rgba(255,255,255,0.6); padding: 12px; border-radius: 12px;">
-                    <h5 style="font-size: 13px; font-weight: bold; color: #666; margin-bottom: 8px;">⏰ 일반 주의사항</h5>
-                    <ul id="general-cautions-list" style="font-size: 13px; color: #666; padding-left: 20px;"></ul>
-                  </div>
-                </div>
-
-                <!-- Section 2 -->
-                <div id="section-2" class="section-card"
-                  style="padding: 20px; border-radius: 16px; border-left: 6px solid #10b981; background: rgba(255,255,255,0.8);">
-                  <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">2) 질환 기반 생활습관 가이드</h4>
-                  <div id="disease-guides-container"
-                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"></div>
-                  <div
-                    style="background: rgba(16,185,129,0.1); padding: 12px; border-radius: 12px; display: flex; gap: 10px;">
-                    <span style="font-size: 18px;">🔄</span>
-                    <div>
-                      <h5 style="font-size: 13px; font-weight: bold; color: #065f46;">통합 관리 포인트</h5>
-                      <p id="integrated-point" style="font-size: 13px; color: #065f46;"></p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Section 3 -->
-                <div id="section-3" class="section-card"
-                  style="padding: 20px; border-radius: 16px; border-left: 6px solid #6366f1; background: rgba(255,255,255,0.8);">
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                    <div>
-                      <h4 style="font-size: 16px; font-weight: bold;">3) 오늘의 실행 플랜</h4>
-                    </div>
-                    <div style="text-align: right;">
-                      <span id="progress-percent" style="font-size: 20px; font-weight: 900; color: #6366f1;">0%</span>
-                    </div>
-                  </div>
-                  <div
-                    style="width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 15px; overflow: hidden;">
-                    <div id="progress-bar" class="progress-bar-fill"
-                      style="height: 100%; background: linear-gradient(to right, #6366f1, #3b82f6); width: 0%;"></div>
-                  </div>
-                  <div id="checklist-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                </div>
-
-                <!-- Section 4 -->
-                <div id="section-4" class="accordion section-card"
-                  style="padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.8);">
-                  <button onclick="toggleAccordion('section-4')"
-                    style="width: 100%; border: none; background: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0;">
-                    <h4 style="font-size: 15px; font-weight: bold; color: #555;">4) 왜 이런 가이드가 생성되었나요?</h4>
-                    <span class="accordion-icon">▼</span>
-                  </button>
-                  <div class="accordion-content">
-                    <div style="padding-top: 12px; border-top: 1px solid #eee; margin-top: 12px;">
-                      <p id="explain-reason" style="font-size: 13px; color: #888; font-style: italic;"></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="box" style="font-size: 12px; color: #888; margin-top: 10px;">⚠️ 본 서비스는 의료 진단을 제공하지 않습니다.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 복용 알람 ================= -->
-      <section class="alarm">
-        <div class="page-title">복용 알람</div>
-
-        <div class="flex">
-          <div class="column box">
-            <h4>현재 복용 중인 약물</h4>
-            <div class="card">약물 이름 1 <div class="toggle"></div>
-            </div>
-            <div class="card">약물 이름 2 <div class="toggle"></div>
-            </div>
-            <div class="card">약물 이름 3 <div class="toggle"></div>
-            </div>
-          </div>
-
-          <div class="column box">
-            <h4>약물 상세 정보</h4>
-            <div class="big-box"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 처방전 / 약봉투 ================= -->
-      <section class="upload">
-        <div>
-          <div class="page-title">처방전 / 약봉투 및 복용약</div>
-
-          <div class="flex">
-            <div class="column">
-              <div class="big-box"></div>
-              <select>
-                <option>JPG</option>
-                <option>PDF</option>
-              </select>
-              <button>업로드</button>
-            </div>
-
-            <div class="column">
-              <div class="box">
-                <h4>분석 결과</h4>
-                <p>✔ 타이레놀 (0.94)</p>
-                <p>✔ 게보린 (0.72)</p>
-                <p>✔ 판콜 (0.61)</p>
-              </div>
-
-              <div class="modal">
-                다음 약을 현재 복용 약물에 연동하시겠습니까?
-                <br>
-                <button>네, 연동하겠습니다</button>
-                <button>아니오</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div>
-          <div class="page-title">처방전 / 약봉투 및 복용약</div>
-
-          <div class="flex">
-            <div class="column">
-              <div class="big-box"></div>
-              <select>
-                <option>JPG</option>
-                <option>PDF</option>
-              </select>
-              <button>업로드</button>
-            </div>
-
-            <div class="column">
-              <div class="box">
-                <h4>분석 결과</h4>
-                <p>✔ 타이레놀 (0.94)</p>
-                <p>✔ 게보린 (0.72)</p>
-                <p>✔ 판콜 (0.61)</p>
-              </div>
-
-              <div class="modal">
-                다음 약을 현재 복용 약물에 연동하시겠습니까?
-                <br>
-                <button>네, 연동하겠습니다</button>
-                <button>아니오</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
     </main>
   </div>
-</body>
 
-<!-- 챗봇 플로팅 버튼 -->
-<button id="chatbot-button" class="chatbot-button">🤖</button>
+  <!-- 챗봇 플로팅 버튼 -->
+  <button id="chatbot-button" class="chatbot-button">🤖</button>
 
-<!-- 챗봇 창 -->
-<div id="chatbot-container" class="chatbot-container">
-  <div class="chatbot-header">
-    <h3>💬 Cloud9 Care 챗봇</h3>
-    <div class="chatbot-header-buttons">
-      <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
-      <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
-      <button id="chatbot-close" class="chatbot-close">×</button>
+  <!-- 챗봇 창 -->
+  <div id="chatbot-container" class="chatbot-container">
+    <div class="chatbot-header">
+      <h3>💬 Cloud9 Care 챗봇</h3>
+      <div class="chatbot-header-buttons">
+        <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
+        <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
+        <button id="chatbot-close" class="chatbot-close">×</button>
+      </div>
+    </div>
+
+    <div id="chatbot-messages" class="chatbot-messages">
+      <!-- 메시지가 여기에 동적으로 추가됩니다 -->
+    </div>
+
+    <div class="chatbot-input">
+      <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
+      <button id="chatbot-send" class="chatbot-send">➤</button>
     </div>
   </div>
 
-  <div id="chatbot-messages" class="chatbot-messages">
-    <!-- 메시지가 여기에 동적으로 추가됩니다 -->
-  </div>
-
-  <div class="chatbot-input">
-    <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
-    <button id="chatbot-send" class="chatbot-send">➤</button>
-  </div>
-</div>
-
-<script src="/static/chatbot.js"></script>
-<script>
-  // 사용자 메뉴 드롭다운 토글
-  document.getElementById('user-menu-btn').addEventListener('click', function (e) {
-    e.stopPropagation();
-    document.getElementById('user-dropdown').classList.toggle('show');
-  });
-
-  // 외부 클릭 시 드롭다운 닫기
-  document.addEventListener('click', function (e) {
-    const dropdown = document.getElementById('user-dropdown');
-    if (dropdown.classList.contains('show')) {
-      dropdown.classList.remove('show');
-    }
-  });
-
-  document.querySelector(".dashboard-btn").addEventListener("click", () => {
-    document.querySelector(".dashboard").classList.add("open")
-    document.querySelector(".guide").classList.remove("open")
-    document.querySelector(".alarm").classList.remove("open")
-    document.querySelector(".upload").classList.remove("open")
-  })
-  document.querySelector(".guide-btn").addEventListener("click", () => {
-    document.querySelector(".dashboard").classList.remove("open")
-    document.querySelector(".guide").classList.add("open")
-    document.querySelector(".alarm").classList.remove("open")
-    document.querySelector(".upload").classList.remove("open")
-
-    // 가이드 초기화 (이미 초기화되었다면 중복 실행 방지)
-    if (!guideData) {
-      initGuide();
-    }
-  })
-
-  // ===== GUIDE LOGIC FROM GUIDE.HTML =====
-  let currentStatus = { diseases: [], allergies: [], meds: [] };
-  let guideData = null;
-  let isSpeaking = false;
-  const synthesis = window.speechSynthesis;
-
-  async function initGuide() {
-    await fetchHealthProfile();
-    await generateNewGuide();
-    setupGuideEventListeners();
-  }
-
-  async function fetchHealthProfile() {
-    try {
-      const fetchJson = async (url) => {
-        try {
-          const res = await fetch(url);
-          return res.ok ? await res.json() : { items: [] };
-        } catch (e) { return { items: [] }; }
-      };
-
-      const diseasesRes = await fetchJson('/api/v1/health/chronic-diseases');
-      const allergiesRes = await fetchJson('/api/v1/health/allergies');
-      const medsRes = await fetchJson('/api/v1/current-meds');
-
-      currentStatus.diseases = (diseasesRes.items && diseasesRes.items.length > 0) ? diseasesRes.items : [{ disease_name: '고혈압' }, { disease_name: '당뇨' }];
-      currentStatus.allergies = (allergiesRes.items && allergiesRes.items.length > 0) ? allergiesRes.items : [{ allergy_name: '땅콩' }, { allergy_name: '항생제' }];
-      currentStatus.meds = (medsRes.items && medsRes.items.length > 0) ? medsRes.items : [{ medication_name: '타이레놀' }, { medication_name: '암로디핀' }];
-
-      renderHealthProfile();
-    } catch (err) {
-      console.error("Profile Load Error:", err);
-      currentStatus.diseases = [{ disease_name: '고혈압' }];
-      currentStatus.allergies = [{ allergy_name: '땅콩' }];
-      currentStatus.meds = [{ medication_name: '타이레놀' }];
-      renderHealthProfile();
-    }
-  }
-
-  async function generateNewGuide() {
-    const skeleton = document.getElementById('guide-skeleton');
-    const content = document.getElementById('guide-sections');
-
-    if (skeleton) skeleton.classList.remove('hidden');
-    if (content) {
-      content.classList.add('hidden');
-      content.style.display = 'none';
-    }
-
-    try {
-      const res = await fetch('/api/v1/guides', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const data = await res.json();
-      if (data.guide_data) {
-        guideData = data.guide_data;
-        renderGuide();
-        if (skeleton) skeleton.classList.add('hidden');
-        if (content) {
-          content.classList.remove('hidden');
-          content.style.display = 'flex';
-        }
-      }
-    } catch (err) {
-      console.error("Guide Gen Error:", err);
-    }
-  }
-
-  function renderHealthProfile() {
-    const dList = document.getElementById('chronic-disease-list');
-    if (dList) dList.innerHTML = currentStatus.diseases.map(d => `
-            <span style="padding: 4px 10px; background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: bold; border-radius: 20px; border: 1px solid #dbeafe;">${d.disease_name}</span>
-        `).join('') || '<span style="color: #888; font-size: 11px; font-style: italic;">정보 없음</span>';
-
-    const aList = document.getElementById('allergy-list');
-    if (aList) aList.innerHTML = currentStatus.allergies.map(a => `
-            <span style="padding: 4px 10px; background: #fffbeb; color: #b45309; font-size: 11px; font-weight: bold; border-radius: 20px; border: 1px solid #fef3c7;">${a.allergy_name}</span>
-        `).join('') || '<span style="color: #888; font-size: 11px; font-style: italic;">정보 없음</span>';
-
-    const mList = document.getElementById('medication-list');
-    if (mList) mList.innerHTML = currentStatus.meds.map(m => `
-            <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #fff; border-radius: 8px; border: 1px solid #eee; cursor: pointer;">
-                <input type="checkbox" checked style="width: 14px; height: 14px;">
-                <span style="font-size: 12px; font-weight: 500; color: #444;">${m.medication_name}</span>
-            </label>
-        `).join('') || '<div style="color: #888; font-size: 11px; font-style: italic; padding: 10px; text-align: center;">복용 중인 약이 없습니다.</div>';
-  }
-
-  function renderGuide() {
-    if (!guideData) return;
-
-    const s1 = guideData.section1;
-    const statusTag = document.getElementById('safety-status-tag');
-    if (statusTag) statusTag.innerText = s1.status;
-
-    const sec1 = document.getElementById('section-1');
-    if (s1.status.includes('위험')) {
-      if (statusTag) { statusTag.style.backgroundColor = '#fee2e2'; statusTag.style.color = '#dc2626'; }
-      if (sec1) sec1.style.borderLeftColor = '#f43f5e';
-    } else if (s1.status.includes('주의')) {
-      if (statusTag) { statusTag.style.backgroundColor = '#fef3c7'; statusTag.style.color = '#d97706'; }
-      if (sec1) sec1.style.borderLeftColor = '#fbbf24';
-    } else {
-      if (statusTag) { statusTag.style.backgroundColor = '#d1fae5'; statusTag.style.color = '#059669'; }
-      if (sec1) sec1.style.borderLeftColor = '#10b981';
-    }
-
-    const sContent = document.getElementById('safety-content');
-    if (sContent) sContent.innerText = s1.content;
-    const sList = document.getElementById('general-cautions-list');
-    if (sList) sList.innerHTML = s1.general_cautions.map(c => `<li>${c}</li>`).join('');
-
-    const s2 = guideData.section2;
-    const dgContainer = document.getElementById('disease-guides-container');
-    if (dgContainer) dgContainer.innerHTML = s2.disease_guides.map(dg => `
-            <div style="background: rgba(255,255,255,0.6); padding: 12px; border-radius: 12px; border: 1px solid #fff;">
-                <h5 style="font-size: 13px; font-weight: bold; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px;">${dg.name}</h5>
-                <ul style="padding-left: 15px; margin: 0;">
-                    ${dg.tips.map(tip => `<li style="font-size: 11px; color: #666; margin-bottom: 4px;">${tip}</li>`).join('')}
-                </ul>
-            </div>
-        `).join('');
-    const iPoint = document.getElementById('integrated-point');
-    if (iPoint) iPoint.innerText = s2.integrated_point;
-
-    const s3 = guideData.section3;
-    const clContainer = document.getElementById('checklist-container');
-    if (clContainer) clContainer.innerHTML = s3.checklist.map((item, idx) => `
-            <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 12px; border: 1px solid #fff; cursor: pointer;">
-                <input type="checkbox" onchange="updateGuideProgress()" class="plan-checkbox" style="width: 18px; height: 18px;">
-                <span style="font-size: 13px; font-weight: bold; color: #555;">${item}</span>
-            </label>
-        `).join('');
-    updateGuideProgress();
-
-    const eReason = document.getElementById('explain-reason');
-    if (eReason) eReason.innerText = guideData.section4.reason;
-  }
-
-  window.updateGuideProgress = function () {
-    const checks = document.querySelectorAll('.plan-checkbox');
-    const total = checks.length;
-    const checked = Array.from(checks).filter(c => c.checked).length;
-    const percent = total > 0 ? Math.round((checked / total) * 100) : 0;
-
-    const bar = document.getElementById('progress-bar');
-    const text = document.getElementById('progress-percent');
-
-    if (bar) bar.style.width = percent + '%';
-    if (text) text.innerText = percent + '%';
-  }
-
-  window.toggleAccordion = function (id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('accordion-active');
-  }
-
-  function setupGuideEventListeners() {
-    const uBtn = document.getElementById('update-btn');
-    if (uBtn) uBtn.addEventListener('click', async () => {
-      const originalText = uBtn.innerHTML;
-      uBtn.innerHTML = `🔄 갱신 중...`;
-      uBtn.disabled = true;
-
-      await generateNewGuide();
-
-      uBtn.innerHTML = originalText;
-      uBtn.disabled = false;
+  <script src="/static/chatbot.js"></script>
+  <script>
+    // 사용자 메뉴 드롭다운 토글
+    document.getElementById('user-menu-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.getElementById('user-dropdown').classList.toggle('show');
     });
 
-    const tBtn = document.getElementById('tts-btn');
-    if (tBtn) tBtn.addEventListener('click', toggleTTS);
-  }
-
-  function toggleTTS() {
-    const btnText = document.getElementById('tts-text');
-    const btnIcon = document.getElementById('tts-icon');
-    const btn = document.getElementById('tts-btn');
-
-    if (isSpeaking) {
-      synthesis.cancel();
-      isSpeaking = false;
-      if (btnText) btnText.innerText = '가이드 읽어주기';
-      if (btnIcon) btnIcon.innerText = '📢';
-      if (btn) {
-        btn.style.background = '#fff';
-        btn.style.color = '#4f46e5';
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener('click', function (e) {
+      const dropdown = document.getElementById('user-dropdown');
+      if (dropdown && dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
       }
-      return;
-    }
-
-    const s1Text = `먼저 복약 안전성 안내입니다. ${guideData.section1.status} 상태이며, ${guideData.section1.content}`;
-    const s3Text = `오늘의 실행 플랜입니다. ${guideData.section3.checklist.join(', ')}를 잊지 마세요.`;
-    const fullText = s1Text + ". " + s3Text;
-
-    const utterance = new SpeechSynthesisUtterance(fullText);
-    utterance.lang = 'ko-KR';
-    utterance.rate = 1.0;
-
-    utterance.onstart = () => {
-      isSpeaking = true;
-      if (btnText) btnText.innerText = '읽기 중지';
-      if (btnIcon) btnIcon.innerText = '⏹';
-      if (btn) {
-        btn.style.background = '#4f46e5';
-        btn.style.color = '#fff';
-      }
-    };
-
-    utterance.onend = () => {
-      isSpeaking = false;
-      if (btnText) btnText.innerText = '가이드 읽어주기';
-      if (btnIcon) btnIcon.innerText = '📢';
-      if (btn) {
-        btn.style.background = '#fff';
-        btn.style.color = '#4f46e5';
-      }
-    };
-
-    synthesis.speak(utterance);
-  }
-  document.querySelector(".alarm-btn").addEventListener("click", () => {
-    document.querySelector(".dashboard").classList.remove("open")
-    document.querySelector(".guide").classList.remove("open")
-    document.querySelector(".alarm").classList.add("open")
-    document.querySelector(".upload").classList.remove("open")
-  })
-  document.querySelector(".upload-btn").addEventListener("click", () => {
-    document.querySelector(".dashboard").classList.remove("open")
-    document.querySelector(".guide").classList.remove("open")
-    document.querySelector(".alarm").classList.remove("open")
-    document.querySelector(".upload").classList.add("open")
-  })
-</script>
+    });
+  </script>
+</body>
 
 </html>
