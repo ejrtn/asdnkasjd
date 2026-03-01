@@ -10,7 +10,7 @@ class ChatMessage(models.Model):
     id = fields.IntField(pk=True)
     user = fields.ForeignKeyField("models.User", related_name="chat_messages")
     session_id = fields.CharField(max_length=100)  # 대화 세션 묶음
-    role = fields.CharField(max_length=20)  # user 또는 assistant
+    role = fields.CharField(max_length=20)  # user 또는 ai
     message = fields.TextField()
     # [RAG 핵심] 질문 시 참고한 가이드 ID를 연결하여 맥락 유지
     reference_guide = fields.ForeignKeyField("models.LLMLifeGuide", related_name="chats", null=True)
