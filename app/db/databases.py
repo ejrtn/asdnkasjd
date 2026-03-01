@@ -4,8 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from app.core import config
 from app.core.config import Env
-
-from app.utils.default_data import DefaultData  # 경로에 맞춰 import
+from app.utils.default_data import DefaultData
 
 TORTOISE_APP_MODELS = [
     "aerich.models",
