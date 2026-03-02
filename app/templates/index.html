@@ -1,319 +1,95 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Cloud9 Care - Dashboard</title>
-  <link rel="stylesheet" href="/static/chatbot.css">
+{% block title %}Cloud9 Care - Dashboard{% endblock %}
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+{% block content %}
+<style>
+  /* ===== COMMON ===== */
+  .banner {
+    height: 260px;
+    border: 1px solid #999;
+    margin-bottom: 20px;
+    background: #eef2ff;
+    border-radius: 12px;
+  }
 
-    body {
-      height: 100vh;
-      background: #f7f7f7;
-    }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
 
-    /* ===== HEADER ===== */
-    .header {
-      height: 64px;
-      border-bottom: 1px solid #ccc;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-    }
+  .card {
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    height: auto;
+    min-height: 160px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
 
-    .header-left {
-      font-size: 20px;
-      font-weight: bold;
-    }
+  .card:hover {
+    transform: translateY(-2px);
+  }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-    }
+  .card h4 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 700;
+  }
 
-    .search {
-      border: 1px solid #aaa;
-      border-radius: 20px;
-      padding: 4px 10px;
-    }
+  .card p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+  }
 
-    /* 사용자 메뉴 드롭다운 */
-    .user-menu {
-      position: relative;
-    }
+  .page-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
 
-    .user-menu-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 8px;
-    }
+  /* GLASSMORPHISM */
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08);
+  }
+</style>
 
-    .user-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 8px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      min-width: 150px;
-      z-index: 1000;
-    }
+<section class="dashboard">
+  <h2 class="page-title">대시보드</h2>
+  <!-- 큰 배너 -->
+  <div class="banner"></div>
 
-    .user-dropdown.show {
-      display: block;
-    }
-
-    .user-dropdown a {
-      display: block;
-      padding: 12px 16px;
-      color: #333;
-      text-decoration: none;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-
-    .user-dropdown a:hover {
-      background: #f5f5f5;
-    }
-
-    /* ===== LAYOUT ===== */
-    .container {
-      display: flex;
-      height: calc(100vh - 64px);
-    }
-
-    /* ===== SIDEBAR ===== */
-    .sidebar {
-      width: 220px;
-      border-right: 1px solid #ccc;
-      background: #fff;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar button {
-      margin-bottom: 10px;
-      padding: 8px;
-      border: 1px solid #333;
-      background: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .sidebar a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-    }
-
-    /* ===== MAIN ===== */
-    .main {
-      flex: 1;
-      padding: 24px;
-      overflow-y: auto;
-    }
-
-    /* ===== COMMON ===== */
-    .banner {
-      height: 260px;
-      border: 1px solid #999;
-      margin-bottom: 20px;
-      background: #eef2ff;
-      border-radius: 12px;
-    }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-
-    .card {
-      border: 1px solid #e2e8f0;
-      padding: 20px;
-      height: auto;
-      min-height: 160px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-    }
-
-    .card h4 {
-      margin-bottom: 12px;
-      font-size: 15px;
-      color: #1e293b;
-      font-weight: 700;
-    }
-
-    .card p {
-      font-size: 13px;
-      color: #64748b;
-      line-height: 1.6;
-    }
-
-    .page-title {
-      font-size: 22px;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-    /* GLASSMORPHISM (Keeping from HEAD) */
-    .glassmorphism {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08);
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">☁️ Cloud9 Care</div>
-    <div class="header-right">
-      <input class="search" placeholder="search">
-      <button>Button</button>
-      <button>➕</button>
-      <div class="user-menu">
-        <button class="user-menu-btn" id="user-menu-btn">👤</button>
-        <div class="user-dropdown" id="user-dropdown">
-          <a href="/signup">회원가입</a>
-          <a href="/login">로그인</a>
-          <a href="/mypage">마이페이지</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-
-    <!-- SIDEBAR (Using User's Link Model) -->
-    <aside class="sidebar">
-      <a href="/">
-        <button class="dashboard-btn"
-          style="background: #eef2ff; border-color: #4f46e5; font-weight: bold;">대시보드</button>
-      </a>
-      <a href="/guide">
-        <button class="guide-btn">생활 안내 가이드</button>
-      </a>
-      <a href="/alarm">
-        <button class="alarm-btn">복용 알람</button>
-      </a>
-      <a href="/prescription-upload">
-        <button class="upload-btn">처방전 및 약물</button>
-      </a>
-
-      <div class="sidebar-footer">
-        <a href="/mypage">
-          <button>👤 마이페이지</button>
-        </a>
-      </div>
-    </aside>
-
-    <!-- MAIN -->
-    <main class="main">
-
-      <section class="dashboard">
-        <h2 class="page-title">대시보드</h2>
-        <!-- 큰 배너 -->
-        <div class="banner"></div>
-
-        <!-- 카드 영역 (Preserving HEAD structure) -->
-        <div class="card-grid">
-          <div class="card">
-            <h4>[ AI 맞춤 건강 요약 배너 ]</h4>
-            <p>안녕하세요, OOO님 👋</p>
-            <p>오늘 복약 2건 예정</p>
-          </div>
-
-          <div class="card">
-            <h4>[ 오늘의 복약 알림 카드 ]</h4>
-            <p>08:00 아침약</p>
-            <p>20:00 저녁약</p>
-          </div>
-
-          <div class="card">
-            <h4>[ 최근 분석 결과 ]</h4>
-            <p>처방전 분석 결과</p>
-          </div>
-
-          <div class="card">
-            <h4>[ AI 생활 가이드 ]</h4>
-            <p>요약 3줄</p>
-          </div>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- 챗봇 플로팅 버튼 -->
-  <button id="chatbot-button" class="chatbot-button">🤖</button>
-
-  <!-- 챗봇 창 -->
-  <div id="chatbot-container" class="chatbot-container">
-    <div class="chatbot-header">
-      <h3>💬 Cloud9 Care 챗봇</h3>
-      <div class="chatbot-header-buttons">
-        <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
-        <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
-        <button id="chatbot-close" class="chatbot-close">×</button>
-      </div>
+  <!-- 카드 영역 -->
+  <div class="card-grid">
+    <div class="card">
+      <h4>[ AI 맞춤 건강 요약 배너 ]</h4>
+      <p>안녕하세요, OOO님 👋</p>
+      <p>오늘 복약 2건 예정</p>
     </div>
 
-    <div id="chatbot-messages" class="chatbot-messages">
-      <!-- 메시지가 여기에 동적으로 추가됩니다 -->
+    <div class="card">
+      <h4>[ 오늘의 복약 알림 카드 ]</h4>
+      <p>08:00 아침약</p>
+      <p>20:00 저녁약</p>
     </div>
 
-    <div class="chatbot-input">
-      <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
-      <button id="chatbot-send" class="chatbot-send">➤</button>
+    <div class="card">
+      <h4>[ 최근 분석 결과 ]</h4>
+      <p>처방전 분석 결과</p>
+    </div>
+
+    <div class="card">
+      <h4>[ AI 생활 가이드 ]</h4>
+      <p>요약 3줄</p>
     </div>
   </div>
-
-  <script src="/static/chatbot.js"></script>
-  <script>
-    // 사용자 메뉴 드롭다운 토글
-    document.getElementById('user-menu-btn').addEventListener('click', function (e) {
-      e.stopPropagation();
-      document.getElementById('user-dropdown').classList.toggle('show');
-    });
-
-    // 외부 클릭 시 드롭다운 닫기
-    document.addEventListener('click', function (e) {
-      const dropdown = document.getElementById('user-dropdown');
-      if (dropdown && dropdown.classList.contains('show')) {
-        dropdown.classList.remove('show');
-      }
-    });
-  </script>
-</body>
-
-</html>
+</section>
+{% endblock %}

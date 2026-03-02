@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cloud9 Care{% endblock %}</title>
+    <link rel="stylesheet" href="/static/chatbot.css">
+    {% block head %}{% endblock %}
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: #f7f7f7;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            height: 64px;
+            border-bottom: 1px solid #ccc;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .search {
+            border: 1px solid #aaa;
+            border-radius: 20px;
+            padding: 4px 10px;
+        }
+
+        /* 사용자 메뉴 드롭다운 */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background: #f5f5f5;
+        }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            display: flex;
+            height: calc(100vh - 64px);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 220px;
+            border-right: 1px solid #ccc;
+            background: #fff;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar button {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #333;
+            background: #fff;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        /* ===== MAIN ===== */
+        .main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: #f7f7f7;
+        }
+
+        /* Active button style */
+        .nav-active {
+            background: #eef2ff !important;
+            border-color: #4f46e5 !important;
+            font-weight: bold !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">☁️ Cloud9 Care</div>
+        <div class="header-right">
+            <input class="search" placeholder="search">
+            <button>Button</button>
+            <button>➕</button>
+            <div class="user-menu">
+                <button class="user-menu-btn" id="user-menu-btn">👤</button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="/signup">회원가입</a>
+                    <a href="/login">로그인</a>
+                    <a href="/mypage">마이페이지</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="/">
+                <button class="dashboard-btn {% if request.url.path == '/' %}nav-active{% endif %}">대시보드</button>
+            </a>
+            <a href="/guide">
+                <button class="guide-btn {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내 가이드</button>
+            </a>
+            <a href="/alarm">
+                <button class="alarm-btn {% if request.url.path == '/alarm' %}nav-active{% endif %}">복용 알람</button>
+            </a>
+            <a href="/prescription-upload">
+                <button class="upload-btn {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전
+                    및 약물</button>
+            </a>
+
+            <div class="sidebar-footer">
+                <a href="/mypage">
+                    <button class="{% if request.url.path == '/mypage' %}nav-active{% endif %}">👤 마이페이지</button>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- 챗봇 플로팅 버튼 -->
+    <button id="chatbot-button" class="chatbot-button">🤖</button>
+
+    <!-- 챗봇 창 -->
+    <div id="chatbot-container" class="chatbot-container">
+        <div class="chatbot-header">
+            <h3>💬 Cloud9 Care 챗봇</h3>
+            <div class="chatbot-header-buttons">
+                <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
+                <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
+                <button id="chatbot-close" class="chatbot-close">×</button>
+            </div>
+        </div>
+
+        <div id="chatbot-messages" class="chatbot-messages"></div>
+
+        <div class="chatbot-input">
+            <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
+            <button id="chatbot-send" class="chatbot-send">➤</button>
+        </div>
+    </div>
+
+    <script src="/static/chatbot.js"></script>
+    <script>
+        // 사용자 메뉴 드롭다운 토글
+        document.getElementById('user-menu-btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.getElementById('user-dropdown').classList.toggle('show');
+        });
+
+        // 외부 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
