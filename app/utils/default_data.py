@@ -49,7 +49,7 @@ class DefaultData:
         await ChronicDisease.get_or_create(disease_name="고혈압", user=user)
 
         # 3. 현재 복용 중인 약물 생성
-        await CurrentMed.get_or_create(
+        current_med, _ = await CurrentMed.get_or_create(
             medication_name="타이레놀정 500mg",
             user=user,
             defaults={"added_from": "PILL_SCAN", "start_date": date(2026, 3, 1)},
@@ -57,7 +57,7 @@ class DefaultData:
 
         # 4. 알림 및 알림 내역 생성
         alarm, _ = await Alarm.get_or_create(
-            drug_name="타이레놀정 500mg", user=user, defaults={"alarm_time": time(9, 0, 0), "is_active": True}
+            current_med=current_med, user=user, defaults={"alarm_time": time(9, 0, 0), "is_active": True}
         )
         await AlarmHistory.get_or_create(alarm=alarm, defaults={"is_confirmed": True})
 
