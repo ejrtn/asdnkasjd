@@ -27,3 +27,19 @@ class ChatSessionResponse(BaseModel):
     session_id: str
     last_message: str
     created_at: str
+
+
+class ChatMessageRequest(BaseModel):
+    message: str = Field(..., description="사용자 메시지")
+    session_id: str | None = Field(None, description="세션 ID (없으면 신규 생성)")
+
+
+class ChatMessageResponse(BaseModel):
+    session_id: str = Field(..., description="세션 ID")
+    assistant_message: str = Field(..., description="챗봇 응답")
+    risk_level: str = Field(..., description="위험도 (Normal/Emergency)")
+    question_type: str = Field(..., description="질문 분류 (복약/증상/일반)")
+
+
+class ChatEndRequest(BaseModel):
+    session_id: str = Field(..., description="종료할 세션 ID")
