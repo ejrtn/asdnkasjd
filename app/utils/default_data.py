@@ -16,6 +16,7 @@ from app.models.health_profile import (
     HealthProfile,
     SmokingStatus,
     WeightChange,
+    SleepChange
 )
 from app.models.llm_life_guide import LLMLifeGuide
 from app.models.multimodal_asset import MultimodalAsset
@@ -210,6 +211,8 @@ class DefaultData:
                 "height_cm": 175.5,
                 "weight_kg": 72.0,
                 "weight_change": WeightChange.NO_CHANGE,
+                "sleep_hours": 7.0,
+                "sleep_change": SleepChange.NO_CHANGE,
                 "job": "개발자",
                 "smoking_status": SmokingStatus.NEVER,
                 "drinking_status": DrinkingStatus.CURRENT,

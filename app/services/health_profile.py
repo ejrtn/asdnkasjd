@@ -31,10 +31,7 @@ class HealthProfileService:
         Returns:
             dict: 통합 건강 프로필 정보
         """
-        if user:
-            user_id = user.id
-        else:
-            user_id = "ejrtn153@naver.com"
+        user_id = user.id
 
         allergies = await self.allergy_repo.get_by_user_id(user_id)
         blood_pressure_records = await self.blood_pressure_record_repo.get_by_user_id(user_id)

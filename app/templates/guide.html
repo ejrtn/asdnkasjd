@@ -278,17 +278,13 @@
             const healthRes = await fetchJsonWithAuth('/api/v1/health');
             console.log(healthRes);
 
-            // ✅ Unpack consolidated response
-            currentStatus.diseases = healthRes.chronic_diseases || [];
-            currentStatus.allergies = healthRes.allergies || [];
-            currentStatus.meds = healthRes.current_meds || [];
+            // ✅ default 제거
+            currentStatus.health_profile = healthRes || [];
 
             renderHealthProfile();
         } catch (err) {
             console.error("Profile Load Error:", err);
-            currentStatus.diseases = [];
-            currentStatus.allergies = [];
-            currentStatus.meds = [];
+            currentStatus.health_profile = [];
             renderHealthProfile();
         }
     }
