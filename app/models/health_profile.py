@@ -1,6 +1,10 @@
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from tortoise import fields, models
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class SmokingStatus(str, Enum):
@@ -18,8 +22,8 @@ class DrinkingStatus(str, Enum):
 
 
 class WeightChange(str, Enum):
-    NONE = "NONE"        # 변화 없음
-    YES = "YES"          # 변화 있음
+    NONE = "NONE"  # 변화 없음
+    YES = "YES"  # 변화 있음
     UNKNOWN = "UNKNOWN"  # 잘 모름
 
 
@@ -47,9 +51,10 @@ class HealthProfile(models.Model):
     사용자 건강 프로필(정적/준정적 정보)
     - 1 user : 1 health_profile
     """
+
     id = fields.IntField(pk=True)
 
-    user = fields.OneToOneField(
+    user: fields.OneToOneRelation["User"] = fields.OneToOneField(
         "models.User",
         related_name="health_profile",
         on_delete=fields.CASCADE,
@@ -83,9 +88,7 @@ class HealthProfile(models.Model):
     exercise_frequency = fields.CharEnumField(
         ExerciseFrequency, default=ExerciseFrequency.UNKNOWN, description="운동 빈도"
     )
-    diet_type = fields.CharEnumField(
-        DietType, default=DietType.UNKNOWN, description="식습관 유형"
-    )
+    diet_type = fields.CharEnumField(DietType, default=DietType.UNKNOWN, description="식습관 유형")
 
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
@@ -95,4 +98,4 @@ class HealthProfile(models.Model):
         table_description = "사용자 건강 프로필(정적/준정적 정보)"
 
     def __str__(self) -> str:
-        return f"HealthProfile(user={self.user_id})"
+        return f"HealthProfile(user={getattr(self, 'user_id', 'N/A')})"

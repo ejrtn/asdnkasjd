@@ -1,4 +1,9 @@
+from typing import TYPE_CHECKING
+
 from tortoise import fields, models
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class BloodPressureRecord(models.Model):
@@ -6,9 +11,10 @@ class BloodPressureRecord(models.Model):
     혈압 기록(동적 기록 수첩)
     - 1 user : N records
     """
+
     id = fields.IntField(pk=True)
 
-    user = fields.ForeignKeyField(
+    user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
         "models.User",
         related_name="blood_pressure_records",
         on_delete=fields.CASCADE,
@@ -27,4 +33,4 @@ class BloodPressureRecord(models.Model):
         table_description = "혈압 기록(수축기/이완기/맥박)"
 
     def __str__(self) -> str:
-        return f"BP(user={self.user_id}, {self.systolic}/{self.diastolic})"
+        return f"BP(user={getattr(self, 'user_id', 'N/A')}, {self.systolic}/{self.diastolic})"
