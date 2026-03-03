@@ -9,13 +9,15 @@ _app: firebase_admin.App | None = None
 def get_firebase_app() -> firebase_admin.App:
     global _app
     if _app is None:
-        cred = credentials.Certificate({
-            "type": "service_account",
-            "project_id": config.FIREBASE_PROJECT_ID,
-            "private_key": config.FIREBASE_PRIVATE_KEY.replace("\\n", "\n"),
-            "client_email": config.FIREBASE_CLIENT_EMAIL,
-            "token_uri": "https://oauth2.googleapis.com/token",
-        })
+        cred = credentials.Certificate(
+            {
+                "type": "service_account",
+                "project_id": config.FIREBASE_PROJECT_ID,
+                "private_key": config.FIREBASE_PRIVATE_KEY.replace("\\n", "\n"),
+                "client_email": config.FIREBASE_CLIENT_EMAIL,
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        )
         _app = firebase_admin.initialize_app(cred)
     return _app
 

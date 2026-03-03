@@ -27,7 +27,9 @@ class Alarm(models.Model):
     is_active = fields.BooleanField(default=True)  # 알람 활성화 여부
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="alarms")
     current_med: fields.ForeignKeyRelation["CurrentMed"] | None = fields.ForeignKeyField(
-        "models.CurrentMed", related_name="alarms", null=True  # MED 타입일 때만 연결, 혈압/혈당은 null
+        "models.CurrentMed",
+        related_name="alarms",
+        null=True,  # MED 타입일 때만 연결, 혈압/혈당은 null
     )
 
     class Meta:

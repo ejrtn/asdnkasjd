@@ -2,12 +2,11 @@
 알람 스케줄러 태스크
 1분마다 현재 시간과 일치하는 활성 알람을 체크하여 FCM 푸시 발송
 """
+
 import asyncio
 import logging
-from datetime import datetime
-
 import zoneinfo
-from tortoise import Tortoise
+from datetime import datetime
 
 from ai_worker.core.config import Config
 from ai_worker.tasks.fcm import send_push_notification
@@ -44,7 +43,9 @@ async def check_and_send_alarms() -> None:
     alarms = await Alarm.filter(is_active=True).prefetch_related("user", "current_med")
 
     for alarm in alarms:
-        alarm_time_str = alarm.alarm_time.strftime("%H:%M") if hasattr(alarm.alarm_time, "strftime") else str(alarm.alarm_time)[:5]
+        alarm_time_str = (
+            alarm.alarm_time.strftime("%H:%M") if hasattr(alarm.alarm_time, "strftime") else str(alarm.alarm_time)[:5]
+        )
 
         if alarm_time_str != current_time:
             continue
@@ -76,13 +77,13 @@ async def check_and_send_alarms() -> None:
 async def run_alarm_scheduler() -> None:
     """정각에 맞춰 알람 체크 루프"""
     logging.info("⏰ 알람 스케줄러 루프 시작")
-    
+
     # 첫 번째 정각까지 대기
     now = datetime.now(tz=zoneinfo.ZoneInfo("Asia/Seoul"))
     seconds_until_next_minute = 60 - now.second
     logging.info(f"⏱️ 다음 정각까지 {seconds_until_next_minute}초 대기")
     await asyncio.sleep(seconds_until_next_minute)
-    
+
     while True:
         try:
             logging.info("⏳ 알람 체크 중...")

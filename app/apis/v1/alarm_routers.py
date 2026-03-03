@@ -77,6 +77,7 @@ async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request
     [ALARM] 알람 확인 (복약/측정 완료 체크)
     """
     from app.models.alarm_history import AlarmHistory
+
     history = await AlarmHistory.filter(alarm_id=alarm_id).order_by("-sent_at").first()
     if history:
         history.is_confirmed = True

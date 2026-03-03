@@ -41,7 +41,9 @@ class AlarmService:
         return [
             self._to_response(
                 alarm,
-                HEALTH_ALARM_NAMES.get(alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"),
+                HEALTH_ALARM_NAMES.get(
+                    alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+                ),
                 alarm.current_med.id if alarm.current_med else 0,
             )
             for alarm in alarms
@@ -84,7 +86,9 @@ class AlarmService:
             alarm.is_active = request.is_active
         await alarm.save()
 
-        med_name = HEALTH_ALARM_NAMES.get(alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음")
+        med_name = HEALTH_ALARM_NAMES.get(
+            alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+        )
         return self._to_response(alarm, med_name, alarm.current_med.id if alarm.current_med else 0)
 
     async def toggle_alarm(self, user: User, alarm_id: int, request: AlarmToggleRequest) -> AlarmResponse:
@@ -96,7 +100,9 @@ class AlarmService:
         alarm.is_active = request.is_active
         await alarm.save()
 
-        med_name = HEALTH_ALARM_NAMES.get(alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음")
+        med_name = HEALTH_ALARM_NAMES.get(
+            alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+        )
         return self._to_response(alarm, med_name, alarm.current_med.id if alarm.current_med else 0)
 
     async def delete_alarm(self, user: User, alarm_id: int) -> None:
