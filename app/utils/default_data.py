@@ -60,20 +60,12 @@ class DefaultData:
             pill_allergy="페니실린",
             food_allergy="갑각류",
             any_allergy="꽃가루",
-            symptom="두드러기, 가려움증"
+            symptom="두드러기, 가려움증",
         )
 
         # 3. 만성질환 생성 (chronic_diseases) - [MODIFIED] when_to_Diagnose 필드 추가
-        await ChronicDisease.get_or_create(
-            user=user,
-            disease_name="고혈압",
-            defaults={"when_to_Diagnose": "10Y"}
-        )
-        await ChronicDisease.get_or_create(
-            user=user,
-            disease_name="당뇨병",
-            defaults={"when_to_Diagnose": "5Y"}
-        )
+        await ChronicDisease.get_or_create(user=user, disease_name="고혈압", defaults={"when_to_Diagnose": "10Y"})
+        await ChronicDisease.get_or_create(user=user, disease_name="당뇨병", defaults={"when_to_Diagnose": "5Y"})
 
         # 4. 현재 복용 중인 약물 생성 (current_meds) - [MODIFIED] one_dose, daily_dose_count, one_dose_count 필드 사용
         current_med, _ = await CurrentMed.get_or_create(
@@ -85,7 +77,7 @@ class DefaultData:
                 "one_dose_count": "1정",
                 "dose_time": DoseTime.LUNCH,
                 "added_from": "OCR",
-                "start_date": "2026-03-01"
+                "start_date": "2026-03-01",
             },
         )
         current_med2, _ = await CurrentMed.get_or_create(
@@ -97,7 +89,7 @@ class DefaultData:
                 "one_dose_count": "1정",
                 "dose_time": DoseTime.MORNING,
                 "added_from": "MANUAL",
-                "start_date": "2025-02-01"
+                "start_date": "2025-02-01",
             },
         )
 

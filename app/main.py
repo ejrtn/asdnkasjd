@@ -85,6 +85,7 @@ async def read_prescription_upload(request: Request):
     """
     return templates.TemplateResponse("prescription_upload.html", {"request": request})
 
+
 @app.get("/health-profile", response_class=HTMLResponse)
 async def read_health_profile(request: Request):
     """

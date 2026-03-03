@@ -14,10 +14,7 @@ from app.utils.default_data import DefaultData
 
 async def run_verification():
     # 1. Initialize Tortoise with SQLite in-memory
-    await Tortoise.init(
-        db_url="sqlite://:memory:",
-        modules={"models": TORTOISE_APP_MODELS}
-    )
+    await Tortoise.init(db_url="sqlite://:memory:", modules={"models": TORTOISE_APP_MODELS})
     await Tortoise.generate_schemas()
 
     print("--- Starting Data Population ---")
@@ -70,6 +67,7 @@ async def run_verification():
 
     print("\n--- Verification Successful! ---")
     await Tortoise.close_connections()
+
 
 if __name__ == "__main__":
     asyncio.run(run_verification())
