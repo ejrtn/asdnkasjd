@@ -60,7 +60,6 @@ class DefaultData:
             defaults={"added_from": "PILL_SCAN", "start_date": date(2025, 2, 1)},
         )
 
-
         # 4. 알림 및 알림 내역 생성
         alarm, _ = await Alarm.get_or_create(
             current_med=current_med, user=user, defaults={"alarm_time": time(9, 0, 0), "is_active": True}

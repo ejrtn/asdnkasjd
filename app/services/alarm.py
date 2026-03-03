@@ -9,7 +9,7 @@ from app.models.user import User
 class AlarmService:
     def _format_time(self, t: object) -> str:
         if hasattr(t, "strftime"):
-            return t.strftime("%H:%M")  # type: ignore[union-attr]
+            return t.strftime("%H:%M")  # type: ignore[union-attr, no-any-return]
         if hasattr(t, "seconds"):  # timedelta
             total = int(t.seconds)  # type: ignore[union-attr]
             return f"{total // 3600:02d}:{(total % 3600) // 60:02d}"

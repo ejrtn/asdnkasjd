@@ -21,7 +21,7 @@ class User(models.Model):
     phone_number = fields.CharField(max_length=11)  # 연락처
     birthday = fields.CharField(max_length=10)  # 생년월일 (YYYY-MM-DD 형식)
     gender = fields.CharField(max_length=10)  # 성별 (예: "남성", "여성", "기타")
-    alarm_tf = fields.BooleanField() # 알람 수신 여부
+    alarm_tf = fields.BooleanField()  # 알람 수신 여부
     is_terms_agreed = fields.BooleanField(default=False)  # 약관 동의 여부
     is_privacy_agreed = fields.BooleanField(default=False)  # 개인정보 동의 여부
     is_marketing_agreed = fields.BooleanField(default=False)  # 마케팅 수신 동의
