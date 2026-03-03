@@ -63,9 +63,9 @@ class DefaultData:
             symptom="두드러기, 가려움증",
         )
 
-        # 3. 만성질환 생성 (chronic_diseases) - [MODIFIED] when_to_Diagnose 필드 추가
-        await ChronicDisease.get_or_create(user=user, disease_name="고혈압", defaults={"when_to_Diagnose": "10Y"})
-        await ChronicDisease.get_or_create(user=user, disease_name="당뇨병", defaults={"when_to_Diagnose": "5Y"})
+        # 3. 만성질환 생성 (chronic_diseases) - [MODIFIED] when_to_diagnose 필드 추가
+        await ChronicDisease.get_or_create(user=user, disease_name="고혈압", defaults={"when_to_diagnose": "10Y"})
+        await ChronicDisease.get_or_create(user=user, disease_name="당뇨병", defaults={"when_to_diagnose": "5Y"})
 
         # 4. 현재 복용 중인 약물 생성 (current_meds) - [MODIFIED] one_dose, daily_dose_count, one_dose_count 필드 사용
         current_med, _ = await CurrentMed.get_or_create(

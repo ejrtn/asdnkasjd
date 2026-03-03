@@ -1,3 +1,4 @@
+from typing import cast
 from app.models.chronic_disease import ChronicDisease
 
 
@@ -9,16 +10,15 @@ class ChronicDiseaseRepository:
     def __init__(self):
         self._model = ChronicDisease
 
-    # 사용자에 해당하는 질병 가져오기
-    async def get_by_user_id(self, user_id: str) -> ChronicDisease | None:
+    # 사용자에 해당하는 질환 목록 가져오기
+    async def get_by_user_id(self, user_id: str) -> list[ChronicDisease]:
         """
-        사용자 아이디를 이용해 질병을 조회합니다.
+        사용자 아이디를 이용해 질환 목록을 조회합니다.
 
         Args:
             user_id (str): 조회할 사용자 아이디
 
         Returns:
-            ChronicDisease | None: 사용자 객체 또는 없음
+            list[ChronicDisease]: 질환 객체 리스트
         """
-        chronic_disease: ChronicDisease | None = await self._model.get_or_none(user_id=user_id)  # type: ignore[assignment]
-        return chronic_disease
+        return cast(list[ChronicDisease], await self._model.filter(user_id=user_id).all())
