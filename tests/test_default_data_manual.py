@@ -1,13 +1,16 @@
 import asyncio
+
 from tortoise import Tortoise
+
 from app.db.databases import TORTOISE_APP_MODELS
-from app.utils.default_data import DefaultData
 from app.models.allergy import Allergy
-from app.models.chronic_disease import ChronicDisease
-from app.models.current_med import CurrentMed
 from app.models.blood_pressure_record import BloodPressureRecord
 from app.models.blood_sugar_record import BloodSugarRecord
+from app.models.chronic_disease import ChronicDisease
+from app.models.current_med import CurrentMed
 from app.models.health_profile import HealthProfile
+from app.utils.default_data import DefaultData
+
 
 async def run_verification():
     # 1. Initialize Tortoise with SQLite in-memory
@@ -25,7 +28,7 @@ async def run_verification():
 
     # 3. Verify records
     print("--- Verifying Records ---")
-    
+
     # Allergies
     allergies = await Allergy.all()
     print(f"Allergies count: {len(allergies)}")

@@ -8,7 +8,7 @@ from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
 from app.models.cnn_history import CNNHistory
-from app.models.current_med import CurrentMed
+from app.models.current_med import CurrentMed, DoseTime
 from app.models.health_profile import (
     DietType,
     DrinkingStatus,

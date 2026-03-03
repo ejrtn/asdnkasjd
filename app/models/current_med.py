@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING
 from enum import Enum
+from typing import TYPE_CHECKING
+
 from tortoise import fields, models
 
 if TYPE_CHECKING:
