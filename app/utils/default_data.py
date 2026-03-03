@@ -14,6 +14,7 @@ from app.models.health_profile import (
     DrinkingStatus,
     ExerciseFrequency,
     HealthProfile,
+    SleepChange,
     SmokingStatus,
     WeightChange,
 )
@@ -63,9 +64,9 @@ class DefaultData:
             symptom="두드러기, 가려움증",
         )
 
-        # 3. 만성질환 생성 (chronic_diseases) - [MODIFIED] when_to_Diagnose 필드 추가
-        await ChronicDisease.get_or_create(user=user, disease_name="고혈압", defaults={"when_to_Diagnose": "10Y"})
-        await ChronicDisease.get_or_create(user=user, disease_name="당뇨병", defaults={"when_to_Diagnose": "5Y"})
+        # 3. 만성질환 생성 (chronic_diseases) - [MODIFIED] when_to_diagnose 필드 추가
+        await ChronicDisease.get_or_create(user=user, disease_name="고혈압", defaults={"when_to_diagnose": "10Y"})
+        await ChronicDisease.get_or_create(user=user, disease_name="당뇨병", defaults={"when_to_diagnose": "5Y"})
 
         # 4. 현재 복용 중인 약물 생성 (current_meds) - [MODIFIED] one_dose, daily_dose_count, one_dose_count 필드 사용
         current_med, _ = await CurrentMed.get_or_create(
@@ -210,6 +211,8 @@ class DefaultData:
                 "height_cm": 175.5,
                 "weight_kg": 72.0,
                 "weight_change": WeightChange.NO_CHANGE,
+                "sleep_hours": 7.0,
+                "sleep_change": SleepChange.NO_CHANGE,
                 "job": "개발자",
                 "smoking_status": SmokingStatus.NEVER,
                 "drinking_status": DrinkingStatus.CURRENT,

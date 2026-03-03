@@ -123,3 +123,7 @@ class UserUpdateRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., description="현재 비밀번호")
     new_password: str = Field(..., description="새 비밀번호")
+
+
+class FcmTokenUpdateRequest(BaseModel):
+    fcm_token: str = Field(..., description="FCM 토큰")

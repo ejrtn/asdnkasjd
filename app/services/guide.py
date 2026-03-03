@@ -69,7 +69,7 @@ class GuideService:
                 meds = await CurrentMed.filter(user=user).all()
 
                 disease_list = [d.disease_name for d in diseases]
-                allergy_list = [a.allergy_name for a in allergies]
+                allergy_list = [a.any_allergy for a in allergies]
                 med_list = [m.medication_name for m in meds]
             else:
                 disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]

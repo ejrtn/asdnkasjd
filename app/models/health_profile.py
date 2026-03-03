@@ -28,6 +28,13 @@ class WeightChange(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class SleepChange(str, Enum):
+    NO_CHANGE = "NO_CHANGE"
+    GAIN = "GAIN"
+    LOSS = "LOSS"
+    UNKNOWN = "UNKNOWN"
+
+
 class ExerciseFrequency(str, Enum):
     NONE = "NONE"
     WEEK_1_2 = "WEEK_1_2"
@@ -70,6 +77,10 @@ class HealthProfile(models.Model):
     height_cm = fields.FloatField(null=True, description="신장(cm)")
     weight_kg = fields.FloatField(null=True, description="체중(kg)")
     weight_change = fields.CharEnumField(WeightChange, default=WeightChange.UNKNOWN, description="최근 체중 변화")
+
+    # 수면
+    sleep_hours = fields.FloatField(null=True, description="수면 시간(시간)")
+    sleep_change = fields.CharEnumField(SleepChange, default=SleepChange.UNKNOWN, description="최근 수면 변화")
 
     # 직업
     job = fields.CharField(max_length=100, null=True, description="직업")
