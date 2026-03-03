@@ -1,4 +1,5 @@
 from typing import cast
+
 from app.models.current_med import CurrentMed
 
 

@@ -1,4 +1,5 @@
 from typing import cast
+
 from app.models.chronic_disease import ChronicDisease
 
 

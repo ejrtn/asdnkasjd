@@ -14,9 +14,9 @@ from app.models.health_profile import (
     DrinkingStatus,
     ExerciseFrequency,
     HealthProfile,
+    SleepChange,
     SmokingStatus,
     WeightChange,
-    SleepChange
 )
 from app.models.llm_life_guide import LLMLifeGuide
 from app.models.multimodal_asset import MultimodalAsset

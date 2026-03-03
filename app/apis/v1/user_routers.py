@@ -4,7 +4,14 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import ORJSONResponse as Response
 
 from app.dependencies.security import get_request_user
-from app.dtos.users import ChangePasswordRequest, SignUpRequest, SignUpResponse, UserMeResponse, UserUpdateRequest
+from app.dtos.users import (
+    ChangePasswordRequest,
+    FcmTokenUpdateRequest,
+    SignUpRequest,
+    SignUpResponse,
+    UserMeResponse,
+    UserUpdateRequest,
+)
 from app.models.user import User
 from app.services.users import UserManageService
 
@@ -116,11 +123,11 @@ async def new_password(
 
 @user_router.patch("/me/fcm-token", status_code=status.HTTP_200_OK)
 async def update_fcm_token(
-    data: dict,
+    data: FcmTokenUpdateRequest,
     user: Annotated[User, Depends(get_request_user)],
 ) -> Response:
     """[USER] FCM 토큰 등록/갱신"""
-    user.fcm_token = data.get("fcm_token")
+    user.fcm_token = data.fcm_token
     await user.save()
     return Response(content={"detail": "FCM 토큰이 등록되었습니다."}, status_code=status.HTTP_200_OK)
 

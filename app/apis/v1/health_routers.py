@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 
 from app.dependencies.security import get_optional_user
 from app.dtos.health import (
@@ -20,6 +20,7 @@ async def get_health_profile(
     service = HealthProfileService()
     return await service.generate_health_profile(user)
 
+
 @health_router.post("", response_model=HealthProfileResponse)
 async def create_health_profile(
     user: Annotated[User | None, Depends(get_optional_user)] = None,
@@ -28,10 +29,11 @@ async def create_health_profile(
     service = HealthProfileService()
     return await service.generate_health_profile(user)
 
+
 @health_router.put("", response_model=HealthProfileResponse)
 async def update_health_profile(
     user: Annotated[User | None, Depends(get_optional_user)] = None,
     refresh: bool = False,
 ):
     service = HealthProfileService()
-    return await service.generate_health_profile(user)  
+    return await service.generate_health_profile(user)

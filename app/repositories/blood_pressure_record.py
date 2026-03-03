@@ -1,4 +1,5 @@
 from typing import cast
+
 from app.models.blood_pressure_record import BloodPressureRecord
 
 
@@ -15,4 +16,3 @@ class BloodPressureRecordRepository:
         사용자 아이디를 이용해 혈압 기록 목록을 조회합니다.
         """
         return cast(list[BloodPressureRecord], await self._model.filter(user_id=user_id).order_by("-recorded_at").all())
-        
