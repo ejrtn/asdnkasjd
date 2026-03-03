@@ -9,6 +9,7 @@ from app.models.user import User
 
 current_med_router = APIRouter(prefix="/current-meds", tags=["current_med"])
 
+
 @current_med_router.get("", response_model=list[CurrentMedResponse])
 async def get_current_meds(user: Annotated[User, Depends(get_request_user)]) -> list[CurrentMedResponse]:
     """현재 복용 중인 약물 목록 조회"""

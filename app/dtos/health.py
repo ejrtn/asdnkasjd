@@ -58,6 +58,7 @@ class CurrentMedResponse(BaseModel):
     added_from: str
     start_date: str
 
+
 class CurrentMedCreateRequest(BaseModel):
     medication_name: str | None
     added_from: str | None
