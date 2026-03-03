@@ -24,6 +24,9 @@ TORTOISE_APP_MODELS = [
     "app.models.upload",
     "app.models.ocr_history",
     "app.models.cnn_history",
+    "app.models.blood_pressure_record",
+    "app.models.blood_sugar_record",
+    "app.models.health_profile",
 ]
 
 TORTOISE_ORM = {

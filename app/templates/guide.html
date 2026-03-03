@@ -220,8 +220,8 @@
     // State
     let currentStatus = { diseases: [], allergies: [], meds: [] };
     let guideData = null;
-    let isSpeaking = false;
-    const synthesis = window.speechSynthesis;
+    let isSpeaking2 = false;
+    const synthesis2 = window.speechSynthesis;
 
     async function initGuide() {
         await fetchHealthProfile();
@@ -366,9 +366,9 @@
         const btnText = document.getElementById('tts-text');
         const btnIcon = document.getElementById('tts-icon');
         const btn = document.getElementById('tts-btn');
-        if (isSpeaking) {
-            synthesis.cancel();
-            isSpeaking = false;
+        if (isSpeaking2) {
+            synthesis2.cancel();
+            isSpeaking2 = false;
             btnText.innerText = '가이드 읽어주기';
             btnIcon.innerText = '📢';
             return;
@@ -377,16 +377,16 @@
         const utterance = new SpeechSynthesisUtterance(fullText);
         utterance.lang = 'ko-KR';
         utterance.onstart = () => {
-            isSpeaking = true;
+            isSpeaking2 = true;
             btnText.innerText = '읽기 중지';
             btnIcon.innerText = '⏹';
         };
         utterance.onend = () => {
-            isSpeaking = false;
+            isSpeaking2 = false;
             btnText.innerText = '가이드 읽어주기';
             btnIcon.innerText = '📢';
         };
-        synthesis.speak(utterance);
+        synthesis2.speak(utterance);
     }
 </script>
 {% endblock %}

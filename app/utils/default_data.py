@@ -1,12 +1,22 @@
-from datetime import date, time
+from datetime import date, datetime, time, timedelta
 
 from app.models.alarm import Alarm
 from app.models.alarm_history import AlarmHistory
 from app.models.allergy import Allergy
+from app.models.blood_pressure_record import BloodPressureRecord
+from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
 from app.models.cnn_history import CNNHistory
 from app.models.current_med import CurrentMed
+from app.models.health_profile import (
+    DietType,
+    DrinkingStatus,
+    ExerciseFrequency,
+    HealthProfile,
+    SmokingStatus,
+    WeightChange,
+)
 from app.models.llm_life_guide import LLMLifeGuide
 from app.models.multimodal_asset import MultimodalAsset
 from app.models.ocr_history import OCRHistory
@@ -175,7 +185,57 @@ class DefaultData:
             },
         )
 
-        # 11. 시스템 로그 생성
+        # 11. 건강 프로필 생성 (정적 정보)
+        await HealthProfile.get_or_create(
+            user=user,
+            defaults={
+                "family_history": True,
+                "family_history_father_note": "고혈압",
+                "family_history_mother_note": "당뇨",
+                "height_cm": 175.5,
+                "weight_kg": 72.0,
+                "weight_change": WeightChange.NONE,
+                "job": "개발자",
+                "smoking_status": SmokingStatus.NEVER,
+                "drinking_status": DrinkingStatus.CURRENT,
+                "drinking_years": 5,
+                "drinking_per_week": 1.5,
+                "exercise_frequency": ExerciseFrequency.WEEK_3_4,
+                "diet_type": DietType.BALANCED,
+            },
+        )
+
+        # 12. 혈압 기록 생성 (동적 정보)
+        bp_records = [
+            {"systolic": 120, "diastolic": 80, "pulse": 72, "recorded_at": datetime.now() - timedelta(days=2)},
+            {"systolic": 125, "diastolic": 82, "pulse": 75, "recorded_at": datetime.now() - timedelta(days=1)},
+            {"systolic": 118, "diastolic": 78, "pulse": 70, "recorded_at": datetime.now()},
+        ]
+        for bp in bp_records:
+            await BloodPressureRecord.create(user=user, **bp)
+
+        # 13. 혈당 기록 생성 (동적 정보)
+        bs_records = [
+            {
+                "glucose_mg_dl": 95.0,
+                "measure_type": GlucoseMeasureType.FASTING,
+                "recorded_at": datetime.now() - timedelta(days=1, hours=4),
+            },
+            {
+                "glucose_mg_dl": 140.0,
+                "measure_type": GlucoseMeasureType.AFTER_MEAL,
+                "recorded_at": datetime.now() - timedelta(days=1),
+            },
+            {
+                "glucose_mg_dl": 100.0,
+                "measure_type": GlucoseMeasureType.FASTING,
+                "recorded_at": datetime.now(),
+            },
+        ]
+        for bs in bs_records:
+            await BloodSugarRecord.create(user=user, **bs)
+
+        # 14. 시스템 로그 생성
         # await SystemLog.create(
         #     api_path="/api/v1/pill-scan",
         #     method="POST",

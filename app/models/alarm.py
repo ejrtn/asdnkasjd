@@ -17,7 +17,7 @@ class Alarm(models.Model):
     alarm_time = fields.TimeField()
     is_active = fields.BooleanField(default=True)
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="alarms")
-    current_med: fields.ForeignKeyRelation["CurrentMed"] = fields.ForeignKeyField(
+    current_med: fields.ForeignKeyRelation["CurrentMed"] | None = fields.ForeignKeyField(
         "models.CurrentMed", related_name="alarms", null=True
     )
 
