@@ -12,6 +12,114 @@
   color: inherit;
 }
 
+/* 네비게이션 아이템 */
+.nav-item { 
+  position: relative; 
+  margin-bottom: 10px; 
+}
+
+.nav-link {
+  display: block;
+  padding: 8px !important;
+  border: 1px solid #333;
+  background: #fff;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 2px;
+  transition: transform .15s ease, box-shadow .15s ease;
+  font-size: 14px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.nav-link:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* 메가 패널 */
+.mega-panel {
+  display: none;
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 0;
+  width: 520px;
+  padding: 16px 16px 14px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(79,70,229,0.18);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.14);
+  z-index: 3000;
+}
+
+/* hover 시 패널 표시 */
+.nav-item:hover .mega-panel { 
+  display: block; 
+}
+
+/* 패널 타이틀/설명 */
+.mega-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.mega-desc {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+/* 카드 그리드 */
+.mega-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mega-card {
+  background: rgba(79,70,229,0.06);
+  border: 1px solid rgba(79,70,229,0.12);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.mega-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.mega-card-desc {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+/* 하단 힌트 */
+.mega-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* 사이드바 오버플로우 */
+.sidebar { 
+  overflow: visible; 
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
 /* 헤더 스타일 개선 */
 .header-left {
   text-decoration: none;
@@ -228,38 +336,113 @@ body.zoom-large .hero-slider {
 
 <div class="container">
   <aside class="sidebar">
-    <a href="/">
-      <button class="dashboard-btn active">대시보드</button>
-    </a>
-    <a href="/guide">
-      <button>생활 안내 가이드</button>
-    </a>
-    <a href="/alarm">
-      <button>복용 알람</button>
-    </a>
-    <a href="/prescription-upload">
-      <button>처방전 및 약물</button>
-    </a>
-    <a href="/health-profile">
-      <button>건강정보</button>
-    </a>
+    <div class="nav-item">
+      <a href="/guide" class="nav-link">
+        생활 안내 가이드
+      </a>
+      <div class="mega-panel" aria-hidden="true">
+        <div class="mega-title">생활 안내 가이드</div>
+        <div class="mega-desc">진료 기록을 바탕으로, 오늘 실천할 수 있는 건강 가이드를 바로 확인해요.</div>
+        <div class="mega-grid">
+          <div class="mega-card">
+            <div class="mega-card-title">나의 건강 요약</div>
+            <div class="mega-card-desc">질환·알레르기·복용약을 한눈에 정리하고, 핵심 주의사항을 빠르게 확인해요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">AI 맞춤 생활 안내 가이드</div>
+            <div class="mega-card-desc">복약 안전, 생활습관 관리 포인트를 쉬운 문장으로 자동 생성해드려요.</div>
+          </div>
+        </div>
+        <div class="mega-hint">클릭하면 자세히 볼 수 있어요 →</div>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <a href="/alarm" class="nav-link">
+        알람
+      </a>
+      <div class="mega-panel" aria-hidden="true">
+        <div class="mega-title">알람</div>
+        <div class="mega-desc">복약과 건강기록을 놓치지 않도록, 나에게 맞는 시간을 설정해요.</div>
+        <div class="mega-grid">
+          <div class="mega-card">
+            <div class="mega-card-title">복약 알람</div>
+            <div class="mega-card-desc">현재 복용 중인 약을 선택하고, 시간별 알람을 켜고 끌 수 있어요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">혈압 알람</div>
+            <div class="mega-card-desc">아침/저녁 혈압 측정 시간과 체크를 규칙적으로 관리해요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">혈당 알람</div>
+            <div class="mega-card-desc">공복·식후·취침 전 혈당 측정 루틴을 알람으로 만들어요.</div>
+          </div>
+        </div>
+        <div class="mega-hint">클릭하면 설정 화면으로 이동해요 →</div>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <a href="/prescription-upload" class="nav-link">
+        처방전 및 약물
+      </a>
+      <div class="mega-panel" aria-hidden="true">
+        <div class="mega-title">처방전 및 약물</div>
+        <div class="mega-desc">촬영 한 번으로 약 정보를 정리하고, 복약 안내까지 연결해요.</div>
+        <div class="mega-grid">
+          <div class="mega-card">
+            <div class="mega-card-title">처방전 / 약봉투 촬영</div>
+            <div class="mega-card-desc">처방 내용을 자동 추출하고 복용 시간/주의사항을 정리해요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">알약 이미지 촬영</div>
+            <div class="mega-card-desc">알약 사진으로 약 정보를 빠르게 확인하고 복약으로 연결해요.</div>
+          </div>
+        </div>
+        <div class="mega-hint">클릭하면 업로드 화면으로 이동해요 →</div>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <a href="/health-profile" class="nav-link">
+        건강정보
+      </a>
+      <div class="mega-panel" aria-hidden="true">
+        <div class="mega-title">건강정보</div>
+        <div class="mega-desc">내 건강 프로필과 기록을 모아, 더 정확한 맞춤 가이드를 만들어요.</div>
+        <div class="mega-grid">
+          <div class="mega-card">
+            <div class="mega-card-title">건강 프로필</div>
+            <div class="mega-card-desc">질환·알레르기·복용약·생활습관을 등록해요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">혈압 수첩</div>
+            <div class="mega-card-desc">최근 기록을 모아 변화 추이를 확인하고 관리할 수 있어요.</div>
+          </div>
+          <div class="mega-card">
+            <div class="mega-card-title">혈당 수첩</div>
+            <div class="mega-card-desc">공복/식후 패턴을 기록하고 나만의 루틴을 만들어요.</div>
+          </div>
+        </div>
+        <div class="mega-hint">클릭하면 건강정보로 이동해요 →</div>
+      </div>
+    </div>
+
     <div class="sidebar-footer">
-      <a href="/mypage">
-        <button>👤 마이페이지</button>
+      <a href="/mypage" class="nav-link">
+        👤 마이페이지
       </a>
     </div>
   </aside>
 
   <main class="main">
-    <!-- 큰 슬라이드 박스 -->
     <div class="hero-slider" id="hero-slider">
-      <!-- 슬라이드 1: 브랜드 & 오늘의 분위기 -->
       <div class="slide active" data-slide="1">
         <div class="slide-header">
           <div class="slide-brand">Cloud9 Care</div>
           <div class="slide-date">
-            <div id="current-date">📅 2026년 3월 3일 (화)</div>
-            <div id="weather-info">🌤️ 18°C · 맑음</div>
+            <div id="dateText">📅 2026년 3월 3일 (화)</div>
+            <div id="weatherText">🌤️ 18°C · 맑음</div>
           </div>
         </div>
         <div class="slide-content">
@@ -271,7 +454,6 @@ body.zoom-large .hero-slider {
         </div>
       </div>
       
-      <!-- 슬라이드 2: 오늘의 건강 인사이트 -->
       <div class="slide" data-slide="2">
         <div class="slide-header">
           <h3>오늘의 건강 인사이트</h3>
@@ -287,16 +469,13 @@ body.zoom-large .hero-slider {
         </div>
       </div>
       
-      <!-- 슬라이드 인디케이터 -->
       <div class="slide-indicators">
         <span class="indicator active" data-slide="1"></span>
         <span class="indicator" data-slide="2"></span>
       </div>
     </div>
 
-    <!-- 작은 카드 4개 -->
     <div class="dashboard-cards">
-      <!-- 1. 건강 지표 -->
       <div class="dashboard-card health-metrics">
         <div class="card-header">
           <h4>📈 건강 지표</h4>
@@ -321,7 +500,6 @@ body.zoom-large .hero-slider {
         </div>
       </div>
 
-      <!-- 2. 오늘의 복약 & 알림 -->
       <div class="dashboard-card medication">
         <div class="card-header">
           <h4>💊 오늘의 복약 & 알림</h4>
@@ -343,7 +521,6 @@ body.zoom-large .hero-slider {
         </div>
       </div>
 
-      <!-- 3. 최근 분석 결과 -->
       <div class="dashboard-card analysis">
         <div class="card-header">
           <h4>🧾 최근 분석 결과</h4>
@@ -356,7 +533,6 @@ body.zoom-large .hero-slider {
         </div>
       </div>
 
-      <!-- 4. 생활 변화 트렌드 -->
       <div class="dashboard-card trends">
         <div class="card-header">
           <h4>🌙 생활 변화 트렌드</h4>
@@ -407,12 +583,10 @@ body.zoom-large .hero-slider {
 document.getElementById('search-btn').addEventListener('click', function() {
   const searchTerm = document.getElementById('search-input').value.trim();
   if (searchTerm) {
-    // 여기에 실제 검색 로직 추가 가능
     alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
   }
 });
 
-// 엔터 키로 검색
 document.getElementById('search-input').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') {
     document.getElementById('search-btn').click();
@@ -433,6 +607,62 @@ document.getElementById('zoom-btn').addEventListener('click', function() {
     this.title = '글자 크기 확대';
   }
 });
+
+// 날씨 API 연동 (콘솔 로그 포함)
+async function fetchWeather(url) {
+  console.log('[Weather] Fetching:', url);
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(await r.text());
+  return await r.json();
+}
+
+function renderWeather(data) {
+  const dateEl = document.getElementById('dateText');
+  const weatherEl = document.getElementById('weatherText');
+  if (!dateEl || !weatherEl) return;
+
+  dateEl.textContent = data.date_text;
+  weatherEl.textContent = data.weather_text;
+  console.log('[Weather] Rendered:', data);
+}
+
+async function initWeather() {
+  console.log('[Weather] Initializing...');
+  if (navigator.geolocation) {
+    console.log('[Weather] Geolocation available, requesting permission...');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        console.log('[Weather] GPS Success:', { latitude, longitude });
+        try {
+          const data = await fetchWeather(`/api/v1/weather/current?lat=${latitude}&lon=${longitude}`);
+          renderWeather(data);
+          console.log('[Weather] GPS-based weather loaded successfully');
+        } catch (e) {
+          console.error('[Weather] GPS API failed, falling back to Seoul:', e);
+          const data = await fetchWeather(`/api/v1/weather/current?city=Seoul`);
+          renderWeather(data);
+          console.log('[Weather] Fallback to Seoul successful');
+        }
+      },
+      async (err) => {
+        console.warn('[Weather] GPS Permission denied or error:', err.message);
+        console.log('[Weather] Using default city: Seoul');
+        const data = await fetchWeather(`/api/v1/weather/current?city=Seoul`);
+        renderWeather(data);
+        console.log('[Weather] Seoul weather loaded successfully');
+      },
+      { timeout: 5000, maximumAge: 600000 }
+    );
+  } else {
+    console.log('[Weather] Geolocation not available, using Seoul');
+    const data = await fetchWeather(`/api/v1/weather/current?city=Seoul`);
+    renderWeather(data);
+    console.log('[Weather] Seoul weather loaded successfully');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initWeather);
 </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 import logging
+import os
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +10,8 @@ from fastapi.templating import Jinja2Templates
 from app.apis.v1 import api_v1_router
 from app.db.databases import initialize_tortoise
 from app.utils.default_data import DefaultData
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 app = FastAPI(
     default_response_class=ORJSONResponse, docs_url="/api/docs", redoc_url="/api/redoc", openapi_url="/api/openapi.json"
@@ -34,8 +38,9 @@ logging.getLogger("tortoise.db_client").setLevel(logging.DEBUG)
 
 # [추가된 기능] 정적 파일 및 템플릿 설정
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-# ✅ 업로드 파일 접근용 mount 추가
-app.mount("/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
+uploads_dir = os.path.join(os.path.dirname(__file__), "../uploads")
+os.makedirs(uploads_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 templates = Jinja2Templates(directory="app/templates")
 
 
@@ -44,7 +49,7 @@ async def read_root(request: Request):
     """
     서비스의 메인 랜딩 페이지(대시보드)를 반환합니다.
     """
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/signup", response_class=HTMLResponse)
@@ -77,14 +82,6 @@ async def read_find_id_pw(request: Request):
     아이디 및 비밀번호 찾기 페이지를 반환합니다.
     """
     return templates.TemplateResponse("find_account.html", {"request": request})
-
-
-@app.get("/dashboard", response_class=HTMLResponse)
-async def read_dashboard(request: Request):
-    """
-    대시보드 페이지를 반환합니다.
-    """
-    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @app.get("/guide", response_class=HTMLResponse)

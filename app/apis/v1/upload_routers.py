@@ -8,7 +8,7 @@ from app.dependencies.security import get_request_user
 from app.models.upload import Upload
 from app.models.user import User
 
-UPLOAD_DIR = "/app/uploads"
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)

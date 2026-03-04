@@ -16,6 +16,8 @@ from app.apis.v1.result_routers import result_router
 from app.apis.v1.system_routers import system_router
 from app.apis.v1.upload_routers import upload_router
 from app.apis.v1.user_routers import user_router
+from app.apis.v1.weather_routers import router as weather_router
+from app.apis.v1.insights_routers import router as insights_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
@@ -35,3 +37,5 @@ api_v1_router.include_router(multimodal_router)
 api_v1_router.include_router(system_router)
 api_v1_router.include_router(common_router)
 api_v1_router.include_router(dashboard_router)
+api_v1_router.include_router(weather_router)
+api_v1_router.include_router(insights_router)
