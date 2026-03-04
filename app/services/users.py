@@ -96,6 +96,7 @@ class UserManageService:
         access_token = create_access_token(data={"user_id": user.id}, expires_delta=access_token_expires)
         refresh_token = create_refresh_token(data={"user_id": user.id}, expires_delta=refresh_token_expires)
 
+        print(refresh_token)
         # Redis에 세션 저장
         await redis_client.setex(f"session:{user.id}", int(access_token_expires.total_seconds()), access_token)
 

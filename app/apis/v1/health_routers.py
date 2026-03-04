@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from app.dependencies.security import get_optional_user
+from app.dependencies.security import get_request_user
 from app.dtos.health import (
     HealthProfileResponse,
 )
@@ -14,7 +14,7 @@ health_router = APIRouter(prefix="/health", tags=["health-profile"])
 
 @health_router.get("", response_model=HealthProfileResponse)
 async def get_health_profile(
-    user: Annotated[User | None, Depends(get_optional_user)] = None,
+    user: Annotated[User | None, Depends(get_request_user)] = None,
     refresh: bool = False,
 ):
     service = HealthProfileService()
@@ -23,7 +23,7 @@ async def get_health_profile(
 
 @health_router.post("", response_model=HealthProfileResponse)
 async def create_health_profile(
-    user: Annotated[User | None, Depends(get_optional_user)] = None,
+    user: Annotated[User | None, Depends(get_request_user)] = None,
     refresh: bool = False,
 ):
     service = HealthProfileService()
@@ -32,7 +32,7 @@ async def create_health_profile(
 
 @health_router.put("", response_model=HealthProfileResponse)
 async def update_health_profile(
-    user: Annotated[User | None, Depends(get_optional_user)] = None,
+    user: Annotated[User | None, Depends(get_request_user)] = None,
     refresh: bool = False,
 ):
     service = HealthProfileService()

@@ -229,29 +229,28 @@
         setupGuideEventListeners();
     }
 
+    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
     async function fetchWithAuth(url, options = {}) {
         let accessToken = localStorage.getItem("access_token");
         const id = localStorage.getItem("user_id");
-
         if (!options.headers) options.headers = {};
         if (accessToken) {
             options.headers["Authorization"] = `Bearer ${accessToken}`;
         }
-
         let response = await fetch(url, options);
-
+        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
         if (response.status === 401) {
             console.log("액세스 토큰 만료, 갱신 시도 중...");
             const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
-
             if (refreshResponse.ok) {
                 const result = await refreshResponse.json();
                 accessToken = result.access_token;
                 localStorage.setItem("access_token", accessToken);
-
+                // 새 토큰으로 원래 요청 재시도
                 options.headers["Authorization"] = `Bearer ${accessToken}`;
                 response = await fetch(url, options);
             } else {
+                // 리프레시 토큰도 만료된 경우
                 alert("세션이 만료되었습니다. 다시 로그인해주세요.");
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("user_id");
@@ -259,29 +258,26 @@
                 return null;
             }
         }
-
         return response;
     }
 
-    async function fetchJsonWithAuth(url) {
-        const res = await fetchWithAuth(url, { method: "GET" });
-        if (!res || !res.ok) return { items: [] };
-
-        const ct = res.headers.get("content-type") || "";
-        if (!ct.includes("application/json")) return { items: [] };
-
-        return await res.json();
-    }
-
     async function fetchHealthProfile() {
+        const id = localStorage.getItem("user_id");
+        if (!id) {
+            location.href = "/login";
+            return;
+        }
+
         try {
-            const healthRes = await fetchJsonWithAuth('/api/v1/health');
-            console.log(healthRes);
+            const healthRes = await fetchWithAuth(`/api/v1/health?id=?id=${encodeURIComponent(id)}`, { method: 'GET' });
+
+             if (!healthRes || !healthRes.ok) throw new Error("Fetch failed");
+            const health = await healthRes.json();
 
             // ✅ Unpack consolidated response
-            currentStatus.diseases = healthRes.chronic_diseases || [];
-            currentStatus.allergies = healthRes.allergies || [];
-            currentStatus.meds = healthRes.current_meds || [];
+            currentStatus.diseases = health.chronic_diseases || [];
+            currentStatus.allergies = health.allergies || [];
+            currentStatus.meds = health.current_meds || [];
 
             renderHealthProfile();
         } catch (err) {
@@ -322,14 +318,14 @@
                 : '<li class="text-gray-400">등록된 질환이 없습니다.</li>';
 
         const allergyList = document.getElementById('allergy-list');
-        console.log(currentStatus.allergies);
+
         allergyList.innerHTML =
             currentStatus.allergies.length > 0
                 ? currentStatus.allergies.map(a => `<li>${a.any_allergy}</li>`).join('')
                 : '<li class="text-gray-400">등록된 알레르기가 없습니다.</li>';
 
         const medList = document.getElementById('medication-list');
-        console.log(currentStatus.meds);
+
         medList.innerHTML =
             currentStatus.meds.length > 0
                 ? currentStatus.meds.map(m => `<li>${m.medication_name}</li>`).join('')

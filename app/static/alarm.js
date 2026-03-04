@@ -91,6 +91,7 @@ function renderMeds() {
             </div>
         `;
     }).join('');
+    showMedDetail(currentMeds[0].id)
 }
 
 function showMedDetail(medId) {
@@ -130,7 +131,6 @@ function showMedDetail(medId) {
     `;
 
     document.getElementById('alarm-detail').innerHTML = detailHtml;
-    renderMeds();
 }
 
 async function toggleMedAlarms(medId, isActive) {

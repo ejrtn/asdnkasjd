@@ -1,25 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
 
 from app.dependencies.security import get_request_user
+from app.dtos.health import CurrentMedCreateRequest, CurrentMedResponse
 from app.models.current_med import CurrentMed
 from app.models.user import User
 
 current_med_router = APIRouter(prefix="/current-meds", tags=["current_med"])
-
-
-class CurrentMedResponse(BaseModel):
-    id: int
-    medication_name: str
-    added_from: str
-    start_date: str
-
-
-class CurrentMedCreateRequest(BaseModel):
-    medication_name: str = Field(..., description="약물 이름")
-    added_from: str = Field(default="MANUAL", description="추가 경로")
 
 
 @current_med_router.get("", response_model=list[CurrentMedResponse])

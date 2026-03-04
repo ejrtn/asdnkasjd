@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Cloud9 Care - 처방전 및 약물 업로드</title>
-    <link rel="stylesheet" href="/static/chatbot.css">
+{% block title %}Cloud9 Care - 생활 안내 가이드{% endblock %}
 
-    <style>
+{% block head %}
+<style>
         * {
             box-sizing: border-box;
             margin: 0;
@@ -464,186 +461,106 @@
             display: none;
         }
     </style>
-</head>
+{% endblock %}
 
-<body>
-
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header-left">☁️ Cloud9 Care</div>
-        <div class="header-right">
-            <input class="search" placeholder="search">
-            <button>Button</button>
-            <button>➕</button>
-            <div class="user-menu">
-                <button class="user-menu-btn" id="user-menu-btn">👤</button>
-                <div class="user-dropdown" id="user-dropdown">
-                    <a href="/signup">회원가입</a>
-                    <a href="/login">로그인</a>
-                    <a href="/mypage">마이페이지</a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <a href="/"><button>대시보드</button></a>
-            <a href="/guide"><button>생활 안내 가이드</button></a>
-            <a href="/alarm"><button>복용 알람</button></a>
-            <button style="background: #eef5ff; border-color: #007bff; font-weight: bold;">처방전 및 약물</button>
-
-            <div class="sidebar-footer">
-                <a href="/mypage"><button>👤 마이페이지</button></a>
-            </div>
-        </aside>
-
-        <!-- MAIN -->
-        <main class="main">
-
-            <!-- ================= 처방전 / 약봉투 ================= -->
-            <section class="upload">
-                <div>
-                    <div class="page-title">처방전 / 약봉투</div>
-
-                    <div class="flex">
-                        <div class="column">
-                            <div class="big-box open-upload-btn" id="prescription-preview-box" data-type="prescription">
-                            </div>
-                        </div>
-
-                        <div class="column">
-                            <div class="box">
-                                <h4>분석 결과</h4>
-                                <p>✔ 타이레놀 (0.94)</p>
-                                <p>✔ 게보린 (0.72)</p>
-                                <p>✔ 판콜 (0.61)</p>
-                            </div>
-
-                            <div class="modal">
-                                다음 약을 현재 복용 약물에 연동하시겠습니까?
-                                <br>
-                                <button>네, 연동하겠습니다</button>
-                                <button>아니오</button>
-                            </div>
-                        </div>
-
+{% block content %}
+<!-- MAIN -->
+<main class="main">
+    <!-- ================= 처방전 / 약봉투 ================= -->
+    <section class="upload">
+        <div>
+            <div class="page-title">처방전 / 약봉투</div>
+            <div class="flex">
+                <div class="column">
+                    <div class="big-box open-upload-btn" id="prescription-preview-box" data-type="prescription">
                     </div>
                 </div>
-                <div style="margin-top: 40px;">
-                    <div class="page-title">복용약 이미지</div>
-
-                    <div class="flex">
-                        <div class="column">
-                            <div class="big-box open-upload-btn" id="medication-preview-box" data-type="medication">
-                            </div>
-                        </div>
-
-                        <div class="column">
-                            <div class="box">
-                                <h4>분석 결과</h4>
-                                <p>✔ 타이레놀 (0.94)</p>
-                                <p>✔ 게보린 (0.72)</p>
-                                <p>✔ 판콜 (0.61)</p>
-                            </div>
-
-                            <div class="modal">
-                                다음 약을 현재 복용 약물에 연동하시겠습니까?
-                                <br>
-                                <button>네, 연동하겠습니다</button>
-                                <button>아니오</button>
-                            </div>
-                        </div>
-
+                <div class="column">
+                    <div class="box">
+                        <h4>분석 결과</h4>
+                        <p>✔ 타이레놀 (0.94)</p>
+                        <p>✔ 게보린 (0.72)</p>
+                        <p>✔ 판콜 (0.61)</p>
+                    </div>
+                    <div class="modal">
+                        다음 약을 현재 복용 약물에 연동하시겠습니까?
+                        <br>
+                        <button>네, 연동하겠습니다</button>
+                        <button>아니오</button>
                     </div>
                 </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- 파일 업로드 팝업 -->
-    <div class="upload-overlay" id="upload-overlay">
-        <div class="upload-modal">
-            <!-- Loading Overlay -->
-            <div class="loading-overlay" id="loading-overlay">
-                <div class="spinner"></div>
-                <p>파일을 업로드 중입니다...</p>
             </div>
-
-            <h3 id="upload-modal-title">파일 업로드</h3>
-
-            <div class="drop-zone" id="drop-zone">
-                <div class="drop-zone-icon">📁</div>
-                <div class="drop-zone-text">여기에 파일을 끌어다 놓거나 클릭하세요</div>
-                <div class="drop-zone-subtext">지원 형식: JPG, PNG, PDF (최대 10MB, 다중 선택 가능)</div>
-                <input type="file" id="hidden-file-input" accept="image/jpeg, image/png, application/pdf" multiple>
+        </div>
+        <div style="margin-top: 40px;">
+            <div class="page-title">복용약 이미지</div>
+            <div class="flex">
+                <div class="column">
+                    <div class="big-box open-upload-btn" id="medication-preview-box" data-type="medication">
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="box">
+                        <h4>분석 결과</h4>
+                        <p>✔ 타이레놀 (0.94)</p>
+                        <p>✔ 게보린 (0.72)</p>
+                        <p>✔ 판콜 (0.61)</p>
+                    </div>
+                    <div class="modal">
+                        다음 약을 현재 복용 약물에 연동하시겠습니까?
+                        <br>
+                        <button>네, 연동하겠습니다</button>
+                        <button>아니오</button>
+                    </div>
+                </div>
             </div>
-
-            <!-- Selected Files List -->
-            <div class="file-list-container" id="file-list-container" style="display: none;">
-                <strong>선택된 파일:</strong>
-                <div id="file-list"></div>
-            </div>
-
-            <!-- Image Previews -->
-            <div class="preview-grid" id="preview-grid" style="display: none;"></div>
-
-            <div class="upload-modal-footer">
-                <button class="btn-close" id="close-upload-modal">닫기</button>
-                <button class="btn-upload-submit" id="submit-upload" disabled>업로드 시작</button>
-            </div>
+        </div>
+    </section>
+</main>
+<!-- 파일 업로드 팝업 -->
+<div class="upload-overlay" id="upload-overlay">
+    <div class="upload-modal">
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+            <p>파일을 업로드 중입니다...</p>
+        </div>
+        <h3 id="upload-modal-title">파일 업로드</h3>
+        <div class="drop-zone" id="drop-zone">
+            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-text">여기에 파일을 끌어다 놓거나 클릭하세요</div>
+            <div class="drop-zone-subtext">지원 형식: JPG, PNG, PDF (최대 10MB, 다중 선택 가능)</div>
+            <input type="file" id="hidden-file-input" accept="image/jpeg, image/png, application/pdf" multiple>
+        </div>
+        <!-- Selected Files List -->
+        <div class="file-list-container" id="file-list-container" style="display: none;">
+            <strong>선택된 파일:</strong>
+            <div id="file-list"></div>
+        </div>
+        <!-- Image Previews -->
+        <div class="preview-grid" id="preview-grid" style="display: none;"></div>
+        <div class="upload-modal-footer">
+            <button class="btn-close" id="close-upload-modal">닫기</button>
+            <button class="btn-upload-submit" id="submit-upload" disabled>업로드 시작</button>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- 챗봇 플로팅 버튼 -->
-    <button id="chatbot-button" class="chatbot-button">🤖</button>
+{% block scripts %}
+<script>
+    // 사용자 메뉴 드롭다운 토글
+    document.getElementById('user-menu-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.getElementById('user-dropdown').classList.toggle('show');
+    });
 
-    <!-- 챗봇 창 -->
-    <div id="chatbot-container" class="chatbot-container">
-        <div class="chatbot-header">
-            <h3>💬 Cloud9 Care 챗봇</h3>
-            <div class="chatbot-header-buttons">
-                <button id="chatbot-tts" class="chatbot-tts" title="답변 읽어주기">🔊</button>
-                <button id="chatbot-end" class="chatbot-end" title="챗 종료">🗑️</button>
-                <button id="chatbot-close" class="chatbot-close">×</button>
-            </div>
-        </div>
-
-        <div id="chatbot-messages" class="chatbot-messages">
-            <!-- 메시지가 여기에 동적으로 추가됩니다 -->
-        </div>
-
-        <div class="chatbot-input">
-            <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
-            <button id="chatbot-send" class="chatbot-send">➤</button>
-        </div>
-    </div>
-
-    <script src="/static/chatbot.js"></script>
-    <script src="/static/upload.js"></script>
-    <script>
-        // 사용자 메뉴 드롭다운 토글
-        document.getElementById('user-menu-btn').addEventListener('click', function (e) {
-            e.stopPropagation();
-            document.getElementById('user-dropdown').classList.toggle('show');
-        });
-
-        // 외부 클릭 시 드롭다운 닫기
-        document.addEventListener('click', function (e) {
-            const dropdown = document.getElementById('user-dropdown');
-            if (dropdown && dropdown.classList.contains('show')) {
-                dropdown.classList.remove('show');
-            }
-        });
-    </script>
-
-</body>
-
-</html>
-
-</body>
-
-</html>
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener('click', function (e) {
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
+<script src="/static/upload.js"></script>
+{% endblock %}
