@@ -18,6 +18,12 @@ function initChatbot() {
   const sendBtn = document.getElementById('chatbot-send');
   const input = document.getElementById('chatbot-input');
 
+  // 요소가 없으면 초기화 스킵
+  if (!button || !container || !closeBtn || !endBtn || !ttsBtn || !sendBtn || !input) {
+    console.warn('[Chatbot] Required elements not found, skipping initialization');
+    return;
+  }
+
   // 챗봇 열기/닫기
   button.addEventListener('click', toggleChatbot);
   closeBtn.addEventListener('click', toggleChatbot);
