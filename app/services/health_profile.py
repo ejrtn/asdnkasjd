@@ -31,6 +31,9 @@ class HealthProfileService:
         Returns:
             dict: 통합 건강 프로필 정보
         """
+        if user is None:
+            return {}
+
         user_id = user.id
 
         allergies = await self.allergy_repo.get_by_user_id(user_id)
