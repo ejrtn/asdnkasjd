@@ -11,6 +11,7 @@ from app.apis.v1.guide_routers import guide_router
 from app.apis.v1.health_routers import health_router
 from app.apis.v1.medication_routers import medication_router
 from app.apis.v1.multimodal_routers import multimodal_router
+from app.apis.v1.ocr_routers import ocr_router
 from app.apis.v1.result_routers import result_router
 from app.apis.v1.system_routers import system_router
 from app.apis.v1.upload_routers import upload_router
@@ -22,6 +23,7 @@ api_v1_router.include_router(auth_router)
 api_v1_router.include_router(user_router)
 api_v1_router.include_router(health_router)
 api_v1_router.include_router(upload_router)
+api_v1_router.include_router(ocr_router)
 api_v1_router.include_router(analysis_router)
 api_v1_router.include_router(result_router)
 api_v1_router.include_router(medication_router)

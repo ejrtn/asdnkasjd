@@ -76,3 +76,7 @@ class Config(BaseSettings):
     FIREBASE_CLIENT_EMAIL: str = ""
     FIREBASE_PRIVATE_KEY: str = ""
     VAPID_PUBLIC_KEY: str = ""
+
+    # Naver Clova OCR
+    CLOVA_OCR_INVOKE_URL: str = ""
+    CLOVA_OCR_SECRET_KEY: str = ""
