@@ -36,6 +36,243 @@
         .header-left {
             font-size: 20px;
             font-weight: bold;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .header-left:hover {
+            color: #4f46e5;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 2px;
+            border: 1px solid #e9ecef;
+        }
+
+        .search-input {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            outline: none;
+            font-size: 14px;
+            width: 200px;
+        }
+
+        .search-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #3730a3;
+        }
+
+        .zoom-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+            margin-left: 8px;
+        }
+
+        .zoom-btn:hover {
+            background: #059669;
+        }
+
+        /* 알람 페이지 확대 기능 */
+        body.zoom-large .page-title {
+            font-size: 28px;
+        }
+
+        body.zoom-large .tab-btn {
+            font-size: 18px;
+            padding: 18px;
+        }
+
+        body.zoom-large .tab-icon {
+            font-size: 28px;
+        }
+
+        body.zoom-large .box h4 {
+            font-size: 20px;
+        }
+
+        body.zoom-large .med-item {
+            font-size: 18px;
+            padding: 16px;
+        }
+
+        body.zoom-large .alarm-time-item {
+            font-size: 18px;
+            padding: 16px;
+        }
+
+        body.zoom-large .alarm-slot-info h5 {
+            font-size: 19px;
+        }
+
+        body.zoom-large .alarm-slot-info p {
+            font-size: 16px;
+        }
+
+        body.zoom-large .guide-card h5 {
+            font-size: 18px;
+        }
+
+        body.zoom-large .guide-card p,
+        body.zoom-large .guide-card li {
+            font-size: 17px;
+        }
+
+        body.zoom-large .normal-range-card h5 {
+            font-size: 18px;
+        }
+
+        body.zoom-large .range-item .label {
+            font-size: 16px;
+        }
+
+        body.zoom-large .range-item .value {
+            font-size: 18px;
+        }
+
+        body.zoom-large .btn-add-time {
+            font-size: 18px;
+            padding: 14px;
+        }
+
+        /* 혈압/혈당 알람 탭 추가 확대 */
+        body.zoom-large .health-panel {
+            font-size: 20px;
+        }
+
+        body.zoom-large .alarm-slot {
+            padding: 20px 24px;
+        }
+
+        body.zoom-large .alarm-slot-right input[type="time"] {
+            font-size: 18px;
+            padding: 10px 14px;
+        }
+
+        body.zoom-large .toggle-switch {
+            width: 60px;
+            height: 32px;
+        }
+
+        body.zoom-large .toggle-switch::after {
+            width: 28px;
+            height: 28px;
+        }
+
+        body.zoom-large .toggle-switch.active::after {
+            left: 30px;
+        }
+
+        /* 생활 안내 가이드 페이지 확대 기능 */
+        body.zoom-large .guide-page-container {
+            font-size: 20px;
+        }
+
+        body.zoom-large .text-xl {
+            font-size: 28px !important;
+        }
+
+        body.zoom-large .text-lg {
+            font-size: 24px !important;
+        }
+
+        body.zoom-large .text-sm {
+            font-size: 18px !important;
+        }
+
+        body.zoom-large .text-xs {
+            font-size: 16px !important;
+        }
+
+        body.zoom-large .text-\[10px\] {
+            font-size: 14px !important;
+        }
+
+        body.zoom-large .p-8 {
+            padding: 32px !important;
+        }
+
+        body.zoom-large .p-6 {
+            padding: 24px !important;
+        }
+
+        body.zoom-large .p-5 {
+            padding: 20px !important;
+        }
+
+        body.zoom-large .p-4 {
+            padding: 16px !important;
+        }
+
+        body.zoom-large .mb-6 {
+            margin-bottom: 24px !important;
+        }
+
+        body.zoom-large .mb-4 {
+            margin-bottom: 16px !important;
+        }
+
+        body.zoom-large .gap-6 {
+            gap: 24px !important;
+        }
+
+        body.zoom-large .gap-4 {
+            gap: 16px !important;
+        }
+
+        /* 건강정보 페이지 확대 기능 */
+        body.zoom-large .form-group label {
+            font-size: 18px !important;
+        }
+
+        body.zoom-large .form-group input,
+        body.zoom-large .form-group select,
+        body.zoom-large .form-group textarea {
+            font-size: 18px !important;
+            padding: 12px !important;
+        }
+
+        body.zoom-large .btn {
+            font-size: 18px !important;
+            padding: 14px 20px !important;
+        }
+
+        body.zoom-large .section-title {
+            font-size: 26px !important;
+        }
+
+        body.zoom-large .form-section h3 {
+            font-size: 22px !important;
+        }
+
+        body.zoom-large .checkbox-item label {
+            font-size: 18px !important;
+        }
+
+        body.zoom-large .radio-item label {
+            font-size: 18px !important;
         }
 
         .header-right {
@@ -152,11 +389,13 @@
 
     <!-- HEADER -->
     <header class="header">
-        <div class="header-left">☁️ Cloud9 Care</div>
+        <a href="/" class="header-left">☁️ Cloud9 Care</a>
         <div class="header-right">
-            <input class="search" placeholder="search">
-            <button>Button</button>
-            <button>➕</button>
+            <div class="search-container">
+                <input class="search-input" id="search-input" placeholder="검색어를 입력하세요">
+                <button class="search-btn" id="search-btn">🔍</button>
+            </div>
+            <button class="zoom-btn" id="zoom-btn" title="글자 크기 조절">🔍</button>
             <div class="user-menu">
                 <button class="user-menu-btn" id="user-menu-btn">👤</button>
                 <div class="user-dropdown" id="user-dropdown">
@@ -173,7 +412,7 @@
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <a href="/">
-                <button class="dashboard-btn {% if request.url.path == '/' %}nav-active{% endif %}">대시보드</button>
+                <button class="dashboard-btn {% if request.url.path == '/' or request.url.path == '/dashboard' %}nav-active{% endif %}">대시보드</button>
             </a>
             <a href="/guide">
                 <button class="guide-btn {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내 가이드</button>
@@ -238,6 +477,42 @@
             if (dropdown && dropdown.classList.contains('show')) {
                 dropdown.classList.remove('show');
             }
+        });
+
+        // 검색 기능
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            if (searchTerm) {
+                alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
+            }
+        });
+
+        // 엔터 키로 검색
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('search-btn').click();
+            }
+        });
+
+        // 확대 기능
+        let isZoomed = false;
+        document.getElementById('zoom-btn').addEventListener('click', function() {
+            isZoomed = !isZoomed;
+            
+            // ✅ 핵심: zoom-large 클래스 토글
+            document.body.classList.toggle('zoom-large', isZoomed);
+            
+            // 사이드바 버튼 확대 (CSS로 처리되므로 제거 가능하지만 유지)
+            document.querySelectorAll('.sidebar button').forEach(btn => {
+                btn.style.fontSize = isZoomed ? '18px' : '';
+                btn.style.padding = isZoomed ? '12px' : '';
+            });
+            
+            // 헤더 확대
+            document.querySelector('.header-left').style.fontSize = isZoomed ? '24px' : '';
+            
+            this.textContent = isZoomed ? '🔎' : '🔍';
+            this.title = isZoomed ? '글자 크기 축소' : '글자 크기 확대';
         });
     </script>
     {% block scripts %}{% endblock %}

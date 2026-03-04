@@ -27,9 +27,9 @@ templates = Jinja2Templates(directory="app/templates")
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """
-    서비스의 메인 랜딩 페이지(Index)를 반환합니다.
+    서비스의 메인 랜딩 페이지(대시보드)를 반환합니다.
     """
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @app.get("/signup", response_class=HTMLResponse)
@@ -62,6 +62,14 @@ async def read_find_id_pw(request: Request):
     아이디 및 비밀번호 찾기 페이지를 반환합니다.
     """
     return templates.TemplateResponse("find_account.html", {"request": request})
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def read_dashboard(request: Request):
+    """
+    대시보드 페이지를 반환합니다.
+    """
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @app.get("/guide", response_class=HTMLResponse)
