@@ -1,7 +1,81 @@
+import io
+import json
+import time
+import uuid
+
+import httpx
+from pypdf import PdfReader
+
+from app.core import config
 from app.dtos.ocr import DrugInfo, OCRExtractResponse, PillAnalyzeResponse, PillCandidate
 
 
 class OCRService:
+    async def extract_raw_text(self, image_bytes: bytes, file_name: str, file_ext: str) -> str:
+        """
+        PDF인 경우 우선 텍스트 추출을 시도하고, 실패하거나 이미지 기반 PDF인 경우 Naver Clova OCR을 사용합니다.
+        """
+        # 1. PDF 텍스트 직접 추출 시도
+        if file_ext.lower() == ".pdf":
+            native_text = self._extract_native_pdf_text(image_bytes, file_name)
+            if native_text:
+                return native_text
+
+        # 2. Naver Clova OCR 사용 (이미지 또는 텍스트 없는 PDF)
+        return await self._extract_clova_ocr_text(image_bytes, file_name, file_ext)
+
+    def _extract_native_pdf_text(self, image_bytes: bytes, file_name: str) -> str | None:
+        """PDF에서 직접 텍스트를 추출합니다."""
+        try:
+            reader = PdfReader(io.BytesIO(image_bytes))
+            native_text = ""
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    native_text += text + "\n"
+
+            # 추출된 텍스트가 의미 있는 수준(50자 이상)이면 반환
+            if len(native_text.strip()) > 50:
+                return native_text.strip()
+        except Exception as e:
+            print(f"Native PDF extraction failed for {file_name}: {e}")
+        return None
+
+    async def _extract_clova_ocr_text(self, image_bytes: bytes, file_name: str, file_ext: str) -> str:
+        """Naver Clova OCR API를 사용하여 텍스트를 추출합니다."""
+        invoke_url = config.CLOVA_OCR_INVOKE_URL
+        secret_key = config.CLOVA_OCR_SECRET_KEY
+
+        if not invoke_url or not secret_key:
+            return "Naver Clova OCR 설정이 누락되었습니다."
+
+        request_json = {
+            "images": [{"format": file_ext.replace(".", ""), "name": file_name}],
+            "requestId": str(uuid.uuid4()),
+            "version": "V2",
+            "timestamp": int(time.time() * 1000),
+        }
+
+        headers = {"X-OCR-SECRET": secret_key}
+        payload = {"message": json.dumps(request_json)}
+        files = {"file": (file_name, image_bytes)}
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(invoke_url, headers=headers, data=payload, files=files, timeout=30.0)
+                if response.status_code != 200:
+                    return f"OCR API 오류: {response.text}"
+
+                res_data = response.json()
+                all_text = []
+                for image in res_data.get("images", []):
+                    for field in image.get("fields", []):
+                        all_text.append(field.get("inferText", ""))
+                        all_text.append(" ")
+                return "".join(all_text).strip()
+        except Exception as e:
+            return f"OCR 요청 중 예외 발생: {str(e)}"
+
     # ==========================================
     # [추가된 기능] 필수 3: OCR 기반 의료정보 인식
     # ==========================================
