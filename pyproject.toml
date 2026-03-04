@@ -112,5 +112,7 @@ module = [
     "httpx.*",
     "openai.*",
     "dotenv.*",
+    "pypdf",
+    "pypdf.*",
 ]
 ignore_missing_imports = true

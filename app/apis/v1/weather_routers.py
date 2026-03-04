@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from typing import Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -9,20 +8,20 @@ router = APIRouter(prefix="/weather", tags=["weather"])
 
 
 @router.get("/current")
-async def get_current_weather(lat: Optional[float] = None, lon: Optional[float] = None, city: str = "Seoul"):
+async def get_current_weather(lat: float | None = None, lon: float | None = None, city: str = "Seoul"):
     """현재 날씨 정보를 가져옵니다."""
-    
+
     weather_api_key = os.getenv("WEATHER_API_KEY")
     if not weather_api_key:
         raise HTTPException(
             status_code=500,
             detail="WEATHER_API_KEY is not set. Put it in .env or environment variables."
         )
-    
+
     base_url = "https://api.openweathermap.org/data/2.5/weather"
-    
+
     if lat is not None and lon is not None:
-        params = {
+        params: dict[str, str | float] = {
             "lat": lat,
             "lon": lon,
             "appid": weather_api_key,
@@ -36,13 +35,13 @@ async def get_current_weather(lat: Optional[float] = None, lon: Optional[float] 
             "units": "metric",
             "lang": "kr"
         }
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(base_url, params=params)
             response.raise_for_status()
             data = response.json()
-        
+
         weather_icons = {
             "01d": "☀️", "01n": "🌙",
             "02d": "⛅", "02n": "☁️",
@@ -54,7 +53,7 @@ async def get_current_weather(lat: Optional[float] = None, lon: Optional[float] 
             "13d": "❄️", "13n": "❄️",
             "50d": "🌫️", "50n": "🌫️"
         }
-        
+
         # icon_code 기준 감성적 한줄 매핑
         tips = {
             "01d": "햇빛 좋은 날이에요. 가벼운 산책 10분만 해도 충분해요.",
@@ -76,19 +75,19 @@ async def get_current_weather(lat: Optional[float] = None, lon: Optional[float] 
             "50d": "안개 낀 날엔 호흡이 답답할 수 있어요. 무리한 야외활동은 피하세요.",
             "50n": "안개 낀 밤이에요. 실내에서 편히 쉬어보세요.",
         }
-        
+
         now = datetime.now()
         weekdays = ["월", "화", "수", "목", "금", "토", "일"]
         date_text = f"📅 {now.year}년 {now.month}월 {now.day}일 {weekdays[now.weekday()]}"
-        
+
         temp = round(data["main"]["temp"])
         weather_desc = data["weather"][0]["description"]
         weather_icon_code = data["weather"][0]["icon"]
         weather_icon = weather_icons.get(weather_icon_code, "🌤️")
         city_name = data["name"]
-        
+
         tip = tips.get(weather_icon_code, "오늘도 몸이 편안해지는 작은 루틴 하나만 해봐요.")
-        
+
         return {
             "date_text": date_text,
             "weather_text": f"{weather_icon} {temp}°C · {weather_desc}",
@@ -98,11 +97,11 @@ async def get_current_weather(lat: Optional[float] = None, lon: Optional[float] 
             "description": weather_desc,
             "tip": tip
         }
-        
+
     except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=502,
             detail=f"OpenWeather error: {e.response.status_code} / {e.response.text}"
-        )
+        ) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"날씨 정보를 가져올 수 없습니다: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"날씨 정보를 가져올 수 없습니다: {str(e)}") from e

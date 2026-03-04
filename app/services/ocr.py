@@ -2,9 +2,17 @@ import io
 import json
 import time
 import uuid
+from typing import TYPE_CHECKING
 
 import httpx
-from pypdf import PdfReader
+
+if TYPE_CHECKING:
+    from pypdf import PdfReader
+else:
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        PdfReader = None  # type: ignore
 
 from app.core import config
 from app.dtos.ocr import DrugInfo, OCRExtractResponse, PillAnalyzeResponse, PillCandidate
@@ -27,6 +35,8 @@ class OCRService:
     def _extract_native_pdf_text(self, image_bytes: bytes, file_name: str) -> str | None:
         """PDF에서 직접 텍스트를 추출합니다."""
         try:
+            if PdfReader is None:
+                return None
             reader = PdfReader(io.BytesIO(image_bytes))
             native_text = ""
             for page in reader.pages:

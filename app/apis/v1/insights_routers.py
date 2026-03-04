@@ -1,10 +1,9 @@
 import json
 import logging
 import os
-from typing import Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/insights", tags=["insights"])
@@ -19,9 +18,9 @@ FALLBACK = {
 
 
 @router.get("/health")
-async def get_health_insights(user_id: Optional[str] = None):
+async def get_health_insights(user_id: str | None = None):
     """건강 인사이트를 생성합니다. 로그인 시 사용자 정보 기반, 미로그인 시 일반 인사이트."""
-    
+
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
         logger.warning("[Insights] OPENAI_API_KEY is not set, returning fallback")

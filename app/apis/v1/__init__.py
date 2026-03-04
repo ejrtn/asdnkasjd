@@ -9,6 +9,7 @@ from app.apis.v1.current_med_routers import current_med_router
 from app.apis.v1.dashboard_routers import router as dashboard_router
 from app.apis.v1.guide_routers import guide_router
 from app.apis.v1.health_routers import health_router
+from app.apis.v1.insights_routers import router as insights_router
 from app.apis.v1.medication_routers import medication_router
 from app.apis.v1.multimodal_routers import multimodal_router
 from app.apis.v1.ocr_routers import ocr_router
@@ -17,7 +18,6 @@ from app.apis.v1.system_routers import system_router
 from app.apis.v1.upload_routers import upload_router
 from app.apis.v1.user_routers import user_router
 from app.apis.v1.weather_routers import router as weather_router
-from app.apis.v1.insights_routers import router as insights_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
