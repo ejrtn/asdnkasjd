@@ -572,7 +572,7 @@
     // 질환 추가
     function addChronic(name) {
         if (chronicList.some(item => item.name === name)) return;
-        chronicList.push({ name: name, when_to_Diagnose: "" });
+        chronicList.push({ name: name, when_to_diagnose: "" });
         renderChronic();
     }
 
@@ -584,7 +584,7 @@
 
     // 진단시기 업데이트
     function updateDiagnose(index, value) {
-        chronicList[index].when_to_Diagnose = value;
+        chronicList[index].when_to_diagnose = value;
         hiddenInput.value = JSON.stringify(chronicList);
     }
 
@@ -796,7 +796,7 @@
 
         // 🔥 만성질환 자동 삭제
         chronicList = chronicList.filter(item =>
-            item.name && item.when_to_Diagnose
+            item.name && item.when_to_diagnose
         );
         renderChronic();
 
@@ -846,8 +846,8 @@
             family_history: familyHistory,
             family_history_note:
                 document.querySelector("[name='family_history_note']").value.trim() || null,
-            height_cm: parseFloat(height),
-            weight_kg: parseFloat(weight),
+            height_cm: parseFloat(height) || null,
+            weight_kg: parseFloat(weight) || null,
             weight_change: weightChange,
             sleep_change: sleepChange,
             sleep_hours:

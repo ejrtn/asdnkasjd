@@ -77,7 +77,7 @@ class HealthProfileService:
         # 1. 건강 프로필 기본 정보 (신장, 체중 등) 업데이트 또는 생성
         profile_data = {
             "family_history": request.family_history,
-            "family_history_father_note": request.family_history_note,
+            "family_history_note": request.family_history_note,
             "height_cm": request.height_cm,
             "weight_kg": request.weight_kg,
             "weight_change": request.weight_change,
@@ -100,9 +100,9 @@ class HealthProfileService:
         # 3. 만성질환 정보 교체
         await self.chronic_disease_repo.delete_by_user_id(user_id)
         if request.chronic_diseases:
-            # DTO 필드명(name, when_to_Diagnose)을 모델 필드명(disease_name, when_to_diagnose)으로 매핑
+            # DTO 필드명(name, when_to_diagnose)을 모델 필드명(disease_name, when_to_diagnose)으로 매핑
             cd_data = [
-                {"disease_name": cd.name, "when_to_diagnose": cd.when_to_Diagnose} for cd in request.chronic_diseases
+                {"disease_name": cd.name, "when_to_diagnose": cd.when_to_diagnose} for cd in request.chronic_diseases
             ]
             await self.chronic_disease_repo.create_many(user_id, cd_data)
 
