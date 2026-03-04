@@ -168,22 +168,20 @@
 {% endblock %}
 
 {% block content %}
-<!-- MAIN -->
-<main class="main">
-      <div class="page-title">알람</div>
+<div class="page-title">알람</div>
 
-      <!-- 탭 바 -->
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('med')">
-          <span class="tab-icon">💊</span>복약 알람
-        </button>
-        <button class="tab-btn" onclick="switchTab('bp')">
-          <span class="tab-icon">🩺</span>혈압 알람
-        </button>
-        <button class="tab-btn" onclick="switchTab('bs')">
-          <span class="tab-icon">🩸</span>혈당 알람
-        </button>
-      </div>
+<!-- 탭 바 -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('med')">
+    <span class="tab-icon">💊</span>복약 알람
+  </button>
+  <button class="tab-btn" onclick="switchTab('bp')">
+    <span class="tab-icon">🩺</span>혈압 알람
+  </button>
+  <button class="tab-btn" onclick="switchTab('bs')">
+    <span class="tab-icon">🩸</span>혈당 알람
+  </button>
+</div>
 
       <!-- 복약 알람 탭 -->
       <div id="tab-med" class="tab-panel active">
@@ -303,9 +301,6 @@
           <button class="btn-add-time" onclick="saveBsAlarms()">💾 혈당 알람 저장</button>
         </div>
       </div>
-
-    </main>
-  </div>
 {% endblock %}
 
 {% block scripts %}

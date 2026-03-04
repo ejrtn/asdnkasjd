@@ -5,14 +5,216 @@
 <title>대시보드 - Cloud9 Care</title>
 <link rel="stylesheet" href="/static/common.css">
 <link rel="stylesheet" href="/static/chatbot.css">
+<link rel="stylesheet" href="/static/dashboard.css">
+<style>
+.sidebar a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 헤더 스타일 개선 */
+.header-left {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.header-left:hover {
+  color: #4f46e5;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 2px;
+  border: 1px solid #e9ecef;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  outline: none;
+  font-size: 14px;
+  width: 200px;
+}
+
+.search-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: #3730a3;
+}
+
+.zoom-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+  margin-left: 8px;
+}
+
+.zoom-btn:hover {
+  background: #059669;
+}
+
+/* 확대 기능 */
+body.zoom-large {
+  font-size: 22px;
+}
+
+body.zoom-large .slide-content h2 {
+  font-size: 38px;
+}
+
+body.zoom-large .slide-content p {
+  font-size: 24px;
+}
+
+body.zoom-large .card h4 {
+  font-size: 22px;
+}
+
+body.zoom-large .metric-value {
+  font-size: 28px;
+}
+
+body.zoom-large .trend-value {
+  font-size: 26px;
+}
+
+body.zoom-large .sidebar button {
+  font-size: 18px;
+  padding: 12px;
+}
+
+body.zoom-large .header-left {
+  font-size: 24px;
+}
+
+body.zoom-large .insight-item {
+  font-size: 20px;
+}
+
+body.zoom-large .med-time,
+body.zoom-large .med-name {
+  font-size: 18px;
+}
+
+body.zoom-large .analysis-title {
+  font-size: 18px;
+}
+
+body.zoom-large .analysis-result {
+  font-size: 16px;
+}
+
+body.zoom-large .metric-label,
+body.zoom-large .trend-label {
+  font-size: 16px;
+}
+
+body.zoom-large .metric-status {
+  font-size: 14px;
+}
+
+/* 혈압/혈당 알람 부분 확대 */
+body.zoom-large .dashboard-card h4 {
+  font-size: 22px;
+}
+
+body.zoom-large .metric-select {
+  font-size: 16px;
+}
+
+body.zoom-large #blood-pressure-data .metric-value,
+body.zoom-large #blood-sugar-data .metric-value {
+  font-size: 28px;
+}
+
+body.zoom-large #blood-pressure-data .metric-label,
+body.zoom-large #blood-sugar-data .metric-label {
+  font-size: 16px;
+}
+
+body.zoom-large #blood-pressure-data .metric-status,
+body.zoom-large #blood-sugar-data .metric-status {
+  font-size: 16px;
+}
+
+body.zoom-large .metric-chart {
+  font-size: 32px;
+}
+
+/* 추가 확대 요소들 */
+body.zoom-large .next-alarm small {
+  font-size: 16px;
+}
+
+body.zoom-large .slide-brand {
+  font-size: 28px;
+}
+
+body.zoom-large .slide-date {
+  font-size: 18px;
+}
+
+body.zoom-large .slide-footer small {
+  font-size: 18px;
+}
+
+body.zoom-large .score-badge {
+  font-size: 16px;
+}
+
+body.zoom-large .score-status {
+  font-size: 14px;
+}
+
+body.zoom-large .trend-change {
+  font-size: 16px;
+}
+
+/* 카드 레이아웃 깨짐 방지 */
+body.zoom-large .dashboard-cards {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+body.zoom-large .dashboard-card {
+  min-height: 220px;
+  padding: 24px;
+}
+
+body.zoom-large .hero-slider {
+  height: 320px;
+}
+</style>
 </head>
 <body>
 <header class="header">
-  <div class="header-left">☁️ Cloud9 Care</div>
+  <a href="/" class="header-left">☁️ Cloud9 Care</a>
   <div class="header-right">
-    <input class="search" placeholder="search">
-    <button>Button</button>
-    <button>➕</button>
+    <div class="search-container">
+      <input class="search-input" id="search-input" placeholder="검색어를 입력하세요">
+      <button class="search-btn" id="search-btn">🔍</button>
+    </div>
+    <button class="zoom-btn" id="zoom-btn" title="글자 크기 조절">🔍</button>
     <div class="user-menu">
       <button class="user-menu-btn" id="user-menu-btn">👤</button>
       <div class="user-dropdown" id="user-dropdown">
@@ -26,35 +228,155 @@
 
 <div class="container">
   <aside class="sidebar">
-    <button onclick="location.href='/dashboard'">대시보드</button>
-    <button onclick="location.href='/guide'">생활 안내 가이드</button>
-    <button onclick="location.href='/alarm'">복용 알람</button>
-    <button onclick="location.href='/upload'">처방전 및 약물</button>
+    <a href="/">
+      <button class="dashboard-btn active">대시보드</button>
+    </a>
+    <a href="/guide">
+      <button>생활 안내 가이드</button>
+    </a>
+    <a href="/alarm">
+      <button>복용 알람</button>
+    </a>
+    <a href="/prescription-upload">
+      <button>처방전 및 약물</button>
+    </a>
+    <a href="/health-profile">
+      <button>건강정보</button>
+    </a>
     <div class="sidebar-footer">
-      <button onclick="location.href='/mypage'">👤 마이페이지</button>
+      <a href="/mypage">
+        <button>👤 마이페이지</button>
+      </a>
     </div>
   </aside>
 
   <main class="main">
-    <div class="banner"></div>
-    <div class="card-grid">
-      <div class="card">
-        <h4>[ AI 맞춤 건강 요약 배너 ]</h4>
-        <p>안녕하세요, OOO님 👋</p>
-        <p>오늘 복약 2건 예정</p>
+    <!-- 큰 슬라이드 박스 -->
+    <div class="hero-slider" id="hero-slider">
+      <!-- 슬라이드 1: 브랜드 & 오늘의 분위기 -->
+      <div class="slide active" data-slide="1">
+        <div class="slide-header">
+          <div class="slide-brand">Cloud9 Care</div>
+          <div class="slide-date">
+            <div id="current-date">📅 2026년 3월 3일 (화)</div>
+            <div id="weather-info">🌤️ 18°C · 맑음</div>
+          </div>
+        </div>
+        <div class="slide-content">
+          <h2>구름 위에 오른 듯한 건강한 일상,<br>Cloud9 Care가 함께합니다.</h2>
+          <p>의료 기록을 이해하기 쉬운<br>맞춤형 건강 가이드로 연결합니다.</p>
+        </div>
+        <div class="slide-footer">
+          <small id="weather-tip">오늘은 가벼운 산책을 하기 좋은 날입니다.</small>
+        </div>
       </div>
-      <div class="card">
-        <h4>[ 오늘의 복약 알림 카드 ]</h4>
-        <p>08:00 아침약</p>
-        <p>20:00 저녁약</p>
+      
+      <!-- 슬라이드 2: 오늘의 건강 인사이트 -->
+      <div class="slide" data-slide="2">
+        <div class="slide-header">
+          <h3>오늘의 건강 인사이트</h3>
+          <div class="health-score">
+            <span class="score-badge">건강 점수 82점</span>
+            <span class="score-status">(안정 상태)</span>
+          </div>
+        </div>
+        <div class="slide-content insight-content">
+          <div class="insight-item">최근 7일 평균 혈압은 안정 범위입니다.</div>
+          <div class="insight-item">수면 시간이 평균보다 40분 감소했습니다.</div>
+          <div class="insight-item">체중은 큰 변화 없이 유지되고 있습니다.</div>
+        </div>
       </div>
-      <div class="card">
-        <h4>[ 최근 분석 결과 ]</h4>
-        <p>처방전 분석 결과</p>
+      
+      <!-- 슬라이드 인디케이터 -->
+      <div class="slide-indicators">
+        <span class="indicator active" data-slide="1"></span>
+        <span class="indicator" data-slide="2"></span>
       </div>
-      <div class="card">
-        <h4>[ AI 생활 가이드 ]</h4>
-        <p>요약 3줄</p>
+    </div>
+
+    <!-- 작은 카드 4개 -->
+    <div class="dashboard-cards">
+      <!-- 1. 건강 지표 -->
+      <div class="dashboard-card health-metrics">
+        <div class="card-header">
+          <h4>📈 건강 지표</h4>
+          <select id="health-metric-select" class="metric-select">
+            <option value="blood-pressure">혈압</option>
+            <option value="blood-sugar">혈당</option>
+          </select>
+        </div>
+        <div class="card-content">
+          <div id="blood-pressure-data" class="metric-data active">
+            <div class="metric-value">132 / 84 mmHg</div>
+            <div class="metric-label">최근 7일 평균</div>
+            <div class="metric-chart">📊</div>
+            <div class="metric-status">지난주 대비 큰 변동 없음</div>
+          </div>
+          <div id="blood-sugar-data" class="metric-data">
+            <div class="metric-value">108 mg/dL</div>
+            <div class="metric-label">최근 7일 평균 공복</div>
+            <div class="metric-chart">📊</div>
+            <div class="metric-status">최근 3일 소폭 상승</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 오늘의 복약 & 알림 -->
+      <div class="dashboard-card medication">
+        <div class="card-header">
+          <h4>💊 오늘의 복약 & 알림</h4>
+        </div>
+        <div class="card-content">
+          <div class="medication-item">
+            <div class="med-time">08:00</div>
+            <div class="med-name">아침약</div>
+            <div class="med-status completed">🟢</div>
+          </div>
+          <div class="medication-item">
+            <div class="med-time">20:00</div>
+            <div class="med-name">저녁약</div>
+            <div class="med-status pending">🔴</div>
+          </div>
+          <div class="next-alarm">
+            <small>다음 알림까지 3시간 12분 남음</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 최근 분석 결과 -->
+      <div class="dashboard-card analysis">
+        <div class="card-header">
+          <h4>🧾 최근 분석 결과</h4>
+        </div>
+        <div class="card-content">
+          <div class="analysis-status">
+            <div class="analysis-title">처방전 분석 완료</div>
+            <div class="analysis-result safe">약물 상호작용 없음</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 생활 변화 트렌드 -->
+      <div class="dashboard-card trends">
+        <div class="card-header">
+          <h4>🌙 생활 변화 트렌드</h4>
+          <select id="trend-select" class="metric-select">
+            <option value="sleep">수면</option>
+            <option value="weight">체중</option>
+          </select>
+        </div>
+        <div class="card-content">
+          <div id="sleep-data" class="trend-data active">
+            <div class="trend-value">6시간 12분</div>
+            <div class="trend-label">평균 수면 시간</div>
+            <div class="trend-change decrease">⬇ 감소 (−40분)</div>
+          </div>
+          <div id="weight-data" class="trend-data">
+            <div class="trend-value">68.2kg</div>
+            <div class="trend-label">현재 체중</div>
+            <div class="trend-change stable">➖ 변화 없음</div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -79,5 +401,38 @@
 
 <script src="/static/common.js"></script>
 <script src="/static/chatbot.js"></script>
+<script src="/static/dashboard.js"></script>
+<script>
+// 검색 기능
+document.getElementById('search-btn').addEventListener('click', function() {
+  const searchTerm = document.getElementById('search-input').value.trim();
+  if (searchTerm) {
+    // 여기에 실제 검색 로직 추가 가능
+    alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
+  }
+});
+
+// 엔터 키로 검색
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    document.getElementById('search-btn').click();
+  }
+});
+
+// 확대 기능
+let isZoomed = false;
+document.getElementById('zoom-btn').addEventListener('click', function() {
+  isZoomed = !isZoomed;
+  if (isZoomed) {
+    document.body.classList.add('zoom-large');
+    this.textContent = '🔎';
+    this.title = '글자 크기 축소';
+  } else {
+    document.body.classList.remove('zoom-large');
+    this.textContent = '🔍';
+    this.title = '글자 크기 확대';
+  }
+});
+</script>
 </body>
 </html>
