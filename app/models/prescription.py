@@ -19,6 +19,7 @@ class Prescription(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="prescriptions")
     # 1개의 이미지는 1개의 처방전 결과 (1:1)
     upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField("models.Upload", related_name="prescription")
+    created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "prescriptions"

@@ -112,7 +112,7 @@ class DefaultData:
             category="prescription",
             user=user,
         )
-        
+
         prescription, _ = await Prescription.get_or_create(
             user=user,
             upload=presc_upload,

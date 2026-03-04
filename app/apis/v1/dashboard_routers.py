@@ -48,7 +48,7 @@ async def get_dashboard_summary(current_user: User = Depends(get_request_user)) 
     }
 
 
-async def get_health_metrics(user_id: int, week_ago: date) -> dict[str, Any]:
+async def get_health_metrics(user_id: str, week_ago: date) -> dict[str, Any]:
     """건강 지표 데이터를 가져옵니다."""
 
     # 혈압 데이터
@@ -70,7 +70,7 @@ async def get_health_metrics(user_id: int, week_ago: date) -> dict[str, Any]:
     )
 
     if bs_records:
-        avg_glucose = sum(record.glucose_level for record in bs_records) / len(bs_records)
+        avg_glucose = sum(record.glucose_mg_dl for record in bs_records) / len(bs_records)
         bs_trend = "정상" if avg_glucose < 126 else "주의"
     else:
         avg_glucose = 0
@@ -91,7 +91,7 @@ async def get_health_metrics(user_id: int, week_ago: date) -> dict[str, Any]:
     }
 
 
-async def get_today_medication(user_id: int, today: date) -> dict[str, Any]:
+async def get_today_medication(user_id: str, today: date) -> dict[str, Any]:
     """오늘의 복약 정보를 가져옵니다."""
 
     # 오늘의 알람 목록
@@ -104,7 +104,7 @@ async def get_today_medication(user_id: int, today: date) -> dict[str, Any]:
         # 오늘 이 알람에 대한 복약 기록 확인
         today_history = await AlarmHistory.filter(alarm_id=alarm.id, created_at__date=today).first()
 
-        is_completed = today_history is not None and today_history.is_taken
+        is_completed = today_history is not None and today_history.is_confirmed
         if is_completed:
             completed_count += 1
 
@@ -148,7 +148,7 @@ async def get_today_medication(user_id: int, today: date) -> dict[str, Any]:
     }
 
 
-async def get_recent_analysis(user_id: int) -> dict[str, Any]:
+async def get_recent_analysis(user_id: str) -> dict[str, Any]:
     """최근 분석 결과를 가져옵니다."""
 
     # 최근 처방전 분석 결과
@@ -173,7 +173,7 @@ async def get_recent_analysis(user_id: int) -> dict[str, Any]:
     }
 
 
-async def get_lifestyle_trends(user_id: int, week_ago: date) -> dict[str, Any]:
+async def get_lifestyle_trends(user_id: str, week_ago: date) -> dict[str, Any]:
     """생활 변화 트렌드를 가져옵니다."""
 
     # 건강 프로필에서 수면, 체중 데이터 가져오기
@@ -183,7 +183,7 @@ async def get_lifestyle_trends(user_id: int, week_ago: date) -> dict[str, Any]:
     sleep_data = {"average": "6시간 12분", "change": "decrease", "change_amount": "40분", "status": "평균보다 감소"}
 
     weight_data = {
-        "current": f"{health_profile.weight}kg" if health_profile and health_profile.weight else "68.2kg",
+        "current": f"{health_profile.weight_kg}kg" if health_profile and health_profile.weight_kg else "68.2kg",
         "change": "stable",
         "change_amount": "0kg",
         "status": "변화 없음",
