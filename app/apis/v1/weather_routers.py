@@ -14,8 +14,7 @@ async def get_current_weather(lat: float | None = None, lon: float | None = None
     weather_api_key = os.getenv("WEATHER_API_KEY")
     if not weather_api_key:
         raise HTTPException(
-            status_code=500,
-            detail="WEATHER_API_KEY is not set. Put it in .env or environment variables."
+            status_code=500, detail="WEATHER_API_KEY is not set. Put it in .env or environment variables."
         )
 
     base_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -26,15 +25,10 @@ async def get_current_weather(lat: float | None = None, lon: float | None = None
             "lon": lon,
             "appid": weather_api_key,
             "units": "metric",
-            "lang": "kr"
+            "lang": "kr",
         }
     else:
-        params = {
-            "q": city,
-            "appid": weather_api_key,
-            "units": "metric",
-            "lang": "kr"
-        }
+        params = {"q": city, "appid": weather_api_key, "units": "metric", "lang": "kr"}
 
     try:
         async with httpx.AsyncClient() as client:
@@ -43,15 +37,24 @@ async def get_current_weather(lat: float | None = None, lon: float | None = None
             data = response.json()
 
         weather_icons = {
-            "01d": "☀️", "01n": "🌙",
-            "02d": "⛅", "02n": "☁️",
-            "03d": "☁️", "03n": "☁️",
-            "04d": "☁️", "04n": "☁️",
-            "09d": "🌧️", "09n": "🌧️",
-            "10d": "🌦️", "10n": "🌧️",
-            "11d": "⛈️", "11n": "⛈️",
-            "13d": "❄️", "13n": "❄️",
-            "50d": "🌫️", "50n": "🌫️"
+            "01d": "☀️",
+            "01n": "🌙",
+            "02d": "⛅",
+            "02n": "☁️",
+            "03d": "☁️",
+            "03n": "☁️",
+            "04d": "☁️",
+            "04n": "☁️",
+            "09d": "🌧️",
+            "09n": "🌧️",
+            "10d": "🌦️",
+            "10n": "🌧️",
+            "11d": "⛈️",
+            "11n": "⛈️",
+            "13d": "❄️",
+            "13n": "❄️",
+            "50d": "🌫️",
+            "50n": "🌫️",
         }
 
         # icon_code 기준 감성적 한줄 매핑
@@ -95,13 +98,12 @@ async def get_current_weather(lat: float | None = None, lon: float | None = None
             "city": city_name,
             "temperature": temp,
             "description": weather_desc,
-            "tip": tip
+            "tip": tip,
         }
 
     except httpx.HTTPStatusError as e:
         raise HTTPException(
-            status_code=502,
-            detail=f"OpenWeather error: {e.response.status_code} / {e.response.text}"
+            status_code=502, detail=f"OpenWeather error: {e.response.status_code} / {e.response.text}"
         ) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"날씨 정보를 가져올 수 없습니다: {str(e)}") from e
