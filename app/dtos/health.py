@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -7,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ChronicDiseaseResponse(BaseModel):
     id: int
     disease_name: str
-    when_to_diagnose: Optional[str] = None
+    when_to_diagnose: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -23,9 +22,9 @@ class ChronicDiseaseSaveRequest(BaseModel):
 
 class AllergyResponse(BaseModel):
     id: int
-    allergy_name: Optional[str] = None
-    symptom: Optional[str] = None
-    category: Optional[str] = None
+    allergy_name: str | None = None
+    symptom: str | None = None
+    category: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,14 +36,14 @@ class AllergyListResponse(BaseModel):
 class AllergySaveRequest(BaseModel):
     category: str                      # 필수
     allergy_name: str                  # 필수
-    symptom: Optional[str] = None      # 선택
+    symptom: str | None = None      # 선택
 
 
 class BloodPressureRecordResponse(BaseModel):
     id: int
     systolic: int
     diastolic: int
-    pulse: Optional[int] = None
+    pulse: int | None = None
     recorded_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -62,9 +61,9 @@ class BloodSugarRecordResponse(BaseModel):
 class CurrentMedResponse(BaseModel):
     id: int
     medication_name: str
-    one_dose: Optional[str] = None
-    one_dose_count: Optional[str] = None
-    dose_time: Optional[str] = None
+    one_dose: str | None = None
+    one_dose_count: str | None = None
+    dose_time: str | None = None
     added_from: str
     start_date: str
 
@@ -74,16 +73,16 @@ class CurrentMedResponse(BaseModel):
 class CurrentMedSaveRequest(BaseModel):
     medication_name: str          # 필수
     dose_time: str                # 필수
-    one_dose: Optional[str] = None
-    one_dose_count: Optional[str] = None
-    added_from: Optional[str] = None
-    start_date: Optional[str] = None
+    one_dose: str | None = None
+    one_dose_count: str | None = None
+    added_from: str | None = None
+    start_date: str | None = None
 
 
 class HealthProfileDetailResponse(BaseModel):
     id: int
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
+    height_cm: float | None = None
+    weight_kg: float | None = None
     weight_change: str
     job: str | None
     smoking_status: str
@@ -95,7 +94,7 @@ class HealthProfileDetailResponse(BaseModel):
 
 
 class HealthProfileResponse(BaseModel):
-    health_profile: Optional[HealthProfileDetailResponse] = None
+    health_profile: HealthProfileDetailResponse | None = None
     chronic_diseases: list[ChronicDiseaseResponse]
     allergies: list[AllergyResponse]
     current_meds: list[CurrentMedResponse]
@@ -117,26 +116,26 @@ class BloodPressureRequest(BaseModel):
 class FullHealthProfileSaveRequest(BaseModel):
     # 기본 건강 정보
     family_history: str
-    family_history_note: Optional[str] = None
+    family_history_note: str | None = None
 
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
+    height_cm: float | None = None
+    weight_kg: float | None = None
     weight_change: str
 
-    sleep_hours: Optional[float] = None
+    sleep_hours: float | None = None
     sleep_change: str
 
     smoking_status: str
-    smoking_years: Optional[int] = None
-    smoking_per_week: Optional[float] = None
+    smoking_years: int | None = None
+    smoking_per_week: float | None = None
 
     drinking_status: str
-    drinking_years: Optional[int] = None
-    drinking_per_week: Optional[float] = None
+    drinking_years: int | None = None
+    drinking_per_week: float | None = None
 
     exercise_frequency: str
     diet_type: str
-    
-    allergies: Optional[List[AllergySaveRequest]] = Field(default_factory=list)
-    chronic_diseases: Optional[List[ChronicDiseaseSaveRequest]] = Field(default_factory=list)
-    medications: Optional[List[CurrentMedSaveRequest]] = Field(default_factory=list)
+
+    allergies: list[AllergySaveRequest] | None = Field(default_factory=list)
+    chronic_diseases: list[ChronicDiseaseSaveRequest] | None = Field(default_factory=list)
+    medications: list[CurrentMedSaveRequest] | None = Field(default_factory=list)

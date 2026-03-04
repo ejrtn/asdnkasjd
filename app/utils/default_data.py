@@ -388,23 +388,23 @@ class DefaultData:
             # -------------------------------------------------------------
             # [추가] 나머지 1개씩 데이터 생성 (Prescription, LLM Guide, Chat, Pill Recognition 등)
             # -------------------------------------------------------------
-            
+
             # (1) 업로드 어셋 생성
             presc_upload, _ = await Upload.get_or_create(
                 user=user,
-                file_url=f"/static/img/prescription.png",
+                file_url="/static/img/prescription.png",
                 file_type="png",
                 category="prescription"
             )
             pill_front_upload, _ = await Upload.get_or_create(
                 user=user,
-                file_url=f"/static/img/pill_front.png",
+                file_url="/static/img/pill_front.png",
                 file_type="png",
                 category="pill_front"
             )
             pill_back_upload, _ = await Upload.get_or_create(
                 user=user,
-                file_url=f"/static/img/pill_back.png",
+                file_url="/static/img/pill_back.png",
                 file_type="png",
                 category="pill_back"
             )
