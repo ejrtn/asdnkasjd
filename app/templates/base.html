@@ -36,6 +36,7 @@
             justify-content: space-between;
             padding: 0 20px;
             flex-shrink: 0;
+            transition: height 0.3s ease;
         }
 
         .header-left {
@@ -44,7 +45,7 @@
             text-decoration: none;
             color: inherit;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: font-size 0.3s ease;
         }
 
         .header-left:hover {
@@ -67,6 +68,7 @@
             outline: none;
             font-size: 14px;
             width: 200px;
+            transition: font-size 0.3s ease, padding 0.3s ease;
         }
 
         .search-btn {
@@ -77,7 +79,7 @@
             padding: 6px 12px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
+            transition: background 0.2s, font-size 0.3s ease, padding 0.3s ease;
         }
 
         .search-btn:hover {
@@ -92,12 +94,108 @@
             padding: 8px 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.2s;
+            transition: background 0.2s, font-size 0.3s ease, padding 0.3s ease;
             margin-left: 8px;
         }
 
         .zoom-btn:hover {
             background: #059669;
+        }
+
+        /* 전체 확대 모드 */
+        body.zoom-large {
+            font-size: 18px;
+        }
+
+        body.zoom-large .header {
+            height: 80px;
+            padding: 0 24px;
+        }
+
+        body.zoom-large .header-left {
+            font-size: 24px;
+        }
+
+        body.zoom-large .search-input {
+            font-size: 16px;
+            padding: 8px 14px;
+        }
+
+        body.zoom-large .search-btn {
+            font-size: 16px;
+            padding: 8px 14px;
+        }
+
+        body.zoom-large .zoom-btn {
+            font-size: 18px;
+            padding: 10px 14px;
+        }
+
+        body.zoom-large .user-menu-btn {
+            font-size: 28px;
+        }
+
+        body.zoom-large .sidebar {
+            width: 280px;
+            padding: 24px 20px;
+        }
+
+        body.zoom-large .sidebar button {
+            font-size: 16px !important;
+            padding: 16px 20px !important;
+        }
+
+        body.zoom-large .container {
+            height: calc(100vh - 80px);
+        }
+
+        body.zoom-large .main {
+            font-size: 18px;
+        }
+
+        body.zoom-large h1 {
+            font-size: 32px;
+        }
+
+        body.zoom-large h2 {
+            font-size: 28px;
+        }
+
+        body.zoom-large h3 {
+            font-size: 24px;
+        }
+
+        body.zoom-large h4 {
+            font-size: 20px;
+        }
+
+        body.zoom-large h5 {
+            font-size: 18px;
+        }
+
+        body.zoom-large input,
+        body.zoom-large select,
+        body.zoom-large textarea {
+            font-size: 16px !important;
+            padding: 12px !important;
+        }
+
+        body.zoom-large button {
+            font-size: 16px !important;
+            padding: 12px 16px !important;
+        }
+
+        body.zoom-large a {
+            font-size: 16px;
+        }
+
+        body.zoom-large .user-dropdown {
+            font-size: 16px;
+        }
+
+        body.zoom-large .user-dropdown a {
+            padding: 16px 20px;
+            font-size: 16px;
         }
 
         /* 알람 페이지 확대 기능 */
@@ -304,6 +402,7 @@
             font-size: 24px;
             cursor: pointer;
             padding: 8px;
+            transition: font-size 0.3s ease;
         }
 
         .user-dropdown {
@@ -318,10 +417,16 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             min-width: 150px;
             z-index: 1000;
+            transition: font-size 0.3s ease, opacity 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .user-dropdown.show {
+        .user-dropdown.show,
+        .user-menu:hover .user-dropdown {
             display: block;
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .user-dropdown a {
@@ -330,7 +435,7 @@
             color: #333;
             text-decoration: none;
             font-size: 14px;
-            transition: background 0.2s;
+            transition: background 0.2s, font-size 0.3s ease, padding 0.3s ease;
         }
 
         .user-dropdown a:hover {
@@ -341,24 +446,32 @@
         .container {
             display: flex;
             height: calc(100vh - 64px);
+            transition: height 0.3s ease;
         }
 
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 240px;
-            /* 약간 넓힘 */
             border-right: 1px solid #e2e8f0;
             background: #fff;
             padding: 20px 16px;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            overflow: visible;
+            transition: width 0.3s ease, padding 0.3s ease;
+        }
+
+        /* 네비게이션 아이템 */
+        .nav-item {
+            position: relative;
+            margin-bottom: 8px;
         }
 
         /* SPECIFICITY BOOST: Tailwind Preflight 방지 */
         .sidebar a button,
         .sidebar button {
-            margin-bottom: 8px;
+            margin-bottom: 0;
             padding: 12px 16px !important;
             border: 1px solid #e2e8f0 !important;
             background: #fff !important;
@@ -386,6 +499,104 @@
             width: 100%;
         }
 
+        /* 메가 패널 */
+        .mega-panel {
+            display: none;
+            position: absolute;
+            left: calc(100% + 14px);
+            top: 0;
+            width: 520px;
+            padding: 16px 16px 14px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+            z-index: 3000;
+            transition: width 0.3s ease, padding 0.3s ease;
+        }
+
+        .nav-item:hover .mega-panel {
+            display: block;
+        }
+
+        .mega-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 6px;
+            transition: font-size 0.3s ease;
+        }
+
+        .mega-desc {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            transition: font-size 0.3s ease;
+        }
+
+        .mega-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .mega-card {
+            background: rgba(79, 70, 229, 0.06);
+            border: 1px solid rgba(79, 70, 229, 0.12);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .mega-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+            transition: font-size 0.3s ease;
+        }
+
+        .mega-card-desc {
+            font-size: 12px;
+            color: #4b5563;
+            line-height: 1.45;
+            transition: font-size 0.3s ease;
+        }
+
+        .mega-hint {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #4f46e5;
+            font-weight: 600;
+            transition: font-size 0.3s ease;
+        }
+
+        body.zoom-large .mega-panel {
+            width: 600px;
+            padding: 20px;
+        }
+
+        body.zoom-large .mega-title {
+            font-size: 18px;
+        }
+
+        body.zoom-large .mega-desc {
+            font-size: 15px;
+        }
+
+        body.zoom-large .mega-card-title {
+            font-size: 16px;
+        }
+
+        body.zoom-large .mega-card-desc {
+            font-size: 14px;
+        }
+
+        body.zoom-large .mega-hint {
+            font-size: 14px;
+        }
+
         .sidebar-footer {
             margin-top: auto;
         }
@@ -403,9 +614,9 @@
         .main {
             flex: 1;
             padding: 0;
-            /* 각 페이지에서 p-6 등으로 처리 권장, 일관성을 위해 0으로 조정 */
             overflow-y: auto;
             background: #f8fafc;
+            transition: font-size 0.3s ease;
         }
     </style>
 </head>
@@ -436,23 +647,86 @@
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-            <a href="/">
-                <button class="dashboard-btn {% if request.url.path == '/' or request.url.path == '/dashboard' %}nav-active{% endif %}">대시보드</button>
-            </a>
-            <a href="/guide">
-                <button class="guide-btn {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내 가이드</button>
-            </a>
-            <a href="/alarm">
-                <button class="alarm-btn {% if request.url.path == '/alarm' %}nav-active{% endif %}">알람</button>
-            </a>
-            <a href="/prescription-upload">
-                <button class="upload-btn {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전
-                    및 약물</button>
-            </a>
-            <a href="/health-profile">
-                <button
-                    class="health-profile {% if request.url.path == '/health-profile' %}nav-active{% endif %}">건강정보</button>
-            </a>
+            <div class="nav-item">
+                <a href="/guide">
+                    <button class="guide-btn {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내 가이드</button>
+                </a>
+                <div class="mega-panel" aria-hidden="true">
+                    <div class="mega-title">생활 안내 가이드</div>
+                    <div class="mega-desc">진료 기록을 바탕으로, 오늘 실천할 수 있는 건강 가이드를 바로 확인해요.</div>
+                    <div class="mega-grid">
+                        <div class="mega-card">
+                            <div class="mega-card-title">나의 건강 요약</div>
+                            <div class="mega-card-desc">질환·알레르기·복용약을 한눈에 정리하고, 핵심 주의사항을 빠르게 확인해요.</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">AI 맞춤 생활 안내 가이드</div>
+                            <div class="mega-card-desc">복약 안전, 생활습관 관리 포인트를 쉬운 문장으로 자동 생성해드려요.</div>
+                        </div>
+                    </div>
+                    <div class="mega-hint">클릭하면 자세히 볼 수 있어요 →</div>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="/alarm">
+                    <button class="alarm-btn {% if request.url.path == '/alarm' %}nav-active{% endif %}">알람</button>
+                </a>
+                <div class="mega-panel" aria-hidden="true">
+                    <div class="mega-title">알람</div>
+                    <div class="mega-desc">복약과 건강기록을 놓치지 않도록, 나에게 맞는 시간을 설정해요.</div>
+                    <div class="mega-grid">
+                        <div class="mega-card">
+                            <div class="mega-card-title">복약 알람</div>
+                            <div class="mega-card-desc">현재 복용 중인 약을 선택하고, 시간별 알람을 켜고 끌 수 있어요.</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">혈압 알람</div>
+                            <div class="mega-card-desc">아침/저녁 혈압 측정 시간과 체크를 규칙적으로 관리해요.</div>
+                        </div>
+                    </div>
+                    <div class="mega-hint">클릭하면 설정 화면으로 이동해요 →</div>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="/prescription-upload">
+                    <button class="upload-btn {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전 및 약물</button>
+                </a>
+                <div class="mega-panel" aria-hidden="true">
+                    <div class="mega-title">처방전 및 약물</div>
+                    <div class="mega-desc">촬영 한 번으로 약 정보를 정리하고, 복약 안내까지 연결해요.</div>
+                    <div class="mega-grid">
+                        <div class="mega-card">
+                            <div class="mega-card-title">처방전 / 약봉투 촬영</div>
+                            <div class="mega-card-desc">처방 내용을 자동 추출하고 복용 시간/주의사항을 정리해요.</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">알약 이미지 촬영</div>
+                            <div class="mega-card-desc">알약 사진으로 약 정보를 빠르게 확인하고 복약으로 연결해요.</div>
+                        </div>
+                    </div>
+                    <div class="mega-hint">클릭하면 업로드 화면으로 이동해요 →</div>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="/health-profile">
+                    <button class="health-profile {% if request.url.path == '/health-profile' %}nav-active{% endif %}">건강정보</button>
+                </a>
+                <div class="mega-panel" aria-hidden="true">
+                    <div class="mega-title">건강정보</div>
+                    <div class="mega-desc">내 건강 프로필과 기록을 모아, 더 정확한 맞춤 가이드를 만들어요.</div>
+                    <div class="mega-grid">
+                        <div class="mega-card">
+                            <div class="mega-card-title">건강 프로필</div>
+                            <div class="mega-card-desc">질환·알레르기·복용약·생활습관을 등록해요.</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">혈압 수첩</div>
+                            <div class="mega-card-desc">최근 기록을 모아 변화 추이를 확인하고 관리할 수 있어요.</div>
+                        </div>
+                    </div>
+                    <div class="mega-hint">클릭하면 건강정보로 이동해요 →</div>
+                </div>
+            </div>
 
             <div class="sidebar-footer">
                 <a href="/mypage">
@@ -491,6 +765,16 @@
 
     <script src="/static/chatbot.js"></script>
     <script>
+        // 페이지 로드 시 저장된 확대 상태 복원
+        window.addEventListener('DOMContentLoaded', function() {
+            const isZoomed = localStorage.getItem('zoomState') === 'true';
+            if (isZoomed) {
+                document.body.classList.add('zoom-large');
+                document.getElementById('zoom-btn').textContent = '🔎';
+                document.getElementById('zoom-btn').title = '글자 크기 축소';
+            }
+        });
+
         // 사용자 메뉴 드롭다운 토글
         document.getElementById('user-menu-btn').addEventListener('click', function (e) {
             e.stopPropagation();
@@ -500,9 +784,17 @@
         // 외부 클릭 시 드롭다운 닫기
         document.addEventListener('click', function (e) {
             const dropdown = document.getElementById('user-dropdown');
-            if (dropdown && dropdown.classList.contains('show')) {
+            const userMenu = document.querySelector('.user-menu');
+            if (dropdown && !userMenu.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
+        });
+
+        // 드롭다운 항목 클릭 시 닫기
+        document.querySelectorAll('.user-dropdown a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('user-dropdown').classList.remove('show');
+            });
         });
 
         // 검색 기능
@@ -520,23 +812,10 @@
             }
         });
 
-        // 확대 기능
-        let isZoomed = false;
+        // 확대 기능 - localStorage에 상태 저장
         document.getElementById('zoom-btn').addEventListener('click', function() {
-            isZoomed = !isZoomed;
-            
-            // ✅ 핵심: zoom-large 클래스 토글
-            document.body.classList.toggle('zoom-large', isZoomed);
-            
-            // 사이드바 버튼 확대 (CSS로 처리되므로 제거 가능하지만 유지)
-            document.querySelectorAll('.sidebar button').forEach(btn => {
-                btn.style.fontSize = isZoomed ? '18px' : '';
-                btn.style.padding = isZoomed ? '12px' : '';
-            });
-            
-            // 헤더 확대
-            document.querySelector('.header-left').style.fontSize = isZoomed ? '24px' : '';
-            
+            const isZoomed = document.body.classList.toggle('zoom-large');
+            localStorage.setItem('zoomState', isZoomed);
             this.textContent = isZoomed ? '🔎' : '🔍';
             this.title = isZoomed ? '글자 크기 축소' : '글자 크기 확대';
         });
