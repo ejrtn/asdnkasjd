@@ -13,9 +13,7 @@ class Allergy(models.Model):
     """
 
     id = fields.IntField(pk=True)
-    pill_allergy = fields.CharField(max_length=100, null=True)
-    food_allergy = fields.CharField(max_length=100, null=True)
-    any_allergy = fields.CharField(max_length=100, null=True)
+    allergy_type = fields.CharField(max_length=100, null=True)
     allergy_name = fields.CharField(max_length=100, null=True)  # 라우터에서 사용하는 필드명
     symptom = fields.CharField(max_length=100, null=True)
 

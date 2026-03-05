@@ -70,6 +70,7 @@ class GuideService:
                 diseases = await ChronicDisease.filter(user=user).all()
                 allergies = await Allergy.filter(user=user).all()
                 meds = await CurrentMed.filter(user=user).all()
+
                 # 최근 혈압, 혈당 데이터
                 bp_records = await BloodPressureRecord.filter(user=user).limit(5)
                 bs_records = await BloodSugarRecord.filter(user=user).limit(5)
@@ -78,8 +79,9 @@ class GuideService:
                 bs_list = [f"{r.glucose_mg_dl} mg/dL ({r.measure_type})" for r in bs_records]
 
                 disease_list = [d.disease_name for d in diseases]
-                allergy_list = [a.any_allergy for a in allergies]
+                allergy_list = [a.allergy_name for a in allergies]
                 med_list = [m.medication_name for m in meds]
+
             else:
                 disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
                 bp_list = ["120/80 mmHg"]

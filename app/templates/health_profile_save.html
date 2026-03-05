@@ -28,6 +28,10 @@
         margin-bottom: 15px;
     }
 
+    .health-profile-page-container .form-group span {
+        color: red;
+    }
+
     .health-profile-page-container label {
         font-weight: 600;
         display: block;
@@ -41,6 +45,8 @@
         padding: 8px;
         border-radius: 6px;
         border: 1px solid #ccc;
+        box-sizing: border-box;
+        resize: none;
     }
 
     .health-profile-page-container button {
@@ -51,6 +57,7 @@
         color: white;
         font-weight: 600;
     }
+
     .health-profile-page-container .category {
         margin-bottom: 15px;
         border: 1px solid #eee;
@@ -87,18 +94,269 @@
     }
 
     .health-profile-page-container .selected-tag {
-        display: inline-block;
-        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 15px;
         margin: 5px;
-        background-color: #2d6cdf;
-        color: white;
+        background-color: #f0f4ff;
+        border: 1px solid #2d6cdf;
+        color: #2d6cdf;
         border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
     }
 
-    .health-profile-page-container .selected-tag span {
-        margin-left: 8px;
+    .health-profile-page-container .selected-tag select {
+        width: auto;
+        padding: 2px 5px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 12px;
+        background: white;
+    }
+
+    .health-profile-page-container .selected-tag .remove-btn {
         cursor: pointer;
         font-weight: bold;
+        color: #ef4444;
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .health-profile-page-container #med-container {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-bottom: 15px;
+    }
+
+    .health-profile-page-container #med-container th {
+        background-color: #f8fafc;
+    }
+
+    .health-profile-page-container #med-container th,
+    .health-profile-page-container #med-container td {
+        padding: 8px 4px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(1) {
+        width: auto;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(2) {
+        width: 80px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(3) {
+        width: 80px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(4) {
+        width: 92px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(5) {
+        width: 100px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(6) {
+        width: 130px;
+    }
+
+    .health-profile-page-container #med-container th:nth-child(7) {
+        width: 40px;
+    }
+
+    .health-profile-page-container #med-container td {
+        text-align: center;
+    }
+
+    .health-profile-page-container #med-container select,
+    .health-profile-page-container #med-container input {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        height: 32px;
+        display: block;
+    }
+
+    .health-profile-page-container #med-container .delete-btn {
+        padding: 0px;
+        font-size: 25px;
+        font-weight: bold;
+        margin: 0px;
+        background-color: white;
+        color: red;
+        cursor: pointer;
+    }
+
+    .health-profile-page-container #med-container span {
+        color: red;
+    }
+
+    /* 알레르기 테이블 스타일 추가 */
+    .health-profile-page-container .allergy-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        table-layout: fixed;
+    }
+
+    .health-profile-page-container .allergy-table th,
+    .health-profile-page-container .allergy-table td {
+        padding: 10px 5px;
+        text-align: center;
+    }
+
+    .health-profile-page-container .allergy-table th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+        font-size: 14px;
+        border-bottom: 2px solid #eef2f7;
+    }
+
+    .health-profile-page-container .allergy-table td {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .health-profile-page-container .allergy-table select,
+    .health-profile-page-container .allergy-table input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 14px;
+        height: 38px;
+        box-sizing: border-box;
+    }
+
+    .health-profile-page-container .allergy-table .delete-btn {
+        background: none;
+        color: #ef4444;
+        font-size: 24px;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .health-profile-page-container .allergy-table span {
+        color: red;
+    }
+
+    /* 추가 카드 스타일 */
+    .health-profile-page-container .nav-card-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .health-profile-page-container .nav-card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .health-profile-page-container .nav-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: #2d6cdf;
+    }
+
+    .health-profile-page-container .nav-card .icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .health-profile-page-container .nav-card h4 {
+        margin: 0;
+        font-size: 18px;
+        color: #1e293b;
+    }
+
+    .health-profile-page-container .nav-card p {
+        font-size: 14px;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    .health-profile-page-container .save-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .health-profile-page-container .save-btn {
+        width: 100%;
+        max-width: 400px;
+        padding: 15px !important;
+        font-size: 18px !important;
+        cursor: pointer;
+    }
+
+    .health-profile-page-container .med-guide-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f1f5ff;
+        border: 1px solid #dbeafe;
+        padding: 15px 18px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .health-profile-page-container .med-guide-text {
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    .health-profile-page-container .med-guide-btn {
+        background: #2d6cdf;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .health-profile-page-container .med-guide-btn:hover {
+        background: #1e4fbf;
+    }
+
+    .health-profile-page-container #custom-disease-input {
+        border: none;
+        padding: 21px;
+    }
+
+    .health-profile-page-container #custom-disease-input:focus {
+        outline: none;
+        /* 클릭 시 붉은색 테두리 */
+    }
+
+    .health-profile-page-container .health-guide-notice {
+        background: #eef6ff;
+        border: 1px solid #dbeafe;
+        color: #1e3a8a;
+        padding: 18px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        line-height: 1.6;
     }
 </style>
 {% endblock %}
@@ -110,64 +368,127 @@
 
     <!-- 건강 프로필 -->
     <div class="section-card">
+        <div class="health-guide-notice">
+            🩺 <strong>건강 정보를 꼼꼼히 입력할수록 더 정확한 생활 건강 가이드를 제공받을 수 있습니다.</strong><br>
+            입력된 정보는 개인 맞춤 건강 관리와 질환 예방 가이드 생성에 사용됩니다.
+        </div>
         <h3>건강 프로필</h3>
 
         <div class="form-group">
-            <label>신장 (cm)</label>
+            <label>가족력<span>*</span></label>
+            <select name="family_history" required>
+                <option>없음</option>
+                <option>모름</option>
+                <option>부 있음</option>
+                <option>모 있음</option>
+                <option>부모 있음</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>가족력 내용(있을 시 필수)</label>
+            <textarea name="family_history_note"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>신장 (cm)<span>*</span></label>
             <input type="number" step="0.1" name="height_cm">
         </div>
 
         <div class="form-group">
-            <label>체중 (kg)</label>
+            <label>체중 (kg)<span>*</span></label>
             <input type="number" step="0.1" name="weight_kg">
         </div>
 
         <div class="form-group">
-            <label>최근 체중 변화</label>
+            <label>최근 체중 변화<span>*</span></label>
             <select name="weight_change">
-                <option value="UNKNOWN">모름</option>
-                <option value="LOSS">감소</option>
-                <option value="GAIN">증가</option>
-                <option value="NO_CHANGE">변화없음</option>
+                <option style="display: none;">최근 체중 변화 선택</option>
+                <option>모름</option>
+                <option>감소</option>
+                <option>증가</option>
+                <option>변화없음</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>최근 수면 시간 변화</label>
+            <label>최근 수면 시간 변화<span>*</span></label>
             <select name="sleep_change">
-                <option value="UNKNOWN">모름</option>
-                <option value="LOSS">감소</option>
-                <option value="GAIN">증가</option>
-                <option value="NO_CHANGE">변화없음</option>
+                <option style="display: none;">최근 수면 시간 변화 선택</option>
+                <option>모름</option>
+                <option>감소</option>
+                <option>증가</option>
+                <option>변화없음</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>흡연 상태</label>
+            <label>수면 시간 (시간)</label>
+            <input type="number" step="0.5" name="sleep_hours" />
+        </div>
+
+        <div class="form-group">
+            <label>흡연 상태<span>*</span></label>
             <select name="smoking_status">
-                <option value="UNKNOWN">모름</option>
-                <option value="NO">비흡연</option>
-                <option value="YES">흡연</option>
-                <option value="FORMER">과거 흡연</option>
+                <option style="display: none;">흡연 상태 선택</option>
+                <option>비흡연</option>
+                <option>흡연</option>
+                <option>과거 흡연</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>음주 상태</label>
+            <label>흡연 기간 (년)</label>
+            <input type="number" name="smoking_years" />
+        </div>
+
+        <div class="form-group">
+            <label>주 평균 흡연량(갑)</label>
+            <input type="number" name="smoking_per_week" />
+        </div>
+
+        <div class="form-group">
+            <label>음주 상태<span>*</span></label>
             <select name="drinking_status">
-                <option value="UNKNOWN">모름</option>
-                <option value="NO">비음주</option>
-                <option value="YES">음주</option>
+                <option style="display: none;">음주 상태 선택</option>
+                <option>과거 음주</option>
+                <option>비음주</option>
+                <option>음주</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>운동 빈도</label>
+            <label>음주 기간(년)</label>
+            <input type="number" name="drinking_years" />
+        </div>
+
+        <div class="form-group">
+            <label>주 평균 음주량</label>
+            <input type="number" name="drinking_per_week" />
+        </div>
+
+        <div class="form-group">
+            <label>운동 빈도<span>*</span></label>
             <select name="exercise_frequency">
-                <option value="UNKNOWN">모름</option>
-                <option value="NONE">안함</option>
-                <option value="WEEK_1_2">주 1~2회</option>
-                <option value="WEEK_3_MORE">주 3회 이상</option>
+                <option style="display: none;">운동 빈도 선택</option>
+                <option>안함</option>
+                <option>주 1~2회</option>
+                <option>주 3회 이상</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>식습관<span>*</span></label>
+            <select name="diet_type">
+                <option style="display: none;">식습관 선택</option>
+                <option>균형 잡힌</option>
+                <option>저염</option>
+                <option>저탄수화물</option>
+                <option>고단백</option>
+                <option>채식</option>
+                <option>불규칙적</option>
+                <option>패스트푸드</option>
+                <option>모름</option>
             </select>
         </div>
     </div>
@@ -176,13 +497,26 @@
     <div class="section-card">
         <h3>알레르기 정보</h3>
 
-        <div id="allergy-container"></div>
+        <table class="allergy-table" id="allergy-table">
+            <thead>
+                <tr>
+                    <th style="width: 110px;">분류<span>*</span></th>
+                    <th>알레르기 성분/명칭<span>*</span></th>
+                    <th>주요 증상</th>
+                    <th style="width: 40px;"></th>
+                </tr>
+            </thead>
+            <tbody id="allergy-tbody">
+                <!-- 동적 추가 -->
+            </tbody>
+        </table>
 
         <button type="button" onclick="addAllergy()">+ 알레르기 추가</button>
     </div>
 
     <div class="section-card">
         <h3>만성질환</h3>
+
         <div class="disease-category">
 
             <!-- 심뇌혈관 및 대사 질환 -->
@@ -232,246 +566,579 @@
             </div>
 
         </div>
-        <div id="selected-diseases"></div>
 
-        <input type="text" id="custom-disease-input" placeholder="질환 입력 후 Enter">
+        <div class="category" style="margin-top: 20px;">
+            <label class="category-title">기타 질환 직접 입력</label>
+            <input type="text" id="custom-disease-input" placeholder="질환 입력 후 Enter">
+        </div>
+
+        <div>
+            <label class="category-title">입력 질환 목록</label>
+            <div id="selected-diseases" class="selected-tag-container"></div>
+        </div>
         <input type="hidden" name="chronic_diseases_json" id="chronic-hidden">
     </div>
 
-    
+
     <div class="section-card">
         <h3>현재 복용 약물</h3>
 
-        <div id="med-container"></div>
-
+        <table id="med-container">
+            <thead>
+                <tr>
+                    <th>약물명<span>*</span></th>
+                    <th>1회 용량</th>
+                    <th>1회 복용 개수</th>
+                    <th>복용 시간<span>*</span></th>
+                    <th>추가 경로</th>
+                    <th>복용 시작일</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
         <button type="button" onclick="addMed()">+ 약 추가</button>
     </div>
-
-    <!-- 혈압 기록 -->
-    <div class="section-card">
-        <h3>혈압 기록</h3>
-
-        <div class="form-group">
-            <label>수축기 (mmHg)</label>
-            <input type="number" name="systolic">
+    <div class="med-guide-box">
+        <div class="med-guide-text">
+            💊 <strong>약 이름이 기억나지 않나요?</strong><br>
+            처방전 또는 약 봉투에서 확인할 수 있습니다.
         </div>
 
-        <div class="form-group">
-            <label>이완기 (mmHg)</label>
-            <input type="number" name="diastolic">
-        </div>
-
-        <div class="form-group">
-            <label>맥박 (bpm)</label>
-            <input type="number" name="pulse">
-        </div>
-
-        <div class="form-group">
-            <label>측정 시각</label>
-            <input type="datetime-local" name="bp_recorded_at">
-        </div>
+        <a href="/prescription-upload" class="med-guide-btn">
+            약 이름 확인하기 →
+        </a>
+    </div>
+    <div class="nav-card-container">
+        <a href="/blood-pressure" class="nav-card">
+            <span class="icon">🩸</span>
+            <h4>혈압 관리</h4>
+            <p>혈압 수치 및 맥박 기록</p>
+        </a>
+        <a href="/blood-sugar" class="nav-card">
+            <span class="icon">🍬</span>
+            <h4>혈당 관리</h4>
+            <p>공복/식후 혈당 수치 기록</p>
+        </a>
     </div>
 
-    <!-- 혈당 기록 -->
-    <div class="section-card">
-        <h3>혈당 기록</h3>
-
-        <div class="form-group">
-            <label>혈당 (mg/dL)</label>
-            <input type="number" step="0.1" name="glucose_mg_dl">
-        </div>
-
-        <div class="form-group">
-            <label>측정 상황</label>
-            <select name="measure_type">
-                <option value="RANDOM">임의</option>
-                <option value="FASTING">공복</option>
-                <option value="BEFORE_MEAL">식전</option>
-                <option value="AFTER_MEAL">식후</option>
-                <option value="BEDTIME">취침 전</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>측정 시각</label>
-            <input type="datetime-local" name="bs_recorded_at">
-        </div>
+    <div class="save-button-container">
+        <button type="submit" class="save-btn">전체 건강정보 저장하기</button>
     </div>
-
-    <button type="submit">저장하기</button>
-
 </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // base.html에서 authGuard가 세션 관리를 처리하므로 중복 제거
-        // 질환 선택 로직
-    const selectedContainer = document.getElementById("selected-diseases");
-    const hiddenInput = document.getElementById("disease-hidden-input");
-    const customInput = document.getElementById("custom-disease-input");
 
     let selectedDiseases = [];
 
-// 태그 추가
-function addDiseaseTag(name) {
-    if (selectedDiseases.includes(name)) return;
-    selectedDiseases.push(name);
-    renderTags();
-}
+    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
+    async function fetchWithAuth(url, options = {}) {
+        let accessToken = localStorage.getItem("access_token");
+        const id = localStorage.getItem("user_id");
+        if (!options.headers) options.headers = {};
+        if (accessToken) {
+            options.headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+        let response = await fetch(url, options);
+        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
+        if (response.status === 401) {
+            console.log("액세스 토큰 만료, 갱신 시도 중...");
+            const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
+            if (refreshResponse.ok) {
+                const result = await refreshResponse.json();
+                accessToken = result.access_token;
+                localStorage.setItem("access_token", accessToken);
+                // 새 토큰으로 원래 요청 재시도
+                options.headers["Authorization"] = `Bearer ${accessToken}`;
+                response = await fetch(url, options);
+            } else {
+                // 리프레시 토큰도 만료된 경우
+                alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("user_id");
+                location.href = "/login";
+                return null;
+            }
+        }
+        return response;
+    }
+    function renderChronicDiseases(list) {
+        const container = document.getElementById("selected-diseases");
+        container.innerHTML = "";
+        list.forEach((item, index) => {
+            chronicList.push({ name: item.disease_name, when_to_diagnose: item.when_to_diagnose });
+            renderChronic()
+        });
+    }
+    function renderAllergies(list) {
+        list.forEach(item => {
+            const tbody = document.getElementById("allergy-tbody");
+            const tr = document.createElement("tr");
 
-// 태그 삭제
-function removeDiseaseTag(name) {
-    selectedDiseases = selectedDiseases.filter(d => d !== name);
-    renderTags();
-}
+            tr.innerHTML = `
+                <td>
+                    <select class="allergie_type" name="allergies[${allergyIndex}][category]">
+                        <option style="display:none;">종류 선택</option>
+                        <option ${item.allergy_type == '약물' ? 'selected' : ''}>약물</option>
+                        <option ${item.allergy_type == '음식' ? 'selected' : ''}>음식</option>
+                        <option ${item.allergy_type == '기타' ? 'selected' : ''}>기타</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="allergie_name" name="allergies[${allergyIndex}][allergy_name]" placeholder="예: 아스피린, 복숭아" value="${item.allergy_name}">
+                </td>
+                <td>
+                    <input type="text" class="allergie_status" name="allergies[${allergyIndex}][symptom]" placeholder="예: 두드러기, 호흡곤란" value="${item.symptom}">
+                </td>
+                <td>
+                    <button type="button" class="delete-btn" onclick="this.closest('tr').remove()">×</button>
+                </td>
+            `;
 
-// 렌더링
-function renderTags() {
-    selectedContainer.innerHTML = "";
-    selectedDiseases.forEach(disease => {
-        const tag = document.createElement("div");
-        tag.className = "selected-tag";
-        tag.innerHTML = `${disease} <span onclick="removeDiseaseTag('${disease}')">×</span>`;
-        selectedContainer.appendChild(tag);
-    });
-    hiddenInput.value = JSON.stringify(selectedDiseases);
-}
+            tbody.appendChild(tr);
+            allergyIndex++;
+        });
+    }
+    function renderMedications(list) {
 
-// 소분류 클릭
-document.querySelectorAll(".disease-option").forEach(option => {
-    option.addEventListener("click", () => {
-        addDiseaseTag(option.dataset.value);
-    });
-});
+        list.forEach(med => {
+            console.log(med)
+            const container = document.querySelector("#med-container tbody");
+            let t = ''
+            t += '<tr>'
+            t += '<td><input type="text" class="med_name" placeholder="약물이름" value="' + med.medication_name + '"></td>'
+            t += '<td><input type="text" class="med_dose" placeholder="500mg" value="' + med.one_dose + '"></td>'
+            t += '<td><input type="text" class="med_count" placeholder="1정" value="' + med.one_dose_count + '"></td>'
+            t += '<td>'
+            t += '<select class="med_time">'
+            t += '<option style="display:none;">시간 선택</option>'
+            t += '<option ' + (med.dose_time == '아침' ? 'selected' : '') + '>아침</option>'
+            t += '<option ' + (med.dose_time == '점심' ? 'selected' : '') + '>점심</option>'
+            t += '<option ' + (med.dose_time == '저녁' ? 'selected' : '') + '>저녁</option>'
+            t += '<option ' + (med.dose_time == '취침 전' ? 'selected' : '') + '>취침 전</option>'
+            t += '</select>'
+            t += '</td>'
+            t += '<td>'
+            t += '<select class="med_from">'
+            t += '<option ' + (med.added_from == '병원 처방' ? 'selected' : '') + '>병원 처방</option>'
+            t += '<option ' + (med.added_from == '약국 구매' ? 'selected' : '') + '>약국 구매</option>'
+            t += '<option ' + (med.added_from == '모름' ? 'selected' : '') + '>모름</option>'
+            t += '</select>'
+            t += '</td>'
+            t += '<td><input type="month" class="med_start" value="' + med.start_date + '"></td>'
+            t += '<td><button class="delete-btn">x</button></td>'
+            t += '</tr>'
+            container.insertAdjacentHTML('beforeend', t);
+            const newRow = container.lastElementChild;
+            newRow.querySelector(".delete-btn").addEventListener("click", (e) => {
+                e.target.closest('tr').remove();
+            });
 
-// 직접 입력
-customInput.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        const value = customInput.value.trim();
-        if (value) {
-            addDiseaseTag(value);
-            customInput.value = "";
+        });
+    }
+    function renderHealthProfile(data) {
+
+        const profile = data.health_profile;
+        console.log(profile)
+        if (profile) {
+            document.querySelector("[name='family_history']").value = profile.family_history ?? "";
+            document.querySelector("[name='family_history_note']").value = profile.family_history_note ?? "";
+
+            document.querySelector("[name='height_cm']").value = profile.height_cm ?? "";
+            document.querySelector("[name='weight_kg']").value = profile.weight_kg ?? "";
+
+            document.querySelector("[name='weight_change']").value = profile.weight_change ?? "";
+
+            document.querySelector("[name='sleep_change']").value = profile.sleep_change ?? "";
+            document.querySelector("[name='sleep_hours']").value = profile.sleep_hours ?? "";
+
+            document.querySelector("[name='smoking_status']").value = profile.smoking_status ?? "";
+            document.querySelector("[name='smoking_years']").value = profile.smoking_years ?? "";
+            document.querySelector("[name='smoking_per_week']").value = profile.smoking_per_week ?? "";
+
+            document.querySelector("[name='drinking_status']").value = profile.drinking_status ?? "";
+            document.querySelector("[name='drinking_years']").value = profile.drinking_years ?? "";
+            document.querySelector("[name='drinking_per_week']").value = profile.drinking_per_week ?? "";
+
+            document.querySelector("[name='exercise_frequency']").value = profile.exercise_frequency ?? "";
+            document.querySelector("[name='diet_type']").value = profile.diet_type ?? "";
+        }
+
+
+        renderChronicDiseases(data.chronic_diseases || []);
+        renderAllergies(data.allergies || []);
+        renderMedications(data.current_meds || []);
+    }
+    window.onload = async () => {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+            try {
+                const healthRes = await fetchWithAuth(`/api/v1/health`, { method: 'GET' });
+
+                if (!healthRes || !healthRes.ok) throw new Error("Fetch failed");
+                const health = await healthRes.json();
+
+
+                renderHealthProfile(health);   // 🔥 데이터 전달
+            } catch (err) {
+            }
         }
     }
-});
 
-let chronicList = [];
+    const selectedContainer = document.getElementById("selected-diseases");
+    const hiddenInput = document.getElementById("chronic-hidden");
+    const customInput = document.getElementById("custom-disease-input");
 
-function renderChronic() {
-    const container = document.getElementById("selected-diseases");
-    container.innerHTML = "";
+    let chronicList = [];
 
-    chronicList.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "selected-tag";
-        div.innerHTML = `
-            ${item.name}
-            <select onchange="updateDiagnose(${index}, this.value)">
-                <option value="">진단시기</option>
-                <option value="1Y">1년 이내</option>
-                <option value="5Y">5년 이내</option>
-                <option value="10Y">10년 이상</option>
-            </select>
-            <span onclick="removeChronic(${index})">×</span>
+    // 렌더링
+    function renderChronic() {
+        selectedContainer.innerHTML = "";
+        chronicList.forEach((item, index) => {
+            const tag = document.createElement("div");
+            tag.className = "selected-tag";
+            tag.innerHTML = `
+                <span>${item.name}</span>
+                <select onchange="updateDiagnose(${index}, this.value)">
+                    <option style="display:none;">진단시기 선택</option>
+                    <option ${item.when_to_diagnose == "1년 이내" ? 'selected' : ''}>1년 이내</option>
+                    <option ${item.when_to_diagnose == "5년 이내" ? 'selected' : ''}>5년 이내</option>
+                    <option ${item.when_to_diagnose == "10년 이상" ? 'selected' : ''}>10년 이상</option>
+                    <option ${item.when_to_diagnose == "알수없음" ? 'selected' : ''}>알수없음</option>
+                </select>
+                <span class="remove-btn" onclick="removeChronic(${index})">×</span>
+            `;
+            selectedContainer.appendChild(tag);
+        });
+        hiddenInput.value = JSON.stringify(chronicList);
+    }
+
+    // 질환 추가
+    function addChronic(name) {
+        if (chronicList.some(item => item.name === name)) return;
+        chronicList.push({ name: name, when_to_diagnose: "" });
+        renderChronic();
+    }
+
+    // 질환 삭제
+    function removeChronic(index) {
+        chronicList.splice(index, 1);
+        renderChronic();
+    }
+
+    // 진단시기 업데이트
+    function updateDiagnose(index, value) {
+        chronicList[index].when_to_diagnose = value;
+        hiddenInput.value = JSON.stringify(chronicList);
+    }
+
+    // 카테고리 클릭 이벤트
+    document.querySelectorAll(".disease-option").forEach(option => {
+        option.addEventListener("click", () => {
+            addChronic(option.dataset.value);
+        });
+    });
+
+    // 직접 입력 이벤트
+    customInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const value = this.value.trim();
+            if (value) {
+                addChronic(value);
+                this.value = "";
+            }
+        }
+    });
+
+    let allergyIndex = 0;
+
+    function addAllergy() {
+        const tbody = document.getElementById("allergy-tbody");
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>
+                <select class="allergie_type" name="allergies[${allergyIndex}][category]">
+                    <option style="display:none;">종류 선택</option>
+                    <option>약물</option>
+                    <option>음식</option>
+                    <option>기타</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="allergie_name" name="allergies[${allergyIndex}][allergy_name]" placeholder="예: 아스피린, 복숭아">
+            </td>
+            <td>
+                <input type="text" class="allergie_status" name="allergies[${allergyIndex}][symptom]" placeholder="예: 두드러기, 호흡곤란">
+            </td>
+            <td>
+                <button type="button" class="delete-btn" onclick="this.closest('tr').remove()">×</button>
+            </td>
         `;
-        container.appendChild(div);
-    });
 
-    document.getElementById("chronic-hidden").value =
-        JSON.stringify(chronicList);
-}
-
-function updateDiagnose(index, value) {
-    chronicList[index].when_to_Diagnose = value;
-    renderChronic();
-}
-
-function removeChronic(index) {
-    chronicList.splice(index, 1);
-    renderChronic();
-}
-
-document.getElementById("custom-disease-input")
-.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        const value = this.value.trim();
-        if (value) {
-            chronicList.push({ name: value, when_to_Diagnose: "" });
-            renderChronic();
-            this.value = "";
-        }
+        tbody.appendChild(tr);
+        allergyIndex++;
     }
-});
 
-let allergyIndex = 0;
+    let medIndex = 0;
 
-function addAllergy() {
-    const container = document.getElementById("allergy-container");
+    function addMed() {
+        const container = document.querySelector("#med-container tbody");
+        let t = ''
+        t += '<tr>'
+        t += '<td><input type="text" class="med_name" placeholder="약물이름"></td>'
+        t += '<td><input type="text" class="med_dose" placeholder="500mg"></td>'
+        t += '<td><input type="text" class="med_count" placeholder="1정"></td>'
+        t += '<td>'
+        t += '<select class="med_time">'
+        t += '<option style="display:none;">시간 선택</option>'
+        t += '<option>아침</option>'
+        t += '<option>점심</option>'
+        t += '<option>저녁</option>'
+        t += '<option>취침 전</option>'
+        t += '</select>'
+        t += '</td>'
+        t += '<td>'
+        t += '<select class="med_from">'
+        t += '<option>병원 처방</option>'
+        t += '<option>약국 구매</option>'
+        t += '<option>모름</option>'
+        t += '</select>'
+        t += '</td>'
+        t += '<td><input type="month" class="med_start"></td>'
+        t += '<td><button class="delete-btn">x</button></td>'
+        t += '</tr>'
+        container.insertAdjacentHTML('beforeend', t);
+        const newRow = container.lastElementChild;
+        newRow.querySelector(".delete-btn").addEventListener("click", (e) => {
+            e.target.closest('tr').remove();
+        });
+    }
+    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
+    async function fetchWithAuth(url, options = {}) {
+        let accessToken = localStorage.getItem("access_token");
+        const id = localStorage.getItem("user_id");
+        if (!options.headers) options.headers = {};
+        if (accessToken) {
+            options.headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+        let response = await fetch(url, options);
+        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
+        if (response.status === 401) {
+            console.log("액세스 토큰 만료, 갱신 시도 중...");
+            const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
+            if (refreshResponse.ok) {
+                const result = await refreshResponse.json();
+                accessToken = result.access_token;
+                localStorage.setItem("access_token", accessToken);
+                // 새 토큰으로 원래 요청 재시도
+                options.headers["Authorization"] = `Bearer ${accessToken}`;
+                response = await fetch(url, options);
+            } else {
+                // 리프레시 토큰도 만료된 경우
+                alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("user_id");
+                location.href = "/login";
+                return null;
+            }
+        }
+        return response;
+    }
 
-    const div = document.createElement("div");
-    div.className = "dynamic-box";
-    div.innerHTML = `
-        <label>약물 알레르기</label>
-        <input type="text" name="allergies[${allergyIndex}][pill_allergy]">
+    document.querySelector(".save-btn").addEventListener("click", async function () {
 
-        <label>음식 알레르기</label>
-        <input type="text" name="allergies[${allergyIndex}][food_allergy]">
+        /* =====================================
+        1️⃣ 건강 프로필 필수 체크
+        ====================================== */
 
-        <label>기타 알레르기</label>
-        <input type="text" name="allergies[${allergyIndex}][any_allergy]">
+        const height = document.querySelector("[name='height_cm']").value;
+        const weight = document.querySelector("[name='weight_kg']").value;
+        const weightChange = document.querySelector("[name='weight_change']").value;
+        const sleepChange = document.querySelector("[name='sleep_change']").value;
+        const smokingStatus = document.querySelector("[name='smoking_status']").value;
+        const drinkingStatus = document.querySelector("[name='drinking_status']").value;
+        const exercise = document.querySelector("[name='exercise_frequency']").value;
+        const diet = document.querySelector("[name='diet_type']").value;
+        const familyHistory = document.querySelector("[name='family_history']").value;
 
-        <label>증상</label>
-        <input type="text" name="allergies[${allergyIndex}][symptom]">
+        if (familyHistory != "없음") {
+            const family_history_note = document.querySelector("[name='family_history_note']").value.trim();
 
-        <button type="button" onclick="this.parentElement.remove()">삭제</button>
-    `;
-    container.appendChild(div);
-    allergyIndex++;
-}
+            if (!family_history_note) {
+                alert("가족력이 있을 경우 내용을 입력해주세요.");
+                return;
+            }
+        }
 
-let medIndex = 0;
+        else if (!height) {
+            alert("신장 (cm) 입력해주세요.")
+            return;
+        }
 
-function addMed() {
-    const container = document.getElementById("med-container");
+        else if (!weight) {
+            alert("체중 (kg) 입력해주세요.")
+            return;
+        }
 
-    const div = document.createElement("div");
-    div.className = "dynamic-box";
-    div.innerHTML = `
-        <label>약물명</label>
-        <input type="text" name="meds[${medIndex}][medication_name]" required>
+        else if (weightChange == '최근 체중 변화 선택') {
+            alert("최근 체중 변화 선택해주세요.");
+            return;
+        }
+        else if (sleepChange == '최근 수면 시간 변화 선택') {
+            alert("최근 수면 시간 변화 선택해주세요.");
+            return;
+        }
+        else if (smokingStatus == '흡연 상태 선택') {
+            alert("흡연 상태 선택해주세요.");
+            return;
+        }
+        else if (drinkingStatus == '음주 상태 선택') {
+            alert("음주 상태 선택해주세요.");
+            return;
+        }
+        else if (exercise == '운동 빈도 선택') {
+            alert("운동 빈도 선택해주세요.");
+            return;
+        }
+        else if (diet == '식습관 선택') {
+            alert("식습관 선택해주세요.");
+            return;
+        }
 
-        <label>1회 용량</label>
-        <input type="text" name="meds[${medIndex}][one_dose]" placeholder="예: 500mg">
 
-        <label>1회 복용 개수</label>
-        <input type="text" name="meds[${medIndex}][one_dose_count]" placeholder="예: 1정">
 
-        <label>복용 시간</label>
-        <select name="meds[${medIndex}][dose_time]">
-            <option value="MORNING">아침</option>
-            <option value="LUNCH">점심</option>
-            <option value="DINNER">저녁</option>
-            <option value="BEDTIME">취침 전</option>
-        </select>
+        /* =====================================
+        2️⃣ 최종 저장 여부 한번 더 확인
+        ====================================== */
 
-        <label>추가 경로</label>
-        <select name="meds[${medIndex}][added_from]">
-            <option value="MANUAL">직접 입력</option>
-            <option value="OCR">OCR</option>
-            <option value="RECOMMEND">추천</option>
-        </select>
+        const finalConfirm = confirm(
+            "저장하시겠습니까?\n" +
+            "미완성 항목은 자동으로 삭제된 후 저장됩니다."
+        );
 
-        <label>복용 시작일</label>
-        <input type="text" name="meds[${medIndex}][start_date]" placeholder="예: 2024-03">
+        if (!finalConfirm) return;
 
-        <button type="button" onclick="this.parentElement.remove()">삭제</button>
-    `;
-    container.appendChild(div);
-    medIndex++;
-}
+        /* =====================================
+        3️⃣ 자동 삭제 처리 (서버 보내기 직전)
+        ====================================== */
+
+        // 🔥 알레르기 자동 삭제
+        document.querySelectorAll("#allergy-tbody tr").forEach(tr => {
+
+            const type = tr.querySelector(".allergie_type")?.value;
+            const name = tr.querySelector(".allergie_name")?.value?.trim();
+            const symptom = tr.querySelector(".allergie_status")?.value?.trim();
+
+            const anyFilled = type || name || symptom;
+
+            if (!anyFilled || !type || !name) {
+                tr.remove();
+            }
+        });
+
+        // 🔥 만성질환 자동 삭제
+        chronicList = chronicList.filter(item =>
+            item.name && item.when_to_diagnose
+        );
+        renderChronic();
+
+        // 🔥 약물 자동 삭제
+        document.querySelectorAll("#med-container tbody tr").forEach(tr => {
+
+            const name = tr.querySelector(".med_name")?.value?.trim();
+            const time = tr.querySelector(".med_time")?.value;
+            const dose = tr.querySelector(".med_dose")?.value?.trim();
+            const count = tr.querySelector(".med_count")?.value?.trim();
+            const start = tr.querySelector(".med_start")?.value;
+
+            if (!name) {
+                tr.remove();
+            }
+            if (!time || time == '시간 선택') {
+                tr.remove();
+            }
+        });
+
+        /* =====================================
+        4️⃣ 정리된 데이터 수집
+        ====================================== */
+
+        const allergies = [];
+        document.querySelectorAll("#allergy-tbody tr").forEach(tr => {
+            allergies.push({
+                allergy_type: tr.querySelector(".allergie_type").value,
+                allergy_name: tr.querySelector(".allergie_name").value.trim(),
+                symptom: tr.querySelector(".allergie_status").value.trim() || null
+            });
+        });
+
+        const medications = [];
+        document.querySelectorAll("#med-container tbody tr").forEach(tr => {
+            medications.push({
+                medication_name: tr.querySelector(".med_name").value.trim(),
+                dose_time: tr.querySelector(".med_time").value,
+                one_dose: tr.querySelector(".med_dose").value.trim() || null,
+                one_dose_count: tr.querySelector(".med_count").value.trim() || null,
+                added_from: tr.querySelector(".med_from").value,
+                start_date: tr.querySelector(".med_start").value || null
+            });
+        });
+
+        // 숫자형 데이터 안전하게 파싱하는 헬퍼
+        const safeParseFloat = (selector) => {
+            const val = document.querySelector(selector)?.value;
+            return (val !== undefined && val !== "") ? parseFloat(val) : null;
+        };
+        const safeParseInt = (selector) => {
+            const val = document.querySelector(selector)?.value;
+            return (val !== undefined && val !== "") ? parseInt(val) : null;
+        };
+
+        const data = {
+
+            family_history: familyHistory,
+            family_history_note: document.querySelector("[name='family_history_note']").value.trim() || null,
+            height_cm: safeParseFloat("[name='height_cm']"),
+            weight_kg: safeParseFloat("[name='weight_kg']"),
+            weight_change: weightChange,
+            sleep_change: sleepChange,
+            sleep_hours: safeParseFloat("[name='sleep_hours']"),
+            smoking_status: smokingStatus,
+            smoking_years: safeParseInt("[name='smoking_years']"),
+            smoking_per_week: safeParseFloat("[name='smoking_per_week']"),
+            drinking_status: drinkingStatus,
+            drinking_years: safeParseInt("[name='drinking_years']"),      // 추가
+            drinking_per_week: safeParseFloat("[name='drinking_per_week']"), // 추가
+            exercise_frequency: exercise,
+            diet_type: diet,
+            allergies,
+            chronic_diseases: chronicList,
+            medications
+        };
+
+        /* =====================================
+        5️⃣ 서버 전송
+        ====================================== */
+
+        const response = await fetchWithAuth("/api/v1/health", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            alert("저장되었습니다.");
+        } else {
+            alert("저장 실패");
+        }
+
+    });
 </script>
 {% endblock %}

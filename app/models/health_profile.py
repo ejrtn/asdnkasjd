@@ -11,6 +11,8 @@ class FamilyHistory(str, Enum):
     NO = "없음"
     MAN = "부 있음"
     WOMAN = "모 있음"
+    MANWOMAN = "부모 있음"
+    UNKNOWN = "모름"
 
 
 class SmokingStatus(str, Enum):

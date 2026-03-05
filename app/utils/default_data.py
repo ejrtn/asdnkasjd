@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from typing import cast
 
 from app.models.alarm import Alarm
 from app.models.alarm_history import AlarmHistory
@@ -8,7 +9,7 @@ from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
 from app.models.cnn_history import CNNHistory
-from app.models.current_med import CurrentMed, DoseTime
+from app.models.current_med import AddedFrom, CurrentMed, DoseTime
 from app.models.health_profile import (
     DietType,
     DrinkingStatus,
@@ -95,24 +96,59 @@ class DefaultData:
         ]
 
         pill_pool = [
-            {"name": "타이레놀정 500mg", "dose": "500mg", "count": "1정", "freq": "3회", "time": DoseTime.LUNCH},
-            {"name": "메트포르민 500mg", "dose": "500mg", "count": "1정", "freq": "2회", "time": DoseTime.MORNING},
-            {"name": "아모디핀정 5mg", "dose": "5mg", "count": "1정", "freq": "1회", "time": DoseTime.MORNING},
-            {"name": "고지혈정 10mg", "dose": "10mg", "count": "1정", "freq": "1회", "time": DoseTime.MORNING},
-            {"name": "비타민C 1000mg", "dose": "1000mg", "count": "1정", "freq": "1회", "time": DoseTime.DINNER},
+            {
+                "name": "타이레놀정 500mg",
+                "dose": "500mg",
+                "count": "1정",
+                "freq": "3회",
+                "time": DoseTime.LUNCH,
+                "from": AddedFrom.HOSPITAL,
+            },
+            {
+                "name": "메트포르민 500mg",
+                "dose": "500mg",
+                "count": "1정",
+                "freq": "2회",
+                "time": DoseTime.MORNING,
+                "from": AddedFrom.PHARMACY,
+            },
+            {
+                "name": "아모디핀정 5mg",
+                "dose": "5mg",
+                "count": "1정",
+                "freq": "1회",
+                "time": DoseTime.MORNING,
+                "from": AddedFrom.UNKNOWN,
+            },
+            {
+                "name": "고지혈정 10mg",
+                "dose": "10mg",
+                "count": "1정",
+                "freq": "1회",
+                "time": DoseTime.MORNING,
+                "from": AddedFrom.PHARMACY,
+            },
+            {
+                "name": "비타민C 1000mg",
+                "dose": "1000mg",
+                "count": "1정",
+                "freq": "1회",
+                "time": DoseTime.DINNER,
+                "from": AddedFrom.UNKNOWN,
+            },
         ]
 
         disease_pool = [
-            {"name": "고혈압", "when": "10Y"},
-            {"name": "당뇨병", "when": "5Y"},
-            {"name": "고지혈증", "when": "3Y"},
-            {"name": "천식", "when": "1Y"},
+            {"name": "고혈압", "when": "10년 이상"},
+            {"name": "당뇨병", "when": "5년 이내"},
+            {"name": "고지혈증", "when": "알수없음"},
+            {"name": "천식", "when": "1년 이내"},
         ]
 
         allergy_pool = [
-            {"pill": "페니실린", "food": "갑각류", "any": "꽃가루", "symptom": "두드러기, 가려움증"},
-            {"pill": "아스피린", "food": "복숭아", "any": "먼지", "symptom": "재채기, 콧물"},
-            {"pill": "설파제", "food": "땅콩", "any": "고양이 털", "symptom": "호흡곤란, 부종"},
+            {"allergy_type": "any", "allergy_name": "꽃가루", "symptom": "두드러기, 가려움증"},
+            {"allergy_type": "any", "allergy_name": "먼지", "symptom": "재채기, 콧물"},
+            {"allergy_type": "any", "allergy_name": "고양이 털", "symptom": "호흡곤란, 부종"},
         ]
 
         for uinfo in users_info:
@@ -142,7 +178,8 @@ class DefaultData:
         user, created = await User.get_or_create(id=user_data["id"], defaults=user_data)
         if not created:
             print(f"User {user.id} already exists.")
-        return user  # type: ignore[no-any-return]
+
+        return cast(User, user)
 
     async def _create_clinical_data(
         self, user: User, uinfo: dict, pill_pool: list, disease_pool: list, allergy_pool: list
@@ -151,11 +188,11 @@ class DefaultData:
         if uinfo["allergy"] > 0:
             a_idx = abs(hash(user.id)) % len(allergy_pool)
             a = allergy_pool[a_idx]
+            print(a)
             await Allergy.get_or_create(
                 user=user,
-                pill_allergy=a["pill"],
-                food_allergy=a["food"],
-                any_allergy=a["any"],
+                allergy_type=a["allergy_type"],
+                allergy_name=a["allergy_name"],
                 symptom=a["symptom"],
             )
 
@@ -178,8 +215,8 @@ class DefaultData:
                     "daily_dose_count": p["freq"],
                     "one_dose_count": p["count"],
                     "dose_time": p["time"],
-                    "added_from": "MANUAL",
-                    "start_date": (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"),
+                    "added_from": p["from"],
+                    "start_date": (datetime.now() - timedelta(days=30)).strftime("%Y-%m"),
                 },
             )
             meds.append(current_med)
@@ -197,13 +234,18 @@ class DefaultData:
         hp_hash = abs(hash(user.id))
         health_profile_defaults = {
             "family_history": FamilyHistory.MAN if hp_hash % 2 == 0 else FamilyHistory.NO,
+            "family_history_note": "암",
             "height_cm": 160.0 + (hp_hash % 20),
             "weight_kg": 50.0 + (hp_hash % 30),
             "weight_change": WeightChange.NO_CHANGE,
             "sleep_hours": 7.0,
             "sleep_change": SleepChange.NO_CHANGE,
             "smoking_status": SmokingStatus.NEVER,
+            "smoking_years": 10,
+            "smoking_per_week": 1,
             "drinking_status": DrinkingStatus.NEVER,
+            "drinking_years": 5,
+            "drinking_per_week": 1,
             "exercise_frequency": ExerciseFrequency.WEEK_3_OR_MORE,
             "diet_type": DietType.BALANCED,
         }

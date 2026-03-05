@@ -14,6 +14,12 @@ class DoseTime(str, Enum):
     BEDTIME = "취침 전"
 
 
+class AddedFrom(str, Enum):
+    UNKNOWN = "모름"
+    HOSPITAL = "병원 처방"
+    PHARMACY = "약국 구매"
+
+
 class CurrentMed(models.Model):
     """
     사용자가 현재 실제로 복용 중인 약물 목록을 관리하는 모델입니다.
@@ -27,7 +33,7 @@ class CurrentMed(models.Model):
     daily_dose_count = fields.CharField(max_length=255, null=True)  # 1일 복용 횟수
     one_dose_count = fields.CharField(max_length=255, null=True)  # 1회 복용 개수 (예: 1정)
     dose_time = fields.CharEnumField(DoseTime, description="복용 시간")
-    added_from = fields.CharField(max_length=20, null=True)  # 출처 (약국, 처방전)
+    added_from = fields.CharEnumField(AddedFrom, description="복용 시간")  # 출처 (약국, 처방전)
     start_date = fields.CharField(max_length=255, null=True)  # 복용 시작 시점
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="current_meds")
 
