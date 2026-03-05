@@ -161,4 +161,5 @@ class GuideService:
                     "section4": {"title": "출처", "reason": "시스템 연결 문제로 기본 가이드가 생성되었습니다."},
                     "disclaimer": "본 정보는 참고용입니다.",
                 },
+                "created_at": "2026-03-01T20:00:00",
             }

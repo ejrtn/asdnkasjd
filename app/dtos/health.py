@@ -44,7 +44,7 @@ class BloodPressureRecordResponse(BaseModel):
     systolic: int
     diastolic: int
     pulse: int | None = None
-    recorded_at: datetime
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -53,7 +53,7 @@ class BloodSugarRecordResponse(BaseModel):
     id: int
     glucose_mg_dl: float
     measure_type: str
-    recorded_at: datetime
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
