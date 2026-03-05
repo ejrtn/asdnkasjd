@@ -985,6 +985,7 @@
         // 세션 만료 처리: 토스트 1회만 표시 + 랜딩/로그인 이동 (중복 방지)
         let __sessionExpiredHandled = false;
         let __sessionToastTimer = null;
+        let __sessionExpiredMode = false; // 세션 만료 처리 중 플래그
 
         function showSessionToast() {
             const toast = document.getElementById('session-toast');
@@ -1013,10 +1014,18 @@
         function handleSessionExpired() {
             if (__sessionExpiredHandled) return;
             __sessionExpiredHandled = true;
+            __sessionExpiredMode = true;
 
-            // 토큰 정리
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("user_id");
+            // 공개 페이지에서는 토스트 띄우지 않기
+            const PUBLIC_PATHS = ['/', '/login', '/signup', '/find-account'];
+            
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_id');
+            
+            if (PUBLIC_PATHS.includes(window.location.pathname)) {
+                window.location.replace('/');
+                return;
+            }
 
             // 토스트 표시
             showSessionToast();
@@ -1032,6 +1041,7 @@
         let __authGuardRunning = false;
 
         async function authGuard() {
+            if (__sessionExpiredMode) return;  // 만료 처리 중이면 아무 것도 하지 않기
             if (__authGuardRunning) return;
             __authGuardRunning = true;
             
@@ -1118,22 +1128,24 @@
             function goLandingNow() {
                 if (__sessionToastTimer) clearTimeout(__sessionToastTimer);
                 __sessionToastTimer = null;
+                __sessionExpiredMode = true;
                 window.location.replace('/');
             }
 
             if (closeBtn) closeBtn.addEventListener('click', () => {
                 hideSessionToast();
-                goLandingNow(); // 닫아도 랜딩으로 이동 (일관성)
+                goLandingNow();
             });
 
             if (dismissBtn) dismissBtn.addEventListener('click', () => {
                 hideSessionToast();
-                goLandingNow(); // 닫아도 랜딩으로 이동 (일관성)
+                goLandingNow();
             });
 
             if (loginBtn) loginBtn.addEventListener('click', () => {
                 if (__sessionToastTimer) clearTimeout(__sessionToastTimer);
                 __sessionToastTimer = null;
+                __sessionExpiredMode = true; // 가드가 방해 못하게
                 window.location.replace('/login');
             });
         });
@@ -1191,7 +1203,6 @@
             // 무조건 랜딩으로
             window.location.replace('/');
         }
-    </script>
     </script>
     {% block scripts %}{% endblock %}
 </body>

@@ -185,5 +185,11 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // 로그인 상태면 랜딩에 머물지 않고 대시보드로
+        const token = localStorage.getItem('access_token');
+        if (token) window.location.replace('/dashboard');
+    </script>
 </body>
 </html>
