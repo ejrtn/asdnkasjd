@@ -83,7 +83,6 @@ class GuideService:
                 med_list = [m.medication_name for m in meds]
 
             else:
-
                 disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
                 bp_list = ["120/80 mmHg"]
                 bs_list = ["95 mg/dL (FASTING)"]
