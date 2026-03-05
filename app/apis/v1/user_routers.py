@@ -49,7 +49,7 @@ async def get_me(user: Annotated[User, Depends(get_request_user)]) -> UserMeResp
         birthday=user.birthday,
         gender=user.gender,
         chronic_diseases=[a.disease_name for a in user.chronic_diseases],
-        allergies=[d.any_allergy for d in user.allergies],
+        allergies=[d.allergy_name for d in user.allergies],
         alarm_tf=user.alarm_tf,
         is_terms_agreed=user.is_terms_agreed,
         is_privacy_agreed=user.is_privacy_agreed,

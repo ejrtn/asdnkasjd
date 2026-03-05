@@ -12,6 +12,7 @@ async def get_current_weather(lat: float | None = None, lon: float | None = None
     """현재 날씨 정보를 가져옵니다."""
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
+
     if not weather_api_key:
         raise HTTPException(
             status_code=500, detail="WEATHER_API_KEY is not set. Put it in .env or environment variables."
