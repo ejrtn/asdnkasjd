@@ -2,6 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from fastapi.responses import ORJSONResponse as Response
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -23,20 +24,19 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     user_service: Annotated[UserManageService, Depends(UserManageService)],
-) -> Response:
+) -> JSONResponse:
     """
     [USER] 로그인 (이메일/비밀번호) -> access_token 발급
     """
-    # Note: UserManageService.login logic remains similar but returns data for New DTO
-    # Adjusting LoginRequest mapping if needed
-
     login_data = LoginRequest(id=form_data.username, password=form_data.password)
     tokens = await user_service.login(login_data)
 
-    return Response(
+    response = JSONResponse(
         content={"access_token": tokens["access_token"], "token_type": tokens["token_type"], "id": tokens["id"]},
         status_code=status.HTTP_200_OK,
     )
+    response.set_cookie("access_token", tokens["access_token"], httponly=False, samesite="lax")
+    return response
 
 
 @auth_router.get("/kakao/authorize", response_model=KakaoAuthUrlResponse)

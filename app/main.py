@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, ORJSONResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -44,27 +44,48 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 templates = Jinja2Templates(directory="app/templates")
 
 
+def _is_logged_in(request: Request) -> bool:
+    return bool(request.cookies.get("access_token"))
+
+
+def require_login(request: Request):
+    if not _is_logged_in(request):
+        return RedirectResponse(url="/", status_code=302)
+    return None
+
+
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def landing(request: Request):
     """
-    서비스의 메인 랜딩 페이지(대시보드)를 반환합니다.
+    랜딩 페이지. 로그인 상태면 대시보드로 리다이렉트.
     """
-    return templates.TemplateResponse("index.html", {"request": request})
+    if _is_logged_in(request):
+        return RedirectResponse(url="/dashboard", status_code=302)
+    return templates.TemplateResponse("landing.html", {"request": request})
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """
+    대시보드. 로그인한 사용자만 접근 가능.
+    """
+    r = require_login(request)
+    if r:
+        return r
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @app.get("/signup", response_class=HTMLResponse)
 async def read_join(request: Request):
-    """
-    회원가입 페이지를 반환합니다.
-    """
+    if _is_logged_in(request):
+        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("join.html", {"request": request})
 
 
 @app.get("/login", response_class=HTMLResponse)
 async def read_login(request: Request):
-    """
-    로그인 페이지를 반환합니다.
-    """
+    if _is_logged_in(request):
+        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -73,6 +94,9 @@ async def read_mypage(request: Request):
     """
     사용자 마이페이지(정보 수정, 비밀번호 변경 등)를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("mypage.html", {"request": request})
 
 
@@ -89,6 +113,9 @@ async def read_guide(request: Request):
     """
     생활 안내 가이드 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("guide.html", {"request": request})
 
 
@@ -97,6 +124,9 @@ async def read_alarm(request: Request):
     """
     복용 알람 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("alarm.html", {"request": request})
 
 
@@ -105,6 +135,9 @@ async def read_prescription_upload(request: Request):
     """
     처방전 및 약물 업로드 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("prescription_upload.html", {"request": request})
 
 
@@ -113,6 +146,9 @@ async def read_health_profile(request: Request):
     """
     건강 정보 통합 관리 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("health_profile_save.html", {"request": request})
 
 
@@ -121,6 +157,9 @@ async def read_blood_pressure(request: Request):
     """
     혈압 기록 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("blood_pressure_save.html", {"request": request})
 
 
@@ -129,6 +168,9 @@ async def read_blood_sugar(request: Request):
     """
     혈당 기록 페이지를 반환합니다.
     """
+    r = require_login(request)
+    if r:
+        return r
     return templates.TemplateResponse("blood_sugar_save.html", {"request": request})
 
 

@@ -16,124 +16,7 @@
         background: #f7f7f7;
     }
 
-    /* ===== HEADER ===== */
-    .header {
-        height: 64px;
-        border-bottom: 1px solid #ccc;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
-    }
 
-    .header-left {
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        position: relative;
-    }
-
-    .search {
-        border: 1px solid #aaa;
-        border-radius: 20px;
-        padding: 4px 10px;
-    }
-
-    /* 사용자 메뉴 드롭다운 */
-    .user-menu {
-        position: relative;
-    }
-
-    .user-menu-btn {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 8px;
-    }
-
-    .user-dropdown {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 8px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        min-width: 150px;
-        z-index: 1000;
-    }
-
-    .user-dropdown.show {
-        display: block;
-    }
-
-    .user-dropdown a {
-        display: block;
-        padding: 12px 16px;
-        color: #333;
-        text-decoration: none;
-        font-size: 14px;
-        transition: background 0.2s;
-    }
-
-    .user-dropdown a:hover {
-        background: #f5f5f5;
-    }
-
-    /* ===== LAYOUT ===== */
-    .container {
-        display: flex;
-        height: calc(100vh - 64px);
-    }
-
-    /* ===== SIDEBAR ===== */
-    .sidebar {
-        width: 220px;
-        border-right: 1px solid #ccc;
-        background: #fff;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sidebar button {
-        margin-bottom: 10px;
-        padding: 8px;
-        border: 1px solid #333;
-        background: #fff;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    .sidebar a {
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .sidebar-footer {
-        margin-top: auto;
-    }
-
-    /* ===== MAIN ===== */
-    .main {
-        flex: 1;
-        padding: 24px;
-        overflow-y: auto;
-    }
-
-    .page-title {
-        font-size: 22px;
-        margin-bottom: 20px;
-    }
 
     .box {
         border: 1px solid #999;
@@ -149,6 +32,11 @@
 
     .column {
         flex: 1;
+    }
+
+    .page-wrap .page-title {
+        font-size: 22px;
+        margin-bottom: 20px;
     }
 
     .big-box {
@@ -464,8 +352,7 @@
 {% endblock %}
 
 {% block content %}
-<!-- MAIN -->
-<main class="main">
+<div class="page-wrap">
     <!-- ================= 처방전 / 약봉투 ================= -->
     <section class="upload">
         <div>
@@ -515,7 +402,7 @@
             </div>
         </div>
     </section>
-</main>
+</div>
 <!-- 파일 업로드 팝업 -->
 <div class="upload-overlay" id="upload-overlay">
     <div class="upload-modal">

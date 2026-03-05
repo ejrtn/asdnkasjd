@@ -1,3 +1,13 @@
+// 로그인 후 대시보드로 리다이렉트
+function redirectToDashboardAfterLogin() {
+    const token = localStorage.getItem('access_token');
+    if (token && window.location.pathname === '/login') {
+        window.location.href = '/dashboard';
+    }
+}
+
+window.addEventListener('load', redirectToDashboardAfterLogin);
+
 // 사용자 메뉴 드롭다운 토글
 document.getElementById('user-menu-btn').addEventListener('click', function(e) {
     e.stopPropagation();

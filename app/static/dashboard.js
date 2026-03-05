@@ -1,22 +1,68 @@
 // Slide Navigation
-document.querySelectorAll('.indicator').forEach(indicator => {
-  indicator.addEventListener('click', () => {
-    const slideNum = indicator.dataset.slide;
-    showSlide(slideNum);
+let currentSlide = 0; // 0-based
+let slideInterval;
+const SLIDE_DURATION = 10000; // 10초마다 슬라이드 변경
+
+function getSlides() {
+  return Array.from(document.querySelectorAll('.slide'));
+}
+
+function getIndicators() {
+  return Array.from(document.querySelectorAll('.indicator'));
+}
+
+function showSlideByIndex(index) {
+  const slides = getSlides();
+  const indicators = getIndicators();
+  if (slides.length === 0) return;
+
+  slides.forEach(s => s.classList.remove('active'));
+  indicators.forEach(i => i.classList.remove('active'));
+
+  const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+  slides[safeIndex].classList.add('active');
+  if (indicators[safeIndex]) indicators[safeIndex].classList.add('active');
+
+  currentSlide = safeIndex;
+}
+
+function nextSlide() {
+  showSlideByIndex(currentSlide + 1);
+}
+
+function startSlideTimer() {
+  stopSlideTimer();
+  slideInterval = setInterval(nextSlide, SLIDE_DURATION);
+}
+
+function stopSlideTimer() {
+  if (slideInterval) clearInterval(slideInterval);
+  slideInterval = null;
+}
+
+function resetSlideTimer() {
+  startSlideTimer();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // indicator 클릭 연결
+  getIndicators().forEach((indicator, idx) => {
+    indicator.addEventListener('click', () => {
+      showSlideByIndex(idx);
+      resetSlideTimer();
+    });
   });
+
+  // 첫 슬라이드 보장
+  showSlideByIndex(0);
+  startSlideTimer();
 });
 
-function showSlide(slideNum) {
-  document.querySelectorAll('.slide').forEach(slide => {
-    slide.classList.remove('active');
-  });
-  document.querySelectorAll('.indicator').forEach(ind => {
-    ind.classList.remove('active');
-  });
-
-  document.querySelector(`[data-slide="${slideNum}"]`).classList.add('active');
-  document.querySelector(`.indicator[data-slide="${slideNum}"]`).classList.add('active');
-}
+// 탭 숨김이면 멈췄다가 돌아오면 재시작
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopSlideTimer();
+  else startSlideTimer();
+});
 
 // Health Metric Toggle
 const healthMetricSelect = document.getElementById('health-metric-select');
@@ -49,16 +95,8 @@ function toggleZoom() {
 
 // Check login status
 function checkLoginStatus() {
-  const token = localStorage.getItem('auth_token');
-  const cardsContainer = document.getElementById('dashboard-cards');
-  
+  const token = localStorage.getItem('access_token');
   if (!token) {
-    cardsContainer.innerHTML = `
-      <div class="login-required-message">
-        <div>🔐</div>
-        <h3>로그인이 필요합니다</h3>
-        <p>상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p>
-      </div>
-    `;
+    window.location.href = '/';
   }
 }

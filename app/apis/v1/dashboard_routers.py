@@ -1,4 +1,10 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+
+from app.dependencies.security import get_request_user
+from app.models.user import User
+from app.services.dashboard import DashboardService
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -26,3 +32,10 @@ async def get_dashboard_summary(user_id: str | None = None):
         "next_alarm_minutes": 192,
         "analysis": {"title": "처방전 분석 완료", "result": "약물 상호작용 없음", "status": "safe"},
     }
+
+
+@router.get("/insights")
+async def get_insights(user: Annotated[User, Depends(get_request_user)]):
+    """사용자 건강 정보 기반 AI 인사이트 생성"""
+    service = DashboardService()
+    return await service.generate_insights(user)

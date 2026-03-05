@@ -135,6 +135,6 @@ class FullHealthProfileSaveRequest(BaseModel):
     exercise_frequency: str
     diet_type: str
 
-    allergies: list[AllergySaveRequest] | None = Field(default_factory=list)
-    chronic_diseases: list[ChronicDiseaseSaveRequest] | None = Field(default_factory=list)
-    medications: list[CurrentMedSaveRequest] | None = Field(default_factory=list)
+    allergies: list[AllergySaveRequest] = Field(default_factory=list)
+    chronic_diseases: list[ChronicDiseaseSaveRequest] = Field(default_factory=list)
+    medications: list[CurrentMedSaveRequest] = Field(default_factory=list)

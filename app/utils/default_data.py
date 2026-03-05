@@ -141,7 +141,7 @@ class DefaultData:
         user, created = await User.get_or_create(id=user_data["id"], defaults=user_data)
         if not created:
             print(f"User {user.id} already exists.")
-        return user
+        return user  # type: ignore[no-any-return]
 
     async def _create_clinical_data(
         self, user: User, uinfo: dict, pill_pool: list, disease_pool: list, allergy_pool: list
