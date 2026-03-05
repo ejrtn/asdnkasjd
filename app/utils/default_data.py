@@ -216,7 +216,6 @@ class DefaultData:
                 "systolic": 120 + (hp_hash % 10),
                 "diastolic": 75 + (hp_hash % 10),
                 "pulse": 70 + (hp_hash % 10),
-                "recorded_at": datetime.now() - timedelta(days=i),
                 "measure_type": RecordTime.MORNING,
             }
             for i in range(5)
@@ -230,7 +229,6 @@ class DefaultData:
             {
                 "glucose_mg_dl": 90.0 + (hp_hash % 20),
                 "measure_type": GlucoseMeasureType.FASTING,
-                "recorded_at": datetime.now() - timedelta(days=i),
             }
             for i in range(5)
         ]
