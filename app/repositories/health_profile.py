@@ -1,3 +1,5 @@
+from typing import cast
+
 from app.models.health_profile import HealthProfile
 
 
@@ -29,4 +31,5 @@ class HealthProfileRepository:
         """
         health_profile: HealthProfile
         health_profile, created = await self._model.update_or_create(user_id=user_id, defaults=data)
-        return health_profile  # type: ignore[no-any-return]
+
+        return cast(HealthProfile, health_profile)

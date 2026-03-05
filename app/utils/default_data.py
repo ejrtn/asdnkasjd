@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from typing import cast
 
 from app.models.alarm import Alarm
 from app.models.alarm_history import AlarmHistory
@@ -8,7 +9,7 @@ from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
 from app.models.cnn_history import CNNHistory
-from app.models.current_med import CurrentMed, DoseTime, AddedFrom
+from app.models.current_med import AddedFrom, CurrentMed, DoseTime
 from app.models.health_profile import (
     DietType,
     DrinkingStatus,
@@ -142,7 +143,8 @@ class DefaultData:
         user, created = await User.get_or_create(id=user_data["id"], defaults=user_data)
         if not created:
             print(f"User {user.id} already exists.")
-        return user  # type: ignore[no-any-return]
+
+        return cast(User, user)
 
     async def _create_clinical_data(
         self, user: User, uinfo: dict, pill_pool: list, disease_pool: list, allergy_pool: list

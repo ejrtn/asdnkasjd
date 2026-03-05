@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
+
 from app.models.health_profile import (
     DietType,
     DrinkingStatus,
@@ -10,6 +11,7 @@ from app.models.health_profile import (
     SmokingStatus,
     WeightChange,
 )
+
 
 class ChronicDiseaseResponse(BaseModel):
     id: int
