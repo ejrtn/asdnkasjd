@@ -5,11 +5,11 @@ from datetime import datetime
 from openai import AsyncOpenAI
 
 from app.models.allergy import Allergy
+from app.models.blood_pressure_record import BloodPressureRecord
+from app.models.blood_sugar_record import BloodSugarRecord
 from app.models.chronic_disease import ChronicDisease
 from app.models.current_med import CurrentMed
 from app.models.user import User
-from app.models.blood_pressure_record import BloodPressureRecord
-from app.models.blood_sugar_record import BloodSugarRecord
 
 
 class GuideService:
@@ -84,7 +84,7 @@ class GuideService:
                 disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
                 bp_list = ["120/80 mmHg"]
                 bs_list = ["95 mg/dL (FASTING)"]
-        except Exception:   
+        except Exception:
             # DB connection error or other DB issues
             disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
             bp_list = ["120/80 mmHg"]
@@ -159,10 +159,12 @@ class GuideService:
 
                 for dname in disease_list:
                     if dname not in guide_names:
-                        guides.append({
-                            "name": dname,
-                            "tips": ["(추가 입력 시 더 정확한 맞춤 가이드를 제공할 수 있어요.)"],
-                        })
+                        guides.append(
+                            {
+                                "name": dname,
+                                "tips": ["(추가 입력 시 더 정확한 맞춤 가이드를 제공할 수 있어요.)"],
+                            }
+                        )
 
                 sec2["disease_guides"] = guides
                 content_json["section2"] = sec2
