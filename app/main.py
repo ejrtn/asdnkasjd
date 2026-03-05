@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, ORJSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -59,10 +59,8 @@ def require_login(request: Request):
 @app.get("/", response_class=HTMLResponse)
 async def landing(request: Request):
     """
-    랜딩 페이지. 로그인 상태면 대시보드로 리다이렉트.
+    랜딩 페이지. 프론트엔드에서 localStorage 기준으로 대시보드 이동 처리.
     """
-    if _is_logged_in(request):
-        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("landing.html", {"request": request})
 
 
@@ -76,15 +74,11 @@ async def dashboard(request: Request):
 
 @app.get("/signup", response_class=HTMLResponse)
 async def read_join(request: Request):
-    if _is_logged_in(request):
-        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("join.html", {"request": request})
 
 
 @app.get("/login", response_class=HTMLResponse)
 async def read_login(request: Request):
-    if _is_logged_in(request):
-        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request})
 
 
