@@ -1,9 +1,12 @@
 import json
 import os
+from datetime import datetime
 
 from openai import AsyncOpenAI
 
 from app.models.allergy import Allergy
+from app.models.blood_pressure_record import BloodPressureRecord
+from app.models.blood_sugar_record import BloodSugarRecord
 from app.models.chronic_disease import ChronicDisease
 from app.models.current_med import CurrentMed
 from app.models.user import User
@@ -67,15 +70,25 @@ class GuideService:
                 diseases = await ChronicDisease.filter(user=user).all()
                 allergies = await Allergy.filter(user=user).all()
                 meds = await CurrentMed.filter(user=user).all()
+                # 최근 혈압, 혈당 데이터
+                bp_records = await BloodPressureRecord.filter(user=user).limit(5)
+                bs_records = await BloodSugarRecord.filter(user=user).limit(5)
+
+                bp_list = [f"{r.systolic}/{r.diastolic} mmHg" for r in bp_records]
+                bs_list = [f"{r.glucose_mg_dl} mg/dL ({r.measure_type})" for r in bs_records]
 
                 disease_list = [d.disease_name for d in diseases]
                 allergy_list = [a.any_allergy for a in allergies]
                 med_list = [m.medication_name for m in meds]
             else:
                 disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
+                bp_list = ["120/80 mmHg"]
+                bs_list = ["95 mg/dL (FASTING)"]
         except Exception:
             # DB connection error or other DB issues
             disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
+            bp_list = ["120/80 mmHg"]
+            bs_list = ["95 mg/dL (FASTING)"]
 
         client = AsyncOpenAI(api_key=api_key)
 
@@ -86,11 +99,15 @@ class GuideService:
     - 만성 질환: {", ".join(disease_list) if disease_list else "없음"}
     - 알레르기: {", ".join(allergy_list) if allergy_list else "없음"}
     - 현재 복용 약: {", ".join(med_list) if med_list else "없음"}
+    - 최근 혈압 기록: {", ".join(bp_list) if bp_list else "없음"}
+    - 최근 혈당 기록: {", ".join(bs_list) if bs_list else "없음"}
 
     [작성 가이드라인]
     1. 과한 확정 진단(예: ~병입니다)은 피하고, '권장합니다', '주의가 필요합니다' 등의 조언 톤을 유지할 것.
     2. 약물 상호작용 및 알레르기 성분을 최우선으로 체크할 것.
     3. 반드시 아래의 JSON 구조로 응답할 것.
+    4. 만성 질환이 2개 이상이면 disease_guides를 질환 개수만큼 반드시 생성할 것(누락 금지).
+    5. disease_guides의 name은 입력된 만성 질환명(disease_list)에 있는 문자열을 그대로 사용할 것.
 
     [응답 JSON 구조]
     {{
@@ -134,11 +151,30 @@ class GuideService:
             )
 
             content_json = json.loads(res.choices[0].message.content or "{}")
+            # ✅ 질환 누락 보정: disease_list에 있는 질환은 모두 disease_guides에 포함되도록 강제
+            try:
+                sec2 = content_json.get("section2") or {}
+                guides = sec2.get("disease_guides") or []
+                guide_names = {g.get("name") for g in guides if isinstance(g, dict)}
+
+                for dname in disease_list:
+                    if dname not in guide_names:
+                        guides.append(
+                            {
+                                "name": dname,
+                                "tips": ["(추가 입력 시 더 정확한 맞춤 가이드를 제공할 수 있어요.)"],
+                            }
+                        )
+
+                sec2["disease_guides"] = guides
+                content_json["section2"] = sec2
+            except Exception:
+                pass
 
             return {
                 "id": 1,
                 "guide_data": content_json,
-                "created_at": "2026-03-01T20:00:00",
+                "created_at": datetime.now().isoformat(),
             }
         except Exception as e:
             print(f"OpenAI Error: {e}")

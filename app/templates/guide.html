@@ -322,7 +322,7 @@
         skeleton.classList.remove('hidden');
         content.classList.add('hidden');
         try {
-            const res = await fetch('/api/v1/guides', {
+            const res = await fetchWithAuth('/api/v1/guides', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             });
