@@ -32,7 +32,7 @@ class HealthProfileService:
         Returns:
             dict: 통합 건강 프로필 정보
         """
-        user_id = user.id
+        user_id = user.id if user else None
 
         allergies = await self.allergy_repo.get_by_user_id(user_id)
         blood_pressure_records = await self.blood_pressure_record_repo.get_by_user_id(user_id)
