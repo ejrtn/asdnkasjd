@@ -306,9 +306,24 @@
 {% block scripts %}
 <script src="/static/common.js"></script>
   <script src="/static/chatbot.js"></script>
-  <script src="/static/alarm.js?v=1"></script>
+  <script src="/static/alarm.js?v=2"></script>
   <script>
-    // 탭 전환
+    function checkLoginStatus() {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        window.__BLOCK_ALARM_LOAD__ = true;
+        document.getElementById('med-list').innerHTML = `
+          <div style="text-align:center; padding: 40px 20px; color:#6b7280;">
+            로그인이 필요합니다
+          </div>
+        `;
+        const loginMsg = '<div style="text-align: center; padding: 40px 20px;"><div style="font-size: 48px; margin-bottom: 16px;">🔐</div><h3 style="font-size: 18px; color: #333; margin-bottom: 8px;">로그인이 필요합니다</h3><p style="color: #999; font-size: 14px; margin-bottom: 20px;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p><a href="/login" style="display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; text-decoration: none; border-radius: 8px;">로그인 하기</a></div>';
+        document.getElementById('alarm-detail').innerHTML = loginMsg;
+        document.querySelectorAll('#tab-bp .alarm-slots, #tab-bs .alarm-slots').forEach(el => el.innerHTML = loginMsg);
+        document.querySelectorAll('#tab-bp .btn-add-time, #tab-bs .btn-add-time').forEach(el => el.style.display = 'none');
+      }
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -316,12 +331,11 @@
       event.currentTarget.classList.add('active');
     }
 
-    // 혈압/혈당 알람 상태 저장소
     const healthAlarms = {};
 
     async function loadHealthAlarms() {
       const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/v1/alarms?alarm_type=BP_MORNING', { headers: { Authorization: `Bearer ${token}` } });
+      if (!token) return;
       const types = ['BP_MORNING','BP_EVENING','BS_FASTING','BS_POSTMEAL','BS_BEDTIME'];
       for (const t of types) {
         const r = await fetch(`/api/v1/alarms?alarm_type=${t}`, { headers: { Authorization: `Bearer ${token}` } });
@@ -403,5 +417,6 @@
     function saveBsAlarms() { saveHealthAlarms(null, { BS_FASTING: 'bs-fasting', BS_POSTMEAL: 'bs-postmeal', BS_BEDTIME: 'bs-bedtime' }); }
 
     loadHealthAlarms();
+    checkLoginStatus();
   </script>
 {% endblock %}

@@ -6,12 +6,29 @@
 <link rel="stylesheet" href="/static/dashboard.css">
 <style>
 /* 확대 기능 */
+body.zoom-large .hero-slider {
+  min-height: 480px;
+  padding: 48px;
+}
+
 body.zoom-large .slide-content h2 {
-  font-size: 38px;
+  font-size: 56px;
 }
 
 body.zoom-large .slide-content p {
-  font-size: 24px;
+  font-size: 32px;
+}
+
+body.zoom-large .slide-brand {
+  font-size: 36px;
+}
+
+body.zoom-large .slide-date {
+  font-size: 22px;
+}
+
+body.zoom-large .slide-footer small {
+  font-size: 22px;
 }
 
 body.zoom-large .card h4 {
@@ -83,18 +100,6 @@ body.zoom-large .next-alarm small {
   font-size: 16px;
 }
 
-body.zoom-large .slide-brand {
-  font-size: 28px;
-}
-
-body.zoom-large .slide-date {
-  font-size: 18px;
-}
-
-body.zoom-large .slide-footer small {
-  font-size: 18px;
-}
-
 body.zoom-large .score-badge {
   font-size: 16px;
 }
@@ -117,8 +122,30 @@ body.zoom-large .dashboard-card {
   padding: 24px;
 }
 
-body.zoom-large .hero-slider {
-  height: 320px;
+/* Login Required Message */
+.login-required {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.dashboard-card {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dashboard-card.show {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  padding: 16px !important;
+  margin: 0 !important;
 }
 </style>
 {% endblock %}
@@ -136,7 +163,7 @@ body.zoom-large .hero-slider {
       </div>
     </div>
     <div class="slide-content">
-      <h2>구름 위에 오른 듯한 건강한 일상,<br>Cloud9 Care가 함께합니다.</h2>
+      <h2>☁️구름 위에 오른 듯한 건강한 일상,<br>Cloud9 Care가 함께합니다.</h2>
       <p>의료 기록을 이해하기 쉬운<br>맞춤형 건강 가이드로 연결합니다.</p>
     </div>
     <div class="slide-footer">
@@ -167,8 +194,8 @@ body.zoom-large .hero-slider {
   </div>
 </div>
 
-<!-- 작은 카드 4개 -->
-<div class="dashboard-cards">
+<!-- 작은 카드 4개 (로그인 필요) -->
+<div class="dashboard-cards" id="dashboard-cards">
   <!-- 1. 건강 지표 -->
   <div class="dashboard-card health-metrics">
     <div class="card-header">
@@ -324,7 +351,34 @@ async function loadWeatherInfo() {
   }
 }
 
+function checkLoginStatus() {
+  const token = localStorage.getItem('access_token');
+  const cardsContainer = document.getElementById('dashboard-cards');
+  
+  if (!token) {
+    cardsContainer.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🔐</div>
+        <h3 style="font-size: 20px; color: #333; margin-bottom: 8px;">로그인이 필요합니다</h3>
+        <p style="color: #999; font-size: 14px;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p>
+      </div>
+    `;
+  } else {
+    const cards = cardsContainer.querySelectorAll('.dashboard-card');
+    cards.forEach(card => card.classList.add('show'));
+  }
+}
+
+window.addEventListener('pageshow', () => {
+  checkLoginStatus();
+});
+
+window.addEventListener('focus', () => {
+  checkLoginStatus();
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  checkLoginStatus();
   loadWeatherInfo();
   loadHealthInsights();
 });

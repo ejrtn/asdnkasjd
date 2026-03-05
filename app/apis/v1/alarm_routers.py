@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.core.logger import default_logger
 from app.dependencies.security import get_request_user
 from app.dtos.alarm import AlarmCreateRequest, AlarmResponse, AlarmToggleRequest, AlarmUpdateRequest
 from app.models.user import User
@@ -15,6 +16,7 @@ async def get_alarms(
     user: Annotated[User, Depends(get_request_user)],
     alarm_type: str | None = None,
 ) -> list[AlarmResponse]:
+    default_logger.info("[Alarm] get_alarms - 로그인")
     service = AlarmService()
     return await service.get_user_alarms(user, alarm_type)
 
@@ -24,6 +26,7 @@ async def create_alarm(request: AlarmCreateRequest, user: Annotated[User, Depend
     """
     [ALARM] 복약 알람 생성
     """
+    default_logger.info("[Alarm] create_alarm - 로그인")
     service = AlarmService()
     try:
         return await service.create_alarm(user, request)
@@ -38,6 +41,7 @@ async def update_alarm(
     """
     [ALARM] 복약 알람 수정
     """
+    default_logger.info("[Alarm] update_alarm - 로그인")
     service = AlarmService()
     try:
         return await service.update_alarm(user, alarm_id, request)
@@ -52,6 +56,7 @@ async def toggle_alarm(
     """
     [ALARM] 복약 알람 온/오프 토글
     """
+    default_logger.info("[Alarm] toggle_alarm - 로그인")
     service = AlarmService()
     try:
         return await service.toggle_alarm(user, alarm_id, request)
@@ -64,6 +69,7 @@ async def delete_alarm(alarm_id: int, user: Annotated[User, Depends(get_request_
     """
     [ALARM] 복약 알람 삭제
     """
+    default_logger.info("[Alarm] delete_alarm - 로그인")
     service = AlarmService()
     try:
         await service.delete_alarm(user, alarm_id)
@@ -76,6 +82,7 @@ async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request
     """
     [ALARM] 알람 확인 (복약/측정 완료 체크)
     """
+    default_logger.info("[Alarm] confirm_alarm - 로그인")
     from app.models.alarm_history import AlarmHistory
 
     history = await AlarmHistory.filter(alarm_id=alarm_id).order_by("-sent_at").first()
@@ -90,6 +97,7 @@ async def get_alarm_history(alarm_id: int, user: Annotated[User, Depends(get_req
     """
     [ALARM] 복약 알람 발송/확인 이력 조회
     """
+    default_logger.info("[Alarm] get_alarm_history - 로그인")
     return {"items": []}
 
 
@@ -98,6 +106,7 @@ async def confirm_alarm_history(history_id: int, user: Annotated[User, Depends(g
     """
     [ALARM] 복약 완료 체크
     """
+    default_logger.info("[Alarm] confirm_alarm_history - 로그인")
     return {"detail": "복약 확인 되었습니다."}
 
 
@@ -106,4 +115,5 @@ async def confirm_alarm_link(history_id: int, confirm_token: str) -> dict:
     """
     [ALARM] 카카오 버튼/링크 기반 복약완료 체크.
     """
+    default_logger.info("[Alarm] confirm_alarm_link - 로그아웃")
     return {"detail": "복약 확인 완료"}

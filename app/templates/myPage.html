@@ -307,11 +307,23 @@
         }
         return response;
     }
+    function showLoginRequired() {
+        const container = document.querySelector('.mypage_container');
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px 20px;">
+                <div style="font-size: 64px; margin-bottom: 24px;">🔐</div>
+                <h3 style="font-size: 20px; color: #333; margin-bottom: 12px; font-weight: bold;">로그인이 필요합니다</h3>
+                <p style="color: #999; font-size: 14px; margin-bottom: 32px; text-align: center;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p>
+                <a href="/login" style="display: inline-block; padding: 12px 32px; background: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; transition: background 0.2s;">로그인 하기</a>
+            </div>
+        `;
+    }
+
     // 페이지 로드 시 정보 불러오기
     window.onload = async () => {
-        const id = localStorage.getItem("user_id");
-        if (!id) {
-            location.href = "/login";
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            showLoginRequired();
             return;
         }
         try {

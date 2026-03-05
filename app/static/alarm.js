@@ -32,7 +32,7 @@ window.onload = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) {
         document.getElementById('med-list').innerHTML =
-            '<p style="text-align: center; color: #f59e0b;">로그인이 필요합니다. <a href="/login">로그인 하기</a></p>';
+            '<p style="text-align: center; color: #6b7280;">로그인이 필요합니다</p>';
         return;
     }
     await Promise.all([loadMeds(), loadAlarms()]);
@@ -40,6 +40,7 @@ window.onload = async () => {
 };
 
 async function loadMeds() {
+    if (window.__BLOCK_ALARM_LOAD__) return;
     try {
         const response = await fetchWithAuth('/api/v1/current-meds');
         if (!response) return;
@@ -47,7 +48,7 @@ async function loadMeds() {
             currentMeds = await response.json();
         } else {
             document.getElementById('med-list').innerHTML =
-                '<p style="text-align: center; color: #f59e0b;">로그인이 필요합니다. <a href="/login">로그인 하기</a></p>';
+                '<p style="text-align: center; color: #6b7280;">로그인이 필요합니다</p>';
         }
     } catch (error) {
         console.error('Error loading meds:', error);
