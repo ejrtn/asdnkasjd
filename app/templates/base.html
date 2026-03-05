@@ -402,7 +402,13 @@
             font-size: 24px;
             cursor: pointer;
             padding: 8px;
-            transition: font-size 0.3s ease;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .user-menu-btn:hover {
+            background: #f3f4f6;
+            color: #4f46e5;
         }
 
         .user-dropdown {
@@ -618,6 +624,50 @@
             background: #f8fafc;
             transition: font-size 0.3s ease;
         }
+
+        /* ===== PAGE LAYOUT (모든 페이지 공통) ===== */
+        .page-wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 24px 24px 40px;
+        }
+
+        .page-wrap h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+        }
+
+        .page-wrap h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .page-wrap h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+
+        body.zoom-large .page-wrap {
+            padding: 32px 32px 48px;
+        }
+
+        body.zoom-large .page-wrap h1 {
+            font-size: 32px;
+        }
+
+        body.zoom-large .page-wrap h2 {
+            font-size: 28px;
+        }
+
+        body.zoom-large .page-wrap h3 {
+            font-size: 24px;
+        }
     </style>
 </head>
 
@@ -635,8 +685,7 @@
             <div class="user-menu">
                 <button class="user-menu-btn" id="user-menu-btn">👤</button>
                 <div class="user-dropdown" id="user-dropdown">
-                    <a href="/signup">회원가입</a>
-                    <a href="/login">로그인</a>
+                    <a href="javascript:logout();">로그아웃</a>
                     <a href="/mypage">마이페이지</a>
                 </div>
             </div>
@@ -765,12 +814,6 @@
 
     <script src="/static/chatbot.js"></script>
     <script>
-        function logAuthStatus(page) {
-            const token = localStorage.getItem('access_token');
-            const status = token ? '로그인' : '로그아웃';
-            console.log(`[${page}] ${status}`);
-        }
-
         window.addEventListener('DOMContentLoaded', function() {
             const isZoomed = localStorage.getItem('zoomState') === 'true';
             if (isZoomed) {
@@ -778,16 +821,10 @@
                 document.getElementById('zoom-btn').textContent = '🔎';
                 document.getElementById('zoom-btn').title = '글자 크기 축소';
             }
-            logAuthStatus('Dashboard');
-        });
-
-        document.querySelector('.header-left').addEventListener('click', function() {
-            logAuthStatus('Cloud9 Care');
         });
 
         document.getElementById('user-menu-btn').addEventListener('click', function (e) {
             e.stopPropagation();
-            logAuthStatus('마이페이지');
             document.getElementById('user-dropdown').classList.toggle('show');
         });
 
@@ -801,14 +838,11 @@
 
         document.querySelectorAll('.user-dropdown a').forEach(link => {
             link.addEventListener('click', function() {
-                const menuName = this.textContent.trim();
-                logAuthStatus(menuName);
                 document.getElementById('user-dropdown').classList.remove('show');
             });
         });
 
         document.getElementById('search-btn').addEventListener('click', function() {
-            logAuthStatus('검색');
             const searchTerm = document.getElementById('search-input').value.trim();
             if (searchTerm) {
                 alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
@@ -817,7 +851,6 @@
 
         document.getElementById('search-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                logAuthStatus('검색');
                 document.getElementById('search-btn').click();
             }
         });
@@ -829,12 +862,21 @@
             this.title = isZoomed ? '글자 크기 축소' : '글자 크기 확대';
         });
 
-        document.querySelectorAll('.sidebar a button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const menuName = this.textContent.trim();
-                logAuthStatus(menuName);
-            });
-        });
+        async function logout() {
+            try {
+                await fetch('/api/v1/users/logout', { method: 'POST', credentials: 'include' });
+            } catch (e) {
+                // 실패해도 클라이언트 정리는 진행
+            }
+            
+            // 클라이언트 스토리지 정리
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_id');
+            
+            // 무조건 랜딩으로
+            window.location.replace('/');
+        }
+    </script>
     </script>
     {% block scripts %}{% endblock %}
 </body>

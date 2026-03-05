@@ -183,6 +183,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="page-wrap">
 <div class="mypage_container">
     <div class="mypage open">
         <h2>마이페이지</h2>
@@ -271,6 +272,7 @@
         <button type="button" class="mypage-move" style="background-color: #6c757d; margin-top: 10px;">마이페이지
             되돌아가기</button>
     </div>
+</div>
 </div>
 {% endblock %}
 
@@ -369,16 +371,6 @@
         if (response && response.ok) alert("수정 완료!");
         else if (response) alert("수정 실패");
     };
-    // 로그아웃
-    async function logout() {
-        try {
-            await fetchWithAuth('/api/v1/users/logout', { method: 'POST' });
-        } catch (e) { }
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_id");
-        alert("로그아웃 되었습니다.");
-        location.href = "/login";
-    }
     // 비밀번호 변경
     async function changePassword() {
         const oldPassword = document.getElementById('old_password').value;

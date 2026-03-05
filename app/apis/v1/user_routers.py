@@ -140,3 +140,13 @@ async def id_check(id: str, user_service: Annotated[UserManageService, Depends(U
     if await user_service.check_id_exists(id):
         return Response(content={"detail": "이미 사용중인 아이디입니다."}, status_code=status.HTTP_200_OK)
     return Response(content={"detail": "사용하고 있지 않은 아이디입니다."}, status_code=status.HTTP_200_OK)
+
+
+@user_router.post("/logout")
+async def logout() -> Response:
+    """
+    [USER] 로그아웃 - 쿠키 삭제
+    """
+    response = Response(content={"detail": "로그아웃되었습니다."}, status_code=status.HTTP_200_OK)
+    response.delete_cookie("access_token", path="/")
+    return response

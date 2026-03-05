@@ -344,3 +344,20 @@
   font-size: 14px;
   margin: 0;
 }
+
+/* Slide 2 insight items should match hero background */
+.hero-slider .insight-item {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  border-left: 3px solid rgba(255,255,255,0.7);
+}
+
+.hero-slider .score-status {
+  color: rgba(255,255,255,0.85);
+}
+
+.hero-slider .score-badge {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.22);
+}
