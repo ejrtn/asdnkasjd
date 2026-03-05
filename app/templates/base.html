@@ -668,6 +668,155 @@
         body.zoom-large .page-wrap h3 {
             font-size: 24px;
         }
+
+        /* ===== Session Expired Toast ===== */
+        .session-toast {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 99999;
+            width: min(420px, calc(100vw - 36px));
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+            overflow: hidden;
+            transform: translateY(-10px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .session-toast.show {
+            animation: toastIn 220ms ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .session-toast.hide {
+            animation: toastOut 180ms ease-in forwards;
+            pointer-events: none;
+        }
+
+        @keyframes toastIn {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            to { transform: translateY(-10px); opacity: 0; }
+        }
+
+        .session-toast-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .session-toast-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        .session-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(79, 70, 229, 0.10);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            color: #4f46e5;
+            font-size: 18px;
+        }
+
+        .session-toast-close {
+            appearance: none;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            color: #64748b;
+            font-size: 18px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .session-toast-close:hover {
+            background: rgba(15, 23, 42, 0.06);
+            color: #0f172a;
+        }
+
+        .session-toast-body {
+            padding: 12px 16px 14px;
+        }
+
+        .session-toast-body p {
+            margin: 0 0 10px 0;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .session-toast-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .session-btn {
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: white;
+            color: #334155;
+            border-radius: 12px;
+            padding: 9px 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.06s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .session-btn:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .session-btn:active {
+            transform: translateY(1px);
+        }
+
+        .session-btn-primary {
+            border: 1px solid rgba(79, 70, 229, 0.30);
+            background: #4f46e5;
+            color: white;
+        }
+
+        .session-btn-primary:hover {
+            border-color: rgba(79, 70, 229, 0.55);
+            box-shadow: 0 14px 24px rgba(79, 70, 229, 0.22);
+        }
+
+        .session-toast-progress {
+            height: 3px;
+            background: rgba(79, 70, 229, 0.12);
+        }
+
+        .session-toast-progress > div {
+            height: 100%;
+            width: 100%;
+            transform-origin: left;
+            background: rgba(79, 70, 229, 0.65);
+            animation: toastProgress 2.5s linear forwards;
+        }
+
+        @keyframes toastProgress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
     </style>
 </head>
 
@@ -812,8 +961,147 @@
         </div>
     </div>
 
+    <!-- 세션 만료 토스트 -->
+    <div id="session-toast" class="session-toast" aria-live="polite" aria-atomic="true">
+        <div class="session-toast-header">
+            <div class="session-toast-title">
+                <span class="session-badge">🔒</span>
+                <span>세션이 만료되었습니다</span>
+            </div>
+            <button class="session-toast-close" type="button" id="session-toast-close" aria-label="닫기">×</button>
+        </div>
+        <div class="session-toast-body">
+            <p>보안을 위해 자동 로그아웃되었습니다. 다시 로그인해주세요.</p>
+            <div class="session-toast-actions">
+                <button class="session-btn" type="button" id="session-toast-dismiss">닫기</button>
+                <button class="session-btn session-btn-primary" type="button" id="session-toast-login">로그인</button>
+            </div>
+        </div>
+        <div class="session-toast-progress"><div></div></div>
+    </div>
+
     <script src="/static/chatbot.js"></script>
     <script>
+        // 세션 만료 처리: 토스트 1회만 표시 + 랜딩/로그인 이동 (중복 방지)
+        let __sessionExpiredHandled = false;
+        let __sessionToastTimer = null;
+
+        function showSessionToast() {
+            const toast = document.getElementById('session-toast');
+            if (!toast) return;
+
+            // progress 애니메이션 재시작(같은 DOM 재사용 시)
+            const prog = toast.querySelector('.session-toast-progress > div');
+            if (prog) {
+                prog.style.animation = 'none';
+                // reflow
+                void prog.offsetHeight;
+                prog.style.animation = '';
+            }
+
+            toast.classList.remove('hide');
+            toast.classList.add('show');
+        }
+
+        function hideSessionToast() {
+            const toast = document.getElementById('session-toast');
+            if (!toast) return;
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+        }
+
+        function handleSessionExpired() {
+            if (__sessionExpiredHandled) return;
+            __sessionExpiredHandled = true;
+
+            // 토큰 정리
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user_id");
+
+            // 토스트 표시
+            showSessionToast();
+
+            // 2.5초 후 랜딩으로 이동
+            __sessionToastTimer = setTimeout(() => {
+                window.location.replace("/");
+            }, 2500);
+        }
+
+        // 세션 보호 함수 (페이지 접근 시 토큰 유효성 검증)
+        const PUBLIC_PATHS = ['/', '/login', '/signup', '/find-account'];
+        let __authGuardRunning = false;
+
+        async function authGuard() {
+            if (__authGuardRunning) return;
+            __authGuardRunning = true;
+            
+            try {
+                const path = window.location.pathname;
+
+                // 공개 페이지면 패스
+                if (PUBLIC_PATHS.includes(path)) return;
+
+                // 로컬 토큰 없으면 즉시 랜딩
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    handleSessionExpired();
+                    return;
+                }
+
+                // 서버에 진짜 유효한지 확인
+                const res = await fetchWithAuth('/api/v1/users/me', { method: 'GET' });
+                if (!res) return;           // fetchWithAuth가 이미 처리함
+                if (!res.ok) {
+                    handleSessionExpired();
+                    return;
+                }
+            } finally {
+                __authGuardRunning = false;
+            }
+        }
+
+        // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
+        async function fetchWithAuth(url, options = {}) {
+            let accessToken = localStorage.getItem("access_token");
+            if (!options.headers) options.headers = {};
+            if (accessToken) {
+                options.headers["Authorization"] = `Bearer ${accessToken}`;
+            }
+            let response = await fetch(url, options);
+            
+            if (response.status === 401) {
+                const refreshResponse = await fetch('/api/v1/users/token/refresh', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (refreshResponse.ok) {
+                    const result = await refreshResponse.json();
+                    accessToken = result.access_token;
+                    localStorage.setItem("access_token", accessToken);
+                    options.headers["Authorization"] = `Bearer ${accessToken}`;
+                    response = await fetch(url, options);
+                    
+                    // 재시도 후에도 401이면 만료 처리
+                    if (response.status === 401) {
+                        handleSessionExpired();
+                        return null;
+                    }
+                } else {
+                    handleSessionExpired();
+                    return null;
+                }
+            }
+            return response;
+        }
+
+        // authGuard 실행 (페이지 로드, 포커스, 주기적 체크)
+        window.addEventListener('DOMContentLoaded', authGuard);
+        window.addEventListener('pageshow', authGuard);
+        window.addEventListener('focus', authGuard);
+        setInterval(authGuard, 60 * 1000); // 1분마다 체크
+
+        // UI 이벤트 핸들러
         window.addEventListener('DOMContentLoaded', function() {
             const isZoomed = localStorage.getItem('zoomState') === 'true';
             if (isZoomed) {
@@ -821,6 +1109,33 @@
                 document.getElementById('zoom-btn').textContent = '🔎';
                 document.getElementById('zoom-btn').title = '글자 크기 축소';
             }
+
+            // 토스트 버튼 이벤트 (기본 1번만 바인딩)
+            const closeBtn = document.getElementById('session-toast-close');
+            const dismissBtn = document.getElementById('session-toast-dismiss');
+            const loginBtn = document.getElementById('session-toast-login');
+
+            function goLandingNow() {
+                if (__sessionToastTimer) clearTimeout(__sessionToastTimer);
+                __sessionToastTimer = null;
+                window.location.replace('/');
+            }
+
+            if (closeBtn) closeBtn.addEventListener('click', () => {
+                hideSessionToast();
+                goLandingNow(); // 닫아도 랜딩으로 이동 (일관성)
+            });
+
+            if (dismissBtn) dismissBtn.addEventListener('click', () => {
+                hideSessionToast();
+                goLandingNow(); // 닫아도 랜딩으로 이동 (일관성)
+            });
+
+            if (loginBtn) loginBtn.addEventListener('click', () => {
+                if (__sessionToastTimer) clearTimeout(__sessionToastTimer);
+                __sessionToastTimer = null;
+                window.location.replace('/login');
+            });
         });
 
         document.getElementById('user-menu-btn').addEventListener('click', function (e) {

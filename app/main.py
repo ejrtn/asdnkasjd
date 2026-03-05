@@ -45,12 +45,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def _is_logged_in(request: Request) -> bool:
+    # 프론트엔드 authGuard가 세션 관리를 담당하므로 서버 측 체크 최소화
+    # 공개 페이지에서만 사용 (로그인 상태면 대시보드로 리다이렉트)
     return bool(request.cookies.get("access_token"))
 
 
 def require_login(request: Request):
-    if not _is_logged_in(request):
-        return RedirectResponse(url="/", status_code=302)
+    # 서버 측 로그인 체크 제거 - 프론트엔드 authGuard가 처리
+    # API 레벨에서는 JWT Bearer 토큰으로 인증 처리
     return None
 
 
@@ -67,11 +69,8 @@ async def landing(request: Request):
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     """
-    대시보드. 로그인한 사용자만 접근 가능.
+    대시보드. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
@@ -92,11 +91,8 @@ async def read_login(request: Request):
 @app.get("/mypage", response_class=HTMLResponse)
 async def read_mypage(request: Request):
     """
-    사용자 마이페이지(정보 수정, 비밀번호 변경 등)를 반환합니다.
+    사용자 마이페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("mypage.html", {"request": request})
 
 
@@ -111,66 +107,48 @@ async def read_find_id_pw(request: Request):
 @app.get("/guide", response_class=HTMLResponse)
 async def read_guide(request: Request):
     """
-    생활 안내 가이드 페이지를 반환합니다.
+    생활 안내 가이드 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("guide.html", {"request": request})
 
 
 @app.get("/alarm", response_class=HTMLResponse)
 async def read_alarm(request: Request):
     """
-    복용 알람 페이지를 반환합니다.
+    복용 알람 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("alarm.html", {"request": request})
 
 
 @app.get("/prescription-upload", response_class=HTMLResponse)
 async def read_prescription_upload(request: Request):
     """
-    처방전 및 약물 업로드 페이지를 반환합니다.
+    처방전 및 약물 업로드 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("prescription_upload.html", {"request": request})
 
 
 @app.get("/health-profile", response_class=HTMLResponse)
 async def read_health_profile(request: Request):
     """
-    건강 정보 통합 관리 페이지를 반환합니다.
+    건강 정보 통합 관리 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("health_profile_save.html", {"request": request})
 
 
 @app.get("/blood-pressure", response_class=HTMLResponse)
 async def read_blood_pressure(request: Request):
     """
-    혈압 기록 페이지를 반환합니다.
+    혈압 기록 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("blood_pressure_save.html", {"request": request})
 
 
 @app.get("/blood-sugar", response_class=HTMLResponse)
 async def read_blood_sugar(request: Request):
     """
-    혈당 기록 페이지를 반환합니다.
+    혈당 기록 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    r = require_login(request)
-    if r:
-        return r
     return templates.TemplateResponse("blood_sugar_save.html", {"request": request})
 
 

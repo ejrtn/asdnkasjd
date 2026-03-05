@@ -317,7 +317,7 @@
             로그인이 필요합니다
           </div>
         `;
-        const loginMsg = '<div style="text-align: center; padding: 40px 20px;"><div style="font-size: 48px; margin-bottom: 16px;">🔐</div><h3 style="font-size: 18px; color: #333; margin-bottom: 8px;">로그인이 필요합니다</h3><p style="color: #999; font-size: 14px; margin-bottom: 20px;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p><a href="/login" style="display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; text-decoration: none; border-radius: 8px;">로그인 하기</a></div>';
+        const loginMsg = '<div style="text-align: center; padding: 40px 20px;"><div style="font-size: 48px; margin-bottom: 16px;">🔐</div><h3 style="font-size: 18px; color: #333; margin-bottom: 8px;">로그인이 필요합니다</h3><p style="color: #999; font-size: 14px; margin-bottom: 20px;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p><a href="/" style="display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; text-decoration: none; border-radius: 8px;">로그인 하기</a></div>';
         document.getElementById('alarm-detail').innerHTML = loginMsg;
         document.querySelectorAll('#tab-bp .alarm-slots, #tab-bs .alarm-slots').forEach(el => el.innerHTML = loginMsg);
         document.querySelectorAll('#tab-bp .btn-add-time, #tab-bs .btn-add-time').forEach(el => el.style.display = 'none');

@@ -112,37 +112,7 @@
 
 {% block scripts %}
 <script>
-    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
-    async function fetchWithAuth(url, options = {}) {
-        let accessToken = localStorage.getItem("access_token");
-        const id = localStorage.getItem("user_id");
-        if (!options.headers) options.headers = {};
-        if (accessToken) {
-            options.headers["Authorization"] = `Bearer ${accessToken}`;
-        }
-        let response = await fetch(url, options);
-        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
-        if (response.status === 401) {
-            console.log("액세스 토큰 만료, 갱신 시도 중...");
-            const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
-            if (refreshResponse.ok) {
-                const result = await refreshResponse.json();
-                accessToken = result.access_token;
-                localStorage.setItem("access_token", accessToken);
-                // 새 토큰으로 원래 요청 재시도
-                options.headers["Authorization"] = `Bearer ${accessToken}`;
-                response = await fetch(url, options);
-            } else {
-                // 리프레시 토큰도 만료된 경우
-                alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("user_id");
-                location.href = "/login";
-                return null;
-            }
-        }
-        return response;
-    }
+    // 공통 API 요청 함수는 base.html에서 제공됨
 
     document.querySelector(".blood_pressure_save").addEventListener("click", async () => {
         const systolic = document.querySelector(".systolic").value;
