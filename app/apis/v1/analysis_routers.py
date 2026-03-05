@@ -20,7 +20,7 @@ async def analyze_prescription(
     [ANALYSIS] 처방전 분석(OCR->정제).
     ocr_history + prescriptions + prescription_drugs 생성
     """
-    default_logger.info(f"[Analysis] analyze_prescription - 로그인")
+    default_logger.info("[Analysis] analyze_prescription - 로그인")
     # Simply mapping to service logic (simplified for specs)
     # In reality, service would fetch upload_id file and do OCR
     return {
@@ -51,7 +51,7 @@ async def analyze_pills(
     [ANALYSIS] 알약 복합 분석(CNN+OCR).
     AI 불확실성 대비 candidates 반환
     """
-    default_logger.info(f"[Analysis] analyze_pills - 로그인")
+    default_logger.info("[Analysis] analyze_pills - 로그인")
     return {
         "cnn_history_id": 2,
         "ocr_history_id": 3,
