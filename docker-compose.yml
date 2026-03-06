@@ -22,13 +22,13 @@ services:
     environment:
       # ${환경변수명} 문법은 OS 환경변수 혹은 .env에서 해당 환경변수명과 일치하는 항목이 있으면 대입합니다.
       # 반드시 사전에 .env에 해당 항목이 존재하는지 확인해야 합니다.
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: Password123@!
+      MYSQL_DATABASE: ai_health
+      MYSQL_USER: ozcoding
+      MYSQL_PASSWORD: pw1234
       TZ: 'Asia/Seoul'
     ports:
-      - ${DB_EXPOSE_PORT}:${DB_PORT}
+      - "3306:3306"
     networks:
       - ws
     volumes:

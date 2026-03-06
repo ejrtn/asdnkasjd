@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from tortoise import fields, models
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class RecordTime(str, Enum):
+class RecordTime(StrEnum):
     MORNING = "아침"
     DINNER = "저녁"
     RANDOM = "임의"

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from tortoise import fields, models
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class FamilyHistory(str, Enum):
+class FamilyHistory(StrEnum):
     NO = "없음"
     MAN = "부 있음"
     WOMAN = "모 있음"
@@ -15,39 +15,39 @@ class FamilyHistory(str, Enum):
     UNKNOWN = "모름"
 
 
-class SmokingStatus(str, Enum):
+class SmokingStatus(StrEnum):
     NEVER = "비흡연"
     CURRENT = "흡연"
     FORMER = "과거 흡연"
 
 
-class DrinkingStatus(str, Enum):
+class DrinkingStatus(StrEnum):
     NEVER = "비음주"
     CURRENT = "음주"
     FORMER = "과거 음주"
 
 
-class WeightChange(str, Enum):
+class WeightChange(StrEnum):
     NO_CHANGE = "변화없음"
     GAIN = "증가"
     LOSS = "감소"
     UNKNOWN = "모름"
 
 
-class SleepChange(str, Enum):
+class SleepChange(StrEnum):
     NO_CHANGE = "변화없음"
     GAIN = "증가"
     LOSS = "감소"
     UNKNOWN = "모름"
 
 
-class ExerciseFrequency(str, Enum):
+class ExerciseFrequency(StrEnum):
     NONE = "안함"
     WEEK_1_2 = "주 1~2회"
     WEEK_3_OR_MORE = "주 3회 이상"
 
 
-class DietType(str, Enum):
+class DietType(StrEnum):
     BALANCED = "균형 잡힌"
     LOW_SALT = "저염"
     LOW_CARB = "저탄수화물"

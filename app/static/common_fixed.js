@@ -8,19 +8,6 @@ function redirectToDashboardAfterLogin() {
 
 window.addEventListener('load', redirectToDashboardAfterLogin);
 
-// 사용자 메뉴 드롭다운 토글
-document.getElementById('user-menu-btn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('user-dropdown').classList.toggle('show');
-});
-
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('user-dropdown');
-    if (dropdown.classList.contains('show')) {
-        dropdown.classList.remove('show');
-    }
-});
-
 // =====================
 // FCM 초기화 및 토큰 등록
 // =====================
@@ -178,7 +165,7 @@ function snoozeAlarm(title, body, alarmId, historyId = null) {
     const snoozeKey = historyId || alarmId;
     if (!snoozeKey) return;
 
-    // 이미 예약된 동일 알람 있으릴 제거 후 다시 예약
+    // 이미 예약된 동일 알람 있으면 제거 후 다시 예약
     if (snoozedAlarmTimers.has(snoozeKey)) {
         clearTimeout(snoozedAlarmTimers.get(snoozeKey));
     }

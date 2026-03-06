@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 from tortoise import fields, models
 
@@ -15,9 +16,26 @@ class AlarmHistory(models.Model):
     """
 
     id = fields.IntField(pk=True)
-    sent_at = fields.DatetimeField(auto_now_add=True)  # 알람 발송 시각
+    sent_at = fields.DatetimeField(auto_now_add=True)  # 알람 발송 시각 (UTC)
+    delivered_at = fields.DatetimeField(null=True)  # 기기 도착 시각 (UTC)
+    read_at = fields.DatetimeField(null=True)  # 사용자 확인 시각 (UTC)
     is_confirmed = fields.BooleanField(default=False)  # 확인(복약/측정 완료) 여부
     alarm: fields.ForeignKeyRelation["Alarm"] = fields.ForeignKeyField("models.Alarm", related_name="histories")
+
+    @property
+    def sent_at_kst(self):
+        """발송 시각을 KST로 변환"""
+        return self.sent_at.astimezone(ZoneInfo("Asia/Seoul"))
+
+    @property
+    def delivered_at_kst(self):
+        """도착 시각을 KST로 변환"""
+        return self.delivered_at.astimezone(ZoneInfo("Asia/Seoul")) if self.delivered_at else None
+
+    @property
+    def read_at_kst(self):
+        """확인 시각을 KST로 변환"""
+        return self.read_at.astimezone(ZoneInfo("Asia/Seoul")) if self.read_at else None
 
     class Meta:
         table = "alarm_history"

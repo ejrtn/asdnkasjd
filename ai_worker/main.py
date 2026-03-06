@@ -47,6 +47,7 @@ async def main() -> None:
 
     try:
         logger.info("🔥 AI Worker started")
+        logger.info(f"🗄️ Worker DB_URL = {DB_URL}")
 
         # DB 연결
         await Tortoise.init(

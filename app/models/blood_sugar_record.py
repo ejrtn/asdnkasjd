@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from tortoise import fields, models
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class GlucoseMeasureType(str, Enum):
+class GlucoseMeasureType(StrEnum):
     FASTING = "공복"  # 공복
     AFTER_MEAL = "식후 2시간"  # 식후 2시간
     BEDTIME = "취침 전"  # 취침 전

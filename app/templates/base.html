@@ -428,7 +428,7 @@
             pointer-events: none;
         }
 
-        .user-dropdown.show,
+        .user-menu.open .user-dropdown,
         .user-menu:hover .user-dropdown {
             display: block;
             opacity: 1;
@@ -496,7 +496,14 @@
 
         .sidebar button:hover {
             background: #f8fafc !important;
-            border-color: #cbd5e1 !important;
+            border-color: #d6deea !important;
+            color: #334155 !important;
+        }
+
+        .sidebar button.nav-active:hover {
+            background: #eff6ff !important;
+            border-color: #3b82f6 !important;
+            color: #2563eb !important;
         }
 
         .sidebar a {
@@ -547,6 +554,10 @@
             gap: 10px;
         }
 
+        .mega-grid-alarm {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
         .mega-card {
             background: rgba(79, 70, 229, 0.06);
             border: 1px solid rgba(79, 70, 229, 0.12);
@@ -580,6 +591,10 @@
         body.zoom-large .mega-panel {
             width: 600px;
             padding: 20px;
+        }
+
+        body.zoom-large .mega-grid-alarm {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         body.zoom-large .mega-title {
@@ -1121,6 +1136,89 @@
                 transform: scaleX(0);
             }
         }
+
+        /* ===== App Toast ===== */
+        .app-toast {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 99998;
+            width: min(380px, calc(100vw - 36px));
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(79, 70, 229, 0.14);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(10px);
+            transform: translateY(-10px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .app-toast.show {
+            animation: toastIn 220ms ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .app-toast.hide {
+            animation: toastOut 180ms ease-in forwards;
+            pointer-events: none;
+        }
+
+        .app-toast-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+        }
+
+        .app-toast-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 18px;
+            background: #eef2ff;
+            color: #4f46e5;
+            border: 1px solid #c7d2fe;
+        }
+
+        .app-toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-toast-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .app-toast-message {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        .app-toast-close {
+            appearance: none;
+            border: none;
+            background: transparent;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #64748b;
+            font-size: 18px;
+        }
+
+        .app-toast-close:hover {
+            background: rgba(15, 23, 42, 0.06);
+            color: #0f172a;
+        }
     </style>
 </head>
 
@@ -1173,8 +1271,8 @@
                 </a>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">알람</div>
-                    <div class="mega-desc">복약과 건강기록을 놓치지 않도록, 나에게 맞는 시간을 설정해요.</div>
-                    <div class="mega-grid">
+                    <div class="mega-desc">복약, 혈압, 혈당 알람을 한 곳에서 설정하고 건강 루틴을 꾸준히 관리해보세요.</div>
+                    <div class="mega-grid mega-grid-alarm">
                         <div class="mega-card">
                             <div class="mega-card-title">복약 알람</div>
                             <div class="mega-card-desc">현재 복용 중인 약을 선택하고, 시간별 알람을 켜고 끌 수 있어요.</div>
@@ -1182,6 +1280,10 @@
                         <div class="mega-card">
                             <div class="mega-card-title">혈압 알람</div>
                             <div class="mega-card-desc">아침/저녁 혈압 측정 시간과 체크를 규칙적으로 관리해요.</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">혈당 알람</div>
+                            <div class="mega-card-desc">공복, 식후, 취침 전 혈당 측정 시간을 놓치지 않도록 관리해요.</div>
                         </div>
                     </div>
                     <div class="mega-hint">클릭하면 설정 화면으로 이동해요 →</div>
@@ -1280,6 +1382,18 @@
         <div class="session-toast-progress"><div></div></div>
     </div>
 
+    <div id="app-toast" class="app-toast" aria-live="polite" aria-atomic="true">
+        <div class="app-toast-inner">
+            <div class="app-toast-badge" id="app-toast-badge">✅</div>
+            <div class="app-toast-content">
+                <div class="app-toast-title" id="app-toast-title">안내</div>
+                <div class="app-toast-message" id="app-toast-message">저장되었습니다.</div>
+            </div>
+            <button class="app-toast-close" type="button" id="app-toast-close" aria-label="닫기">×</button>
+        </div>
+    </div>
+
+    <script src="/static/common.js"></script>
     <script src="/static/chatbot.js"></script>
     <script>
         let __sessionExpiredHandled = false;
@@ -1434,24 +1548,33 @@
             });
         });
 
-        document.getElementById('user-menu-btn').addEventListener('click', function (e) {
-            e.stopPropagation();
-            document.getElementById('user-dropdown').classList.toggle('show');
-        });
+        const userMenu = document.querySelector('.user-menu');
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
 
-        document.addEventListener('click', function (e) {
-            const dropdown = document.getElementById('user-dropdown');
-            const userMenu = document.querySelector('.user-menu');
-            if (dropdown && !userMenu.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
-
-        document.querySelectorAll('.user-dropdown a').forEach(link => {
-            link.addEventListener('click', function () {
-                document.getElementById('user-dropdown').classList.remove('show');
+        if (userMenu && userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                userMenu.classList.toggle('open');
             });
-        });
+
+            userDropdown.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!userMenu.contains(e.target)) {
+                    userMenu.classList.remove('open');
+                }
+            });
+
+            document.querySelectorAll('.user-dropdown a').forEach(link => {
+                link.addEventListener('click', function () {
+                    userMenu.classList.remove('open');
+                });
+            });
+        }
 
         document.getElementById('search-btn').addEventListener('click', function () {
             const searchTerm = document.getElementById('search-input').value.trim();
