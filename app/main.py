@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -8,29 +9,45 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.apis.v1 import api_v1_router
+from app.core.http_client import http_client
 from app.db.databases import initialize_tortoise
 from app.utils.default_data import DefaultData
 
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
-app = FastAPI(
-    default_response_class=ORJSONResponse, docs_url="/api/docs", redoc_url="/api/redoc", openapi_url="/api/openapi.json"
-)
-initialize_tortoise(app)
-
 logger = logging.getLogger("seed")
 
 
-# startup 이벤트 함수 추가
-@app.on_event("startup")
-async def seed_default_data():
-    logger.warning("🔥🔥🔥 [startup] seed_default_data called")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- Startup ---
+    # 1. HTTP Client 초기화
+    http_client.init_client()
+
+    # 2. 기본 데이터 생성 (기본 앱 구동 시 필요 데이터)
+    logger.warning("🔥🔥🔥 [lifespan] seed_default_data starting")
     try:
         await DefaultData().create_default_data()
         logger.warning("✅✅✅ Default data population completed successfully.")
     except Exception:
         logger.exception("⚠️⚠️⚠️ Default data population failed")
 
+    yield
+
+    # --- Shutdown ---
+    # 1. HTTP Client 종료
+    await http_client.close_client()
+    logger.warning("👋 [lifespan] http_client closed")
+
+
+app = FastAPI(
+    default_response_class=ORJSONResponse,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan,
+)
+initialize_tortoise(app)
 
 # Tortoise-ORM의 SQL 로그를 활성화
 logging.basicConfig(level=logging.DEBUG)

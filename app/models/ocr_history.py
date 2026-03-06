@@ -16,13 +16,14 @@ class OCRHistory(models.Model):
     id = fields.IntField(pk=True)
     # [중요] 처방전 글자 혹은 알약 표면의 각인(문자/숫자) 원본 결과
     raw_text = fields.TextField()
+    is_valid = fields.BooleanField(default=False)  # 유효한 데이터일 때 True
     inference_metadata: Any = fields.JSONField(null=True)  # 분석 소요 시간, 모델 버전 등
     created_at = fields.DatetimeField(auto_now_add=True)
     front_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
         "models.Upload", related_name="ocr_histories_front"
     )
     back_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
-        "models.Upload", related_name="ocr_histories_back"
+        "models.Upload", related_name="ocr_histories_back", null=True
     )
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="ocr_histories")
 
