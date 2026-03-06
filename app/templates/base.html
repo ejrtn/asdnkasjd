@@ -145,7 +145,7 @@
             padding: 16px 20px !important;
         }
 
-        body.zoom-large .container {
+        body.zoom-large .app-container {
             height: calc(100vh - 80px);
         }
 
@@ -449,10 +449,12 @@
         }
 
         /* ===== LAYOUT ===== */
-        .container {
+        .app-container {
             display: flex;
             height: calc(100vh - 64px);
             transition: height 0.3s ease;
+            width: 100%;
+            max-width: none;
         }
 
         /* ===== SIDEBAR ===== */
@@ -468,13 +470,11 @@
             transition: width 0.3s ease, padding 0.3s ease;
         }
 
-        /* 네비게이션 아이템 */
         .nav-item {
             position: relative;
             margin-bottom: 8px;
         }
 
-        /* SPECIFICITY BOOST: Tailwind Preflight 방지 */
         .sidebar a button,
         .sidebar button {
             margin-bottom: 0;
@@ -505,7 +505,6 @@
             width: 100%;
         }
 
-        /* 메가 패널 */
         .mega-panel {
             display: none;
             position: absolute;
@@ -607,7 +606,6 @@
             margin-top: auto;
         }
 
-        /* Active button style (SPECIFICITY BOOST) */
         .sidebar button.nav-active {
             background: #eff6ff !important;
             border-color: #3b82f6 !important;
@@ -625,7 +623,7 @@
             transition: font-size 0.3s ease;
         }
 
-        /* ===== PAGE LAYOUT (모든 페이지 공통) ===== */
+        /* ===== PAGE LAYOUT ===== */
         .page-wrap {
             max-width: 1180px;
             margin: 0 auto;
@@ -669,6 +667,300 @@
             font-size: 24px;
         }
 
+        /* ===== Cloud9 Care UI System ===== */
+
+        :root {
+            --c9-bg: #f8fafc;
+            --c9-surface: #ffffff;
+            --c9-surface-soft: #f8fbff;
+            --c9-border: #e5e7eb;
+            --c9-border-soft: #eef2f7;
+            --c9-text: #1f2937;
+            --c9-text-strong: #111827;
+            --c9-text-muted: #6b7280;
+            --c9-primary: #4f46e5;
+            --c9-primary-dark: #3730a3;
+            --c9-primary-soft: #eef2ff;
+            --c9-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+            --c9-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+            --c9-radius-card: 16px;
+            --c9-radius-lg: 20px;
+            --c9-radius-xl: 24px;
+        }
+
+        .c9-page-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 24px 28px;
+            background: var(--c9-surface);
+            border: 1px solid var(--c9-border-soft);
+            border-radius: var(--c9-radius-xl);
+            box-shadow: var(--c9-shadow-sm);
+            margin-bottom: 24px;
+        }
+
+        .c9-page-title {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.3;
+            color: var(--c9-text-strong);
+            margin: 0;
+        }
+
+        .c9-section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .c9-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--c9-text-strong);
+            margin: 0;
+        }
+
+        .c9-section-title-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .c9-soft-card {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(229, 231, 235, 0.9);
+            border-radius: var(--c9-radius-xl);
+            box-shadow: var(--c9-shadow-sm);
+            backdrop-filter: blur(8px);
+        }
+
+        .c9-subcard {
+            background: #ffffff;
+            border: 1px solid #edf2f7;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .c9-subcard-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--c9-text-strong);
+        }
+
+        .c9-subcard-bar {
+            width: 6px;
+            height: 28px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .c9-muted {
+            color: var(--c9-text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .c9-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .c9-chip-blue {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+        .c9-chip-amber {
+            background: #fff7ed;
+            color: #d97706;
+            border-color: #fed7aa;
+        }
+
+        .c9-chip-emerald {
+            background: #ecfdf5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+
+        .c9-chip-slate {
+            background: #f8fafc;
+            color: #475569;
+            border-color: #e2e8f0;
+        }
+
+        .c9-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.01em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .c9-badge-primary {
+            background: #eef2ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
+        }
+
+        .c9-badge-success {
+            background: #ecfdf5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+
+        .c9-badge-warn {
+            background: #fffbeb;
+            color: #d97706;
+            border-color: #fde68a;
+        }
+
+        .c9-badge-danger {
+            background: #fff1f2;
+            color: #e11d48;
+            border-color: #fecdd3;
+        }
+
+        .c9-badge-slate {
+            background: #f3f4f6;
+            color: #4b5563;
+            border-color: #e5e7eb;
+        }
+
+        .c9-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--c9-border);
+            background: white;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .c9-btn:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .c9-btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.18);
+        }
+
+        .c9-btn-primary:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .c9-btn-soft {
+            background: white;
+            color: #4338ca;
+            border-color: #c7d2fe;
+        }
+
+        .c9-btn-soft:hover {
+            background: #eef2ff;
+            border-color: #a5b4fc;
+        }
+
+        .c9-tabs {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .c9-tab {
+            padding-bottom: 8px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .c9-tab.is-active {
+            color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .c9-stack-20 {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .c9-stack-16 {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        body.zoom-large .c9-page-title {
+            font-size: 24px;
+        }
+
+        body.zoom-large .c9-section-title {
+            font-size: 20px;
+        }
+
+        body.zoom-large .c9-btn {
+            min-height: 48px;
+            font-size: 16px;
+            padding: 12px 18px;
+        }
+
+        @media (max-width: 1024px) {
+            .c9-page-header {
+                padding: 20px;
+                border-radius: 20px;
+            }
+        }
+
         /* ===== Session Expired Toast ===== */
         .session-toast {
             position: fixed;
@@ -680,7 +972,7 @@
             border: 1px solid rgba(79, 70, 229, 0.18);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
             overflow: hidden;
             transform: translateY(-10px);
             opacity: 0;
@@ -698,10 +990,17 @@
         }
 
         @keyframes toastIn {
-            to { transform: translateY(0); opacity: 1; }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         @keyframes toastOut {
-            to { transform: translateY(-10px); opacity: 0; }
+            to {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
         }
 
         .session-toast-header {
@@ -805,7 +1104,7 @@
             background: rgba(79, 70, 229, 0.12);
         }
 
-        .session-toast-progress > div {
+        .session-toast-progress>div {
             height: 100%;
             width: 100%;
             transform-origin: left;
@@ -814,15 +1113,19 @@
         }
 
         @keyframes toastProgress {
-            from { transform: scaleX(1); }
-            to { transform: scaleX(0); }
+            from {
+                transform: scaleX(1);
+            }
+
+            to {
+                transform: scaleX(0);
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- HEADER -->
     <header class="header">
         <a href="/" class="header-left">☁️ Cloud9 Care</a>
         <div class="header-right">
@@ -841,9 +1144,7 @@
         </div>
     </header>
 
-    <div class="container">
-
-        <!-- SIDEBAR -->
+    <div class="app-container">
         <aside class="sidebar">
             <div class="nav-item">
                 <a href="/guide">
@@ -865,6 +1166,7 @@
                     <div class="mega-hint">클릭하면 자세히 볼 수 있어요 →</div>
                 </div>
             </div>
+
             <div class="nav-item">
                 <a href="/alarm">
                     <button class="alarm-btn {% if request.url.path == '/alarm' %}nav-active{% endif %}">알람</button>
@@ -885,6 +1187,7 @@
                     <div class="mega-hint">클릭하면 설정 화면으로 이동해요 →</div>
                 </div>
             </div>
+
             <div class="nav-item">
                 <a href="/prescription-upload">
                     <button class="upload-btn {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전 및 약물</button>
@@ -905,6 +1208,7 @@
                     <div class="mega-hint">클릭하면 업로드 화면으로 이동해요 →</div>
                 </div>
             </div>
+
             <div class="nav-item">
                 <a href="/health-profile">
                     <button class="health-profile {% if request.url.path == '/health-profile' %}nav-active{% endif %}">건강정보</button>
@@ -933,16 +1237,13 @@
             </div>
         </aside>
 
-        <!-- MAIN -->
         <main class="main">
             {% block content %}{% endblock %}
         </main>
     </div>
 
-    <!-- 챗봇 플로팅 버튼 -->
     <button id="chatbot-button" class="chatbot-button">🤖</button>
 
-    <!-- 챗봇 창 -->
     <div id="chatbot-container" class="chatbot-container">
         <div class="chatbot-header">
             <h3>💬 Cloud9 Care 챗봇</h3>
@@ -961,7 +1262,6 @@
         </div>
     </div>
 
-    <!-- 세션 만료 토스트 -->
     <div id="session-toast" class="session-toast" aria-live="polite" aria-atomic="true">
         <div class="session-toast-header">
             <div class="session-toast-title">
@@ -982,20 +1282,17 @@
 
     <script src="/static/chatbot.js"></script>
     <script>
-        // 세션 만료 처리: 토스트 1회만 표시 + 랜딩/로그인 이동 (중복 방지)
         let __sessionExpiredHandled = false;
         let __sessionToastTimer = null;
-        let __sessionExpiredMode = false; // 세션 만료 처리 중 플래그
+        let __sessionExpiredMode = false;
 
         function showSessionToast() {
             const toast = document.getElementById('session-toast');
             if (!toast) return;
 
-            // progress 애니메이션 재시작(같은 DOM 재사용 시)
             const prog = toast.querySelector('.session-toast-progress > div');
             if (prog) {
                 prog.style.animation = 'none';
-                // reflow
                 void prog.offsetHeight;
                 prog.style.animation = '';
             }
@@ -1016,51 +1313,43 @@
             __sessionExpiredHandled = true;
             __sessionExpiredMode = true;
 
-            // 공개 페이지에서는 토스트 띄우지 않기
             const PUBLIC_PATHS = ['/', '/login', '/signup', '/find-account'];
-            
+
             localStorage.removeItem('access_token');
             localStorage.removeItem('user_id');
-            
+
             if (PUBLIC_PATHS.includes(window.location.pathname)) {
                 window.location.replace('/');
                 return;
             }
 
-            // 토스트 표시
             showSessionToast();
 
-            // 2.5초 후 랜딩으로 이동
             __sessionToastTimer = setTimeout(() => {
                 window.location.replace("/");
             }, 2500);
         }
 
-        // 세션 보호 함수 (페이지 접근 시 토큰 유효성 검증)
         const PUBLIC_PATHS = ['/', '/login', '/signup', '/find-account'];
         let __authGuardRunning = false;
 
         async function authGuard() {
-            if (__sessionExpiredMode) return;  // 만료 처리 중이면 아무 것도 하지 않기
+            if (__sessionExpiredMode) return;
             if (__authGuardRunning) return;
             __authGuardRunning = true;
-            
+
             try {
                 const path = window.location.pathname;
-
-                // 공개 페이지면 패스
                 if (PUBLIC_PATHS.includes(path)) return;
 
-                // 로컬 토큰 없으면 즉시 랜딩
                 const token = localStorage.getItem('access_token');
                 if (!token) {
                     handleSessionExpired();
                     return;
                 }
 
-                // 서버에 진짜 유효한지 확인
                 const res = await fetchWithAuth('/api/v1/users/me', { method: 'GET' });
-                if (!res) return;           // fetchWithAuth가 이미 처리함
+                if (!res) return;
                 if (!res.ok) {
                     handleSessionExpired();
                     return;
@@ -1070,7 +1359,6 @@
             }
         }
 
-        // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
         async function fetchWithAuth(url, options = {}) {
             let accessToken = localStorage.getItem("access_token");
             if (!options.headers) options.headers = {};
@@ -1078,21 +1366,20 @@
                 options.headers["Authorization"] = `Bearer ${accessToken}`;
             }
             let response = await fetch(url, options);
-            
+
             if (response.status === 401) {
                 const refreshResponse = await fetch('/api/v1/users/token/refresh', {
                     method: 'GET',
                     credentials: 'include'
                 });
-                
+
                 if (refreshResponse.ok) {
                     const result = await refreshResponse.json();
                     accessToken = result.access_token;
                     localStorage.setItem("access_token", accessToken);
                     options.headers["Authorization"] = `Bearer ${accessToken}`;
                     response = await fetch(url, options);
-                    
-                    // 재시도 후에도 401이면 만료 처리
+
                     if (response.status === 401) {
                         handleSessionExpired();
                         return null;
@@ -1105,14 +1392,12 @@
             return response;
         }
 
-        // authGuard 실행 (페이지 로드, 포커스, 주기적 체크)
         window.addEventListener('DOMContentLoaded', authGuard);
         window.addEventListener('pageshow', authGuard);
         window.addEventListener('focus', authGuard);
-        setInterval(authGuard, 60 * 1000); // 1분마다 체크
+        setInterval(authGuard, 60 * 1000);
 
-        // UI 이벤트 핸들러
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             const isZoomed = localStorage.getItem('zoomState') === 'true';
             if (isZoomed) {
                 document.body.classList.add('zoom-large');
@@ -1120,7 +1405,6 @@
                 document.getElementById('zoom-btn').title = '글자 크기 축소';
             }
 
-            // 토스트 버튼 이벤트 (기본 1번만 바인딩)
             const closeBtn = document.getElementById('session-toast-close');
             const dismissBtn = document.getElementById('session-toast-dismiss');
             const loginBtn = document.getElementById('session-toast-login');
@@ -1145,7 +1429,7 @@
             if (loginBtn) loginBtn.addEventListener('click', () => {
                 if (__sessionToastTimer) clearTimeout(__sessionToastTimer);
                 __sessionToastTimer = null;
-                __sessionExpiredMode = true; // 가드가 방해 못하게
+                __sessionExpiredMode = true;
                 window.location.replace('/login');
             });
         });
@@ -1164,25 +1448,25 @@
         });
 
         document.querySelectorAll('.user-dropdown a').forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function () {
                 document.getElementById('user-dropdown').classList.remove('show');
             });
         });
 
-        document.getElementById('search-btn').addEventListener('click', function() {
+        document.getElementById('search-btn').addEventListener('click', function () {
             const searchTerm = document.getElementById('search-input').value.trim();
             if (searchTerm) {
                 alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
             }
         });
 
-        document.getElementById('search-input').addEventListener('keypress', function(e) {
+        document.getElementById('search-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 document.getElementById('search-btn').click();
             }
         });
 
-        document.getElementById('zoom-btn').addEventListener('click', function() {
+        document.getElementById('zoom-btn').addEventListener('click', function () {
             const isZoomed = document.body.classList.toggle('zoom-large');
             localStorage.setItem('zoomState', isZoomed);
             this.textContent = isZoomed ? '🔎' : '🔍';
@@ -1193,14 +1477,10 @@
             try {
                 await fetch('/api/v1/users/logout', { method: 'POST', credentials: 'include' });
             } catch (e) {
-                // 실패해도 클라이언트 정리는 진행
             }
-            
-            // 클라이언트 스토리지 정리
+
             localStorage.removeItem('access_token');
             localStorage.removeItem('user_id');
-            
-            // 무조건 랜딩으로
             window.location.replace('/');
         }
     </script>
