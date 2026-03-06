@@ -171,7 +171,7 @@
 
         const result = await response.json();
         alert("혈당 기록이 저장되었습니다.");
-        location.href = "/health-profile"
+        loadBloodSugarChart();
     })
 
     // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
