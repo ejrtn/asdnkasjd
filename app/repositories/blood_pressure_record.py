@@ -15,7 +15,9 @@ class BloodPressureRecordRepository:
         """
         사용자 아이디를 이용해 혈압 기록 목록을 조회합니다.
         """
-        return cast(list[BloodPressureRecord], await self._model.filter(user_id=user_id).order_by("-created_at").all())
+        return cast(
+            list[BloodPressureRecord], await self._model.filter(user_id=user_id).order_by("-created_at").limit(30)
+        )
 
     async def create_blood_pressure(self, data: dict):
         return await self._model.create(**data)

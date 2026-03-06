@@ -139,6 +139,10 @@ class BloodPressureRequest(BaseModel):
     measure_type: str
 
 
+class Day30Data(BaseModel):
+    days: int
+
+
 class FullHealthProfileSaveRequest(BaseModel):
     # 기본 건강 정보
     family_history: str

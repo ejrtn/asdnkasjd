@@ -71,6 +71,10 @@
         font-weight: 600;
     }
 
+    .health-profile-page-container .category-title span{
+        color: red;
+    }
+
     .health-profile-page-container .subcategory {
         padding: 10px;
     }
@@ -252,6 +256,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 20px;
         margin-bottom: 30px;
+        margin-top: 60px;
     }
 
     .health-profile-page-container .nav-card {
@@ -295,7 +300,6 @@
     .health-profile-page-container .save-button-container {
         display: flex;
         justify-content: center;
-        margin-top: 20px;
     }
 
     .health-profile-page-container .save-btn {
@@ -463,7 +467,7 @@
         </div>
 
         <div class="form-group">
-            <label>주 평균 음주량</label>
+            <label>월 평균 음주량(일)</label>
             <input type="number" name="drinking_per_week" />
         </div>
 
@@ -573,13 +577,23 @@
         </div>
 
         <div>
-            <label class="category-title">입력 질환 목록</label>
+            <label class="category-title">입력 질환 목록<span>(진단시기 선택 필수)</span></label>
             <div id="selected-diseases" class="selected-tag-container"></div>
         </div>
         <input type="hidden" name="chronic_diseases_json" id="chronic-hidden">
     </div>
 
 
+    <div class="med-guide-box">
+        <div class="med-guide-text">
+            💊 <strong>약 이름이 기억나지 않나요?</strong><br>
+            처방전 또는 약 봉투에서 확인할 수 있습니다.
+        </div>
+
+        <a href="/prescription-upload" class="med-guide-btn">
+            약 이름 확인하기 →
+        </a>
+    </div>
     <div class="section-card">
         <h3>현재 복용 약물</h3>
 
@@ -599,32 +613,24 @@
         </table>
         <button type="button" onclick="addMed()">+ 약 추가</button>
     </div>
-    <div class="med-guide-box">
-        <div class="med-guide-text">
-            💊 <strong>약 이름이 기억나지 않나요?</strong><br>
-            처방전 또는 약 봉투에서 확인할 수 있습니다.
-        </div>
-
-        <a href="/prescription-upload" class="med-guide-btn">
-            약 이름 확인하기 →
-        </a>
+    
+    <div class="save-button-container">
+        <button type="submit" class="save-btn">건강정보 저장하기</button>
     </div>
+
     <div class="nav-card-container">
         <a href="/blood-pressure" class="nav-card">
             <span class="icon">🩸</span>
-            <h4>혈압 관리</h4>
+            <h4>혈압 관리 페이지 이동</h4>
             <p>혈압 수치 및 맥박 기록</p>
         </a>
         <a href="/blood-sugar" class="nav-card">
             <span class="icon">🍬</span>
-            <h4>혈당 관리</h4>
+            <h4>혈당 관리 페이지 이동</h4>
             <p>공복/식후 혈당 수치 기록</p>
         </a>
     </div>
 
-    <div class="save-button-container">
-        <button type="submit" class="save-btn">전체 건강정보 저장하기</button>
-    </div>
 </div>
 </div>
 {% endblock %}
@@ -677,7 +683,7 @@
         list.forEach(item => {
             const tbody = document.getElementById("allergy-tbody");
             const tr = document.createElement("tr");
-
+            
             tr.innerHTML = `
                 <td>
                     <select class="allergie_type" name="allergies[${allergyIndex}][category]">
@@ -705,7 +711,6 @@
     function renderMedications(list) {
 
         list.forEach(med => {
-            console.log(med)
             const container = document.querySelector("#med-container tbody");
             let t = ''
             t += '<tr>'
@@ -742,7 +747,7 @@
     function renderHealthProfile(data) {
 
         const profile = data.health_profile;
-        console.log(profile)
+
         if (profile) {
             document.querySelector("[name='family_history']").value = profile.family_history ?? "";
             document.querySelector("[name='family_history_note']").value = profile.family_history_note ?? "";
@@ -949,6 +954,28 @@
         }
         return response;
     }
+
+    document.querySelector("[name='family_history']").addEventListener("click",(e)=>{
+        if(document.querySelector("[name='family_history']").value == '없음' ||
+            document.querySelector("[name='family_history']").value == '모름'){
+
+            document.querySelector("[name='family_history_note']").value = ''
+        }
+    })
+
+    document.querySelector("[name='smoking_status']").addEventListener("click",(e)=>{
+        if(document.querySelector("[name='smoking_status']").value == '비흡연'){
+            document.querySelector("[name='smoking_years']").value = ''
+            document.querySelector("[name='smoking_per_week']").value = ''
+        }
+    })
+
+    document.querySelector("[name='drinking_status']").addEventListener("click",(e)=>{
+        if(document.querySelector("[name='drinking_status']").value == '비음주'){
+            document.querySelector("[name='drinking_years']").value = ''
+            document.querySelector("[name='drinking_per_week']").value = ''
+        }
+    })
 
     document.querySelector(".save-btn").addEventListener("click", async function () {
 

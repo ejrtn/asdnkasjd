@@ -22,7 +22,7 @@ class BloodSugarRecordRepository:
         Returns:
             list[BloodSugarRecord]: 혈당 기록 리스트
         """
-        return cast(list[BloodSugarRecord], await self._model.filter(user_id=user_id).order_by("-created_at").all())
+        return cast(list[BloodSugarRecord], await self._model.filter(user_id=user_id).order_by("-created_at").limit(30))
 
     async def create_blood_sugar(self, data: dict):
         return await self._model.create(**data)

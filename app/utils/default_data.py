@@ -1,3 +1,4 @@
+import random
 from datetime import date, datetime, time, timedelta
 from typing import cast
 
@@ -146,9 +147,9 @@ class DefaultData:
         ]
 
         allergy_pool = [
-            {"allergy_type": "any", "allergy_name": "꽃가루", "symptom": "두드러기, 가려움증"},
-            {"allergy_type": "any", "allergy_name": "먼지", "symptom": "재채기, 콧물"},
-            {"allergy_type": "any", "allergy_name": "고양이 털", "symptom": "호흡곤란, 부종"},
+            {"allergy_type": "기타", "allergy_name": "꽃가루", "symptom": "두드러기, 가려움증"},
+            {"allergy_type": "기타", "allergy_name": "먼지", "symptom": "재채기, 콧물"},
+            {"allergy_type": "기타", "allergy_name": "고양이 털", "symptom": "호흡곤란, 부종"},
         ]
 
         for uinfo in users_info:
@@ -254,27 +255,55 @@ class DefaultData:
             await hp.update_from_dict(health_profile_defaults).save()
 
         # 혈압 기록 (히스토리 생성)
-        bp_records = [
-            {
-                "systolic": 120 + (hp_hash % 10),
-                "diastolic": 75 + (hp_hash % 10),
-                "pulse": 70 + (hp_hash % 10),
-                "measure_type": RecordTime.MORNING,
-            }
-            for i in range(5)
-        ]
+        base_time = datetime.now()
+        bp_records = []
+
+        for i in range(30):
+            # i가 커질수록 12시간씩 과거로 감
+            past_time = base_time - timedelta(hours=i * 12)
+
+            bp_records.append(
+                {
+                    "systolic": 120 + random.randint(-5, 15),
+                    "diastolic": 75 + random.randint(-5, 10),
+                    "pulse": 70 + random.randint(-5, 15),
+                    "measure_type": RecordTime.MORNING if i % 2 == 0 else RecordTime.RANDOM,
+                    "created_at": past_time.isoformat(),  # 이 값을 프론트로 보냄
+                }
+            )
+        print(bp_records)
         if await BloodPressureRecord.filter(user=user).count() == 0:
             for bp in bp_records:
                 await BloodPressureRecord.create(user=user, **bp)
 
         # 혈당 기록 (히스토리 생성)
-        bs_records = [
-            {
-                "glucose_mg_dl": 90.0 + (hp_hash % 20),
-                "measure_type": GlucoseMeasureType.FASTING,
-            }
-            for i in range(5)
-        ]
+        # 현재 시간 기준
+        base_time = datetime.now()
+        bs_records = []
+
+        for i in range(15):
+            # 날짜를 하루씩 뒤로 감
+            current_date = base_time - timedelta(days=i)
+
+            # 1. 아침 공복 (오전 7~8시경)
+            fasting_time = current_date.replace(hour=7, minute=random.randint(0, 59))
+            bs_records.append(
+                {
+                    "glucose_mg_dl": float(95 + random.randint(-15, 15)),  # 80~110 범위
+                    "measure_type": GlucoseMeasureType.FASTING,
+                    "created_at": fasting_time.isoformat(),
+                }
+            )
+
+            # 2. 식후 2시간 (오후 1~2시경)
+            after_meal_time = current_date.replace(hour=13, minute=random.randint(0, 59))
+            bs_records.append(
+                {
+                    "glucose_mg_dl": float(140 + random.randint(-20, 30)),  # 120~170 범위
+                    "measure_type": GlucoseMeasureType.AFTER_MEAL,
+                    "created_at": after_meal_time.isoformat(),
+                }
+            )
         if await BloodSugarRecord.filter(user=user).count() == 0:
             for bs in bs_records:
                 await BloodSugarRecord.create(user=user, **bs)
