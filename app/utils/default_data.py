@@ -332,6 +332,17 @@ class DefaultData:
             defaults={"dosage_amount": 1.0, "daily_frequency": 1, "duration_days": 30, "is_linked_to_meds": True},
         )
 
+        # 처방전 OCR History
+        await OCRHistory.get_or_create(
+            user=user,
+            front_upload=presc_upload,
+            defaults={
+                "raw_text": f"처방전\n환자 성명: {uinfo['name']}\n의료기관: 서울대학교병원\n처방 의약품: 아모디핀정 5mg\n투약량: 1정\n투여횟수: 1일 1회\n투약일수: 30일",
+                "is_valid": True,
+                "inference_metadata": {"time_spent": 1500, "model": "clova_ocr"},
+            },
+        )
+
         # AI 가이드
         guide, _ = await LLMLifeGuide.get_or_create(
             user=user,
@@ -368,11 +379,31 @@ class DefaultData:
                 "raw_result": {"모양": "장방형", "색상": "흰색"},
             },
         )
+        # 과거 OCR History 데이터 (더미)
+        ocr_texts = ["AMLO 5", "METFO 500", "LIPITOR 10"]
+        for i, text in enumerate(ocr_texts):
+            past_front, _ = await Upload.get_or_create(
+                user=user, file_path=f"/static/past_front_{i}.png", file_type="png", category="pill_front"
+            )
+            past_back, _ = await Upload.get_or_create(
+                user=user, file_path=f"/static/past_back_{i}.png", file_type="png", category="pill_back"
+            )
+            await OCRHistory.get_or_create(
+                user=user,
+                front_upload=past_front,
+                back_upload=past_back,
+                defaults={
+                    "raw_text": text,
+                    "is_valid": True,
+                    "inference_metadata": {"time_spent": random.randint(200, 800), "model": "tesseract"},
+                },
+            )
+
         ocr_history, _ = await OCRHistory.get_or_create(
             user=user,
             front_upload=upload_front,
             back_upload=upload_back,
-            defaults={"raw_text": "TYLENOL 500"},
+            defaults={"raw_text": "TYLENOL 500", "is_valid": True},
         )
         await PillRecognition.get_or_create(
             user=user,
