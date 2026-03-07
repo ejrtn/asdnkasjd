@@ -97,6 +97,7 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -115,5 +116,15 @@ module = [
     "dotenv.*",
     "pypdf",
     "pypdf.*",
+    "pydantic",
+    "pydantic.*",
+    "pydantic_settings",
+    "pydantic_settings.*",
+    "starlette",
+    "starlette.*",
+    "pytest",
+    "pytest.*",
+    "_pytest",
+    "_pytest.*",
 ]
 ignore_missing_imports = true
