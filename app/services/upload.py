@@ -4,7 +4,6 @@ from datetime import datetime
 
 from fastapi import UploadFile
 
-from app.core.config import Config
 from app.models.user import User
 from app.repositories.upload import UploadRepository
 
@@ -14,7 +13,11 @@ class UploadService:
         self._repo = UploadRepository()
 
     async def file_save(self, user: User, files: list[UploadFile]):
-        upload_dir = Config.UPLOAD_DIR
+        upload_dir = "/app/uploads"
+
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
         os.makedirs(upload_dir, exist_ok=True)
 
         uploaded_results = []

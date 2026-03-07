@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, UploadFile, status
@@ -6,11 +5,6 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 from app.dependencies.security import get_request_user
 from app.models.user import User
 from app.services.upload import UploadService
-
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
-
-if not os.path.exists(UPLOAD_DIR):
-    os.makedirs(UPLOAD_DIR)
 
 upload_router = APIRouter(prefix="/uploads", tags=["upload"])
 
