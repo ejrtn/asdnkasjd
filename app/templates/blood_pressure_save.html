@@ -136,7 +136,7 @@
 {% block scripts %}
 <script>
     // 공통 API 요청 함수는 base.html에서 제공됨
-
+    let bpChart = null;
     document.querySelector(".blood_pressure_save").addEventListener("click", async () => {
         const systolic = document.querySelector(".systolic").value;
         const diastolic = document.querySelector(".diastolic").value;
@@ -248,7 +248,12 @@
 
         const ctx = document.getElementById('bpChart');
 
-        new Chart(ctx, {
+        // 기존 차트 삭제
+        if (bpChart) {
+            bpChart.destroy();
+        }
+        
+        bpChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels, // 위에서 가공한 ["03.01", "", "", "", "03.06"] 형태의 배열

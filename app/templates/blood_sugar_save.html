@@ -127,7 +127,7 @@
 {% block scripts %}
 <script>
     // 공통 API 요청 함수는 base.html에서 제공됨
-
+    let bpChart = null
     document.querySelector(".blood_sugar_save").addEventListener("click", async () => {
         const glucose_mg_dl = document.querySelector(".glucose_mg_dl").value;
         const measure_type = document.querySelector("select[name='measure_type']").value;
@@ -145,7 +145,6 @@
             glucose_mg_dl: glucose_mg_dl,
             measure_type: measure_type
         }
-        console.log(data)
 
         const response = await fetchWithAuth('/api/v1/health/blood-sugar', {
             method: 'POST',
@@ -237,8 +236,13 @@
 
         const ctx = document.getElementById('bpChart'); // ID가 bpChart라면 그대로 유지
 
+        // 기존 차트 삭제
+        if (bpChart) {
+            bpChart.destroy();
+        }
+
         // 4. 차트 생성
-        new Chart(ctx, {
+        bpChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
