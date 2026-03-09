@@ -70,6 +70,8 @@ class SocialLoginRequest(BaseModel):
     phone_number: str
     social_id: str
     provider: str
+    birthday: str
+    gender: str
 
 
 # 구글 인가 URL 응답

@@ -12,7 +12,6 @@ from app.dtos.users import (
     LoginRequest,
     LoginResponse,
     NaverAuthUrlResponse,
-    SocialLoginRequest,
     SocialLoginResponse,
 )
 from app.services.users import UserManageService
@@ -57,31 +56,14 @@ async def google_authorize() -> Response:
 
 @auth_router.get("/google/callback", response_model=SocialLoginResponse)
 async def google_callback(
-    code: str, user_service: Annotated[UserManageService, Depends(UserManageService)]
+    code: str,
+    user_service: Annotated[UserManageService, Depends(UserManageService)],
 ) -> Response:
     """
     [USER] 구글 로그인 콜백. service access_token 발급.
     """
-    # Using existing service logic for demo data mapping
 
-    social_data = SocialLoginRequest(
-        id="google_user@gmail.com",
-        name="구글사용자",
-        nickname="google_user_456",
-        phone_number="01098765432",
-        social_id="google_unique_id_abc",
-        provider="google",
-    )
-    tokens = await user_service.social_login(social_data)
-
-    return Response(
-        content={
-            "user_id": tokens["id"],
-            "is_new_user": tokens.get("is_new_user", False),
-            "access_token": tokens["access_token"],
-        },
-        status_code=status.HTTP_200_OK,
-    )
+    return await user_service.google_login(code)
 
 
 @auth_router.get("/naver/authorize", response_model=NaverAuthUrlResponse)
@@ -110,22 +92,4 @@ async def naver_callback(
     [USER] 네이버 로그인 콜백. service access_token 발급.
     """
 
-    # Mocking Naver user data for implementation demonstration
-    social_data = SocialLoginRequest(
-        id="naver_user@naver.com",
-        name="네이버사용자",
-        nickname="naver_user_789",
-        phone_number="01012345678",
-        social_id="naver_unique_id_xyz",
-        provider="naver",
-    )
-    tokens = await user_service.social_login(social_data)
-
-    return Response(
-        content={
-            "user_id": tokens["id"],
-            "is_new_user": tokens.get("is_new_user", False),
-            "access_token": tokens["access_token"],
-        },
-        status_code=status.HTTP_200_OK,
-    )
+    return await user_service.naver_login(code, state)

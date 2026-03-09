@@ -237,24 +237,23 @@
             </div>
             <div class="form-group">
                 <label>이름</label>
-                <input type="text" name="name" id="name" maxlength="20" value="asdasd" required>
+                <input type="text" name="name" id="name" maxlength="20" required>
             </div>
             <div class="form-group">
                 <label>닉네임</label>
-                <input type="text" name="nickname" id="nickname" maxlength="20" value="asdasd" required>
+                <input type="text" name="nickname" id="nickname" maxlength="20" required>
             </div>
             <div class="form-group">
                 <label>비밀번호</label>
-                <input type="password" name="password" id="password" value="!Qq123456789" required>
+                <input type="password" name="password" id="password" required>
             </div>
             <div class="form-group">
                 <label>비밀번호 확인</label>
-                <input type="password" name="password_check" id="password_check" value="!Qq123456789" required>
+                <input type="password" name="password_check" id="password_check" required>
             </div>
             <div class="form-group">
                 <label>전화번호</label>
-                <input type="text" name="phone_number" id="phone_number" maxlength="11" value="01012341234"
-                    placeholder="01012345678" required>
+                <input type="text" name="phone_number" id="phone_number" maxlength="11" placeholder="01012345678" required>
             </div>
             <div class="form-group birthday-gender-age">
                 <span>생년월일</span>
@@ -302,6 +301,77 @@
     </div>
 
     <script>
+
+        // 쿠키에서 특정 이름의 값을 가져오는 헬퍼 함수
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // 쿠키 삭제 함수 
+        function deleteCookie(name) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+        }
+
+        // DOM 로드 시 소셜 로그인 연동 회원가입 처리
+        window.addEventListener('DOMContentLoaded', () => {
+            const socialEmail = getCookie('social_id').replaceAll('"','');
+            const socialName = getCookie('social_name');
+            const socialNickname = getCookie('social_nickname');
+            const socialPhoneNumber = getCookie('social_phone_number');
+            const socialBirthday = getCookie('social_birthday');
+            const socialGender = getCookie('social_gender');
+            const socialProvider = getCookie('social_provider')
+            console.log(socialEmail,socialName,socialNickname,socialPhoneNumber,socialBirthday,socialGender)
+            if (socialEmail) {
+                const idInput = document.getElementById('id');
+                const nameInput = document.getElementById('name');
+                const nicknameInput = document.getElementById('nickname');
+                const phoneNumberInput = document.getElementById('phone_number');
+                const birthdayInput = document.getElementById('birthday');
+                const genderInput = document.getElementById('gender');
+
+                // URL 디코딩 필요 시 decodeURIComponent 사용
+                idInput.value = decodeURIComponent(socialEmail);
+                idInput.readOnly = true; // 소셜 이메일 변경 불가
+                nameInput.value = decodeURIComponent(socialName);
+                nameInput.readOnly = true; // 소셜 이메일 변경 불가
+                nicknameInput.value = decodeURIComponent(socialNickname);
+                
+                if(socialProvider != 'google'){
+                    phoneNumberInput.value = decodeURIComponent(socialPhoneNumber);
+                    phoneNumberInput.readOnly = true;
+                    birthdayInput.value = decodeURIComponent(socialBirthday);
+                    birthdayInput.readOnly = true;
+                    genderInput.value = decodeURIComponent(socialGender);
+                    genderInput.readOnly = true;
+                }
+
+                // 소셜 로그인은 이메일 인증 패스 처리
+                const verifyBtn = idInput.nextElementSibling;
+                if (verifyBtn) verifyBtn.style.display = 'none';
+
+                const codeGroup = document.getElementById('code').closest('.form-group');
+                if (codeGroup) codeGroup.style.display = 'none';
+
+                // 임의로 인증 완료 상태 부여
+                const dummyStatus = document.createElement('span');
+                dummyStatus.textContent = '인증 완료';
+                dummyStatus.style.display = 'none';
+                document.getElementById('code').parentNode.after(dummyStatus);
+
+                // 일회성 데이터이므로 읽은 후 쿠키 삭제
+                deleteCookie('social_id');
+                deleteCookie('social_name');
+                deleteCookie('social_nickname');
+                deleteCookie('social_phone_number');
+                deleteCookie('social_birthday');
+                deleteCookie('social_gender');
+                deleteCookie('social_provider');
+            }
+        });
 
         // 1. 인증번호 발송 함수
         async function sendCode() {
@@ -505,15 +575,15 @@
 <!-- 챗봇 UI -->
 <button id="chatbot-button" class="chatbot-button">🤖</button>
 <div id="chatbot-container" class="chatbot-container">
-  <div class="chatbot-header">
-    <h3>💬 Cloud9 Care 챗봇</h3>
-    <button id="chatbot-close" class="chatbot-close">×</button>
-  </div>
-  <div id="chatbot-messages" class="chatbot-messages"></div>
-  <div class="chatbot-input">
-    <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
-    <button id="chatbot-send" class="chatbot-send">➤</button>
-  </div>
+    <div class="chatbot-header">
+        <h3>💬 Cloud9 Care 챗봇</h3>
+        <button id="chatbot-close" class="chatbot-close">×</button>
+    </div>
+    <div id="chatbot-messages" class="chatbot-messages"></div>
+    <div class="chatbot-input">
+        <input id="chatbot-input" type="text" placeholder="메시지를 입력하세요..." autocomplete="off">
+        <button id="chatbot-send" class="chatbot-send">➤</button>
+    </div>
 </div>
 <script src="/static/chatbot.js"></script>
 
