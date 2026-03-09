@@ -1,3 +1,32 @@
+// 쿠키에서 특정 이름의 값을 가져오는 헬퍼 함수
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// 쿠키에서 토큰을 읽어 localStorage에 저장하는 함수 (소셜 로그인용)
+function syncTokensFromCookies() {
+    const accessToken = getCookie('access_token');
+    const userId = getCookie('user_id');
+
+    if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('auth_token', accessToken); // auth_token도 함께 세팅 (보안 가드용)
+        // localStorage로 옮긴 후 쿠키에서는 삭제
+        document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+    }
+
+    if (userId) {
+        localStorage.setItem('user_id', userId);
+        document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+    }
+}
+
+// 스크립트 로드 시 즉시 동기화 실행
+syncTokensFromCookies();
+
 // 로그인 후 대시보드로 리다이렉트
 function redirectToDashboardAfterLogin() {
     const token = localStorage.getItem('access_token');
@@ -6,15 +35,18 @@ function redirectToDashboardAfterLogin() {
     }
 }
 
-window.addEventListener('load', redirectToDashboardAfterLogin);
+window.addEventListener('load', () => {
+    syncTokensFromCookies(); // 혹시 로딩 과정에서 쿠키가 들어왔을 때를 대비해 한 번 더 체크
+    redirectToDashboardAfterLogin();
+});
 
 // 사용자 메뉴 드롭다운 토글
-document.getElementById('user-menu-btn').addEventListener('click', function(e) {
+document.getElementById('user-menu-btn').addEventListener('click', function (e) {
     e.stopPropagation();
     document.getElementById('user-dropdown').classList.toggle('show');
 });
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const dropdown = document.getElementById('user-dropdown');
     if (dropdown.classList.contains('show')) {
         dropdown.classList.remove('show');
@@ -35,7 +67,7 @@ async function initFCM() {
 
     try {
         console.log('🚀 FCM: 초기화 시작');
-        
+
         // Service Worker 등록
         const swReg = await navigator.serviceWorker.register('/static/firebase-messaging-sw.js');
         console.log('✅ FCM: Service Worker 등록 완료');
@@ -79,8 +111,8 @@ async function initFCM() {
         onMessage(messaging, (payload) => {
             console.log('📱 FCM: 메시지 수신!', payload);
             showAlarmPopup(
-                payload.notification.title, 
-                payload.notification.body, 
+                payload.notification.title,
+                payload.notification.body,
                 payload.data?.alarm_id || null,
                 payload.data?.history_id || null
             );

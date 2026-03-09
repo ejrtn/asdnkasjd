@@ -1,13 +1,22 @@
 from datetime import timedelta
+from urllib.parse import quote  # 파일 상단에 추가
 
+import httpx
 from fastapi.exceptions import HTTPException
+from fastapi.responses import HTMLResponse
 from passlib.context import CryptContext
 from pydantic import EmailStr
 from starlette import status
 from tortoise.transactions import in_transaction
 
 from app.core import config
-from app.dtos.users import ChangePasswordRequest, LoginRequest, SignUpRequest, UserUpdateRequest
+from app.dtos.users import (
+    ChangePasswordRequest,
+    LoginRequest,
+    SignUpRequest,
+    SocialLoginRequest,
+    UserUpdateRequest,
+)
 from app.models.allergy import Allergy
 from app.models.chronic_disease import ChronicDisease
 from app.models.user import User
@@ -208,17 +217,227 @@ class UserManageService:
 
         await user.save()
 
-    async def social_login(self, data) -> dict:
+    async def social_login(self, user: User, remember_me: bool = False) -> dict:
         """
-        소셜 로그인 처리 (간소화)
+        소셜 로그인 처리 (가입된 유저 객체를 직접 받음)
         """
+        # Generate tokens
         access_token_expires = timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(data={"user_id": data.id}, expires_delta=access_token_expires)
 
-        await redis_client.setex(f"session:{data.id}", int(access_token_expires.total_seconds()), access_token)
+        if remember_me:
+            refresh_token_expires = timedelta(minutes=config.REFRESH_TOKEN_EXPIRE_MINUTES)
+        else:
+            refresh_token_expires = timedelta(minutes=config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT)
 
-        return {
-            "access_token": access_token,
-            "id": data.id,
-            "is_new_user": False,  # Logic to check if user existed can be added
-        }
+        access_token = create_access_token(data={"user_id": user.id}, expires_delta=access_token_expires)
+        refresh_token = create_refresh_token(data={"user_id": user.id}, expires_delta=refresh_token_expires)
+
+        # Redis에 세션 저장 시 문자열 값 그대로 저장해야 get_request_user와 매칭됨
+        await redis_client.setex(f"session:{user.id}", int(access_token_expires.total_seconds()), access_token)
+
+        return {"access_token": access_token, "refresh_token": refresh_token, "id": user.id, "token_type": "bearer"}
+
+    async def google_login(self, code) -> HTMLResponse:
+        """
+        구글 로그인 처리
+        """
+        async with httpx.AsyncClient() as client:
+            # --- 1단계: 인가 코드를 access_token으로 교환 ---
+            token_url = "https://oauth2.googleapis.com/token"
+            token_data = {
+                "code": code,
+                "client_id": config.GOOGLE_CLIENT_ID,
+                "client_secret": config.GOOGLE_CLIENT_SECRET,
+                "redirect_uri": config.GOOGLE_REDIRECT_URI,
+                "grant_type": "authorization_code",
+            }
+
+            token_res = await client.post(token_url, data=token_data)
+            if token_res.status_code != 200:
+                raise HTTPException(status_code=400, detail="구글 토큰 발급 실패")
+
+            google_tokens = token_res.json()
+            google_access_token = google_tokens.get("access_token")
+
+            # --- 2단계: access_token으로 구글 사용자 정보 가져오기 ---
+            user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+            user_res = await client.get(user_info_url, headers={"Authorization": f"Bearer {google_access_token}"})
+
+            if user_res.status_code != 200:
+                raise HTTPException(status_code=400, detail="구글 사용자 정보 취득 실패")
+
+            user_info = user_res.json()
+
+        # --- 3단계: 실제 데이터를 SocialLoginRequest에 매핑 ---
+        # user_info 예시: {'sub': '123...', 'email': 'abc@gmail.com', 'name': '홍길동', 'picture': '...', ...}
+        social_data = SocialLoginRequest(
+            id=user_info.get("email"),  # 구글 이메일
+            name=user_info.get("name"),  # 구글 이름
+            nickname=user_info.get("name"),  # 닉네임 (보통 이름으로 초기화)
+            social_id=user_info.get("sub"),  # 구글 고유 식별자 (중요)
+            provider="google",
+            phone_number="",  # 구글은 기본적으로 전화번호를 주지 않음 (필요시 비워둠)
+            birthday="",
+            gender="",
+        )
+
+        # --- 4단계: 기존 로직 수행 (유저 체크 및 리다이렉트) ---
+        existing_user = await self.check_id_exists(social_data.id)
+
+        if existing_user:
+            # 이미 가입된 유저
+            tokens = await self.social_login(existing_user)
+
+            # 팝업창에서 부모창으로 넘기고 닫는 HTML
+            html_content = """
+            <!DOCTYPE html>
+            <html><body><script>
+                if (window.opener) {
+                    window.opener.postMessage({status: 'login_success'}, '*');
+                    window.close();
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            </script></body></html>
+            """
+            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+
+            # 쿠키 설정
+            response.set_cookie(
+                "access_token", tokens["access_token"], httponly=False, samesite="lax", max_age=3600 * 24 * 30
+            )
+            response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", max_age=3600 * 24 * 30)
+            return response
+        else:
+            # 보안을 위해 정보를 쿼리 스트링에 노출하기보다 임시 쿠키를 사용하여 전달합니다.
+            html_content = """
+            <!DOCTYPE html>
+            <html><body><script>
+                if (window.opener) {
+                    window.opener.postMessage({status: 'signup_required'}, '*');
+                    window.close();
+                } else {
+                    window.location.href = '/signup';
+                }
+            </script></body></html>
+            """
+            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+            response.set_cookie(
+                "social_id", social_data.id, httponly=False, samesite="lax", max_age=3600
+            )  # 프론트에서 읽을 수 있게 httponly=False
+            response.set_cookie("social_name", quote(social_data.name), httponly=False, samesite="lax", max_age=3600)
+            response.set_cookie(
+                "social_nickname", quote(social_data.nickname), httponly=False, samesite="lax", max_age=3600
+            )
+            response.set_cookie(
+                "social_provider", quote(social_data.provider), httponly=False, samesite="lax", max_age=3600
+            )
+            return response
+
+    async def naver_login(self, code: str, state: str | None = None) -> HTMLResponse:
+        """
+        네이버 로그인 처리
+        """
+        async with httpx.AsyncClient() as client:
+            # --- 1단계: 인가 코드를 access_token으로 교환 ---
+            token_url = "https://nid.naver.com/oauth2.0/token"
+            token_data = {
+                "grant_type": "authorization_code",
+                "client_id": config.NAVER_CLIENT_ID,
+                "client_secret": config.NAVER_CLIENT_SECRET,
+                "code": code,
+                "state": state or "",
+            }
+
+            token_res = await client.post(token_url, data=token_data)
+            if token_res.status_code != 200:
+                raise HTTPException(status_code=400, detail="네이버 토큰 발급 실패")
+
+            naver_tokens = token_res.json()
+            naver_access_token = naver_tokens.get("access_token")
+
+            # --- 2단계: access_token으로 네이버 사용자 정보 가져오기 ---
+            user_info_url = "https://openapi.naver.com/v1/nid/me"
+            user_res = await client.get(user_info_url, headers={"Authorization": f"Bearer {naver_access_token}"})
+
+            if user_res.status_code != 200:
+                raise HTTPException(status_code=400, detail="네이버 사용자 정보 취득 실패")
+
+            user_info_json = user_res.json()
+            if user_info_json.get("resultcode") != "00":
+                raise HTTPException(status_code=400, detail="네이버 사용자 정보가 올바르지 않습니다")
+
+            user_info = user_info_json.get("response", {})
+
+        # --- 3단계: 실제 데이터를 SocialLoginRequest에 매핑 ---
+        # user_info 예시: {'email': 'abc@naver.com', 'name': '홍길동', 'id': 'unique_id', 'mobile': '010-1234-5678'}
+        social_data = SocialLoginRequest(
+            id=user_info.get("email"),  # 네이버 이메일
+            name=user_info.get("name"),  # 네이버 이름
+            nickname=user_info.get("nickname") or user_info.get("name"),  # 닉네임 (없으면 이름으로)
+            social_id=user_info.get("id"),  # 네이버 고유 식별자
+            provider="naver",
+            phone_number=user_info.get("mobile"),  # 전화번호 (옵션)
+            birthday=user_info.get("birthyear") + "-" + user_info.get("birthday"),
+            gender="남자" if user_info.get("gender") == "M" else "여자",
+        )
+
+        # --- 4단계: 기존 로직 수행 (유저 체크 및 팝업창 닫기 응답) ---
+        existing_user = await self.check_id_exists(social_data.id)
+
+        if existing_user:
+            # 이미 가입된 유저
+            tokens = await self.social_login(existing_user)
+
+            # 팝업창에서 부모창으로 넘기고 닫는 HTML
+            html_content = """
+            <!DOCTYPE html>
+            <html><body><script>
+                if (window.opener) {
+                    window.opener.postMessage({status: 'login_success'}, '*');
+                    window.close();
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            </script></body></html>
+            """
+            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+
+            # 쿠키 설정
+            response.set_cookie(
+                "access_token", tokens["access_token"], httponly=False, samesite="lax", max_age=3600 * 24 * 30
+            )
+            response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", max_age=3600 * 24 * 30)
+            return response
+        else:
+            # 회원가입 필요
+            html_content = """
+            <!DOCTYPE html>
+            <html><body><script>
+                if (window.opener) {
+                    window.opener.postMessage({status: 'signup_required'}, '*');
+                    window.close();
+                } else {
+                    window.location.href = '/signup';
+                }
+            </script></body></html>
+            """
+            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+            response.set_cookie("social_id", social_data.id, httponly=False, samesite="lax", max_age=3600)
+            response.set_cookie("social_name", quote(social_data.name), httponly=False, samesite="lax", max_age=3600)
+            response.set_cookie(
+                "social_nickname", quote(social_data.nickname), httponly=False, samesite="lax", max_age=3600
+            )
+            response.set_cookie(
+                "social_phone_number", quote(social_data.phone_number), httponly=False, samesite="lax", max_age=3600
+            )
+            response.set_cookie(
+                "social_birthday", quote(social_data.birthday), httponly=False, samesite="lax", max_age=3600
+            )
+            response.set_cookie(
+                "social_gender", quote(social_data.gender), httponly=False, samesite="lax", max_age=3600
+            )
+            response.set_cookie(
+                "social_provider", quote(social_data.provider), httponly=False, samesite="lax", max_age=3600
+            )
+            return response
