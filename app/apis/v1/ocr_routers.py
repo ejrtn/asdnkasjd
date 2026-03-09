@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from typing import Annotated
@@ -9,9 +10,13 @@ from app.models.ocr_history import OCRHistory
 from app.models.upload import Upload
 from app.models.user import User
 from app.services.ocr import OCRService
+from app.services.prescription import PrescriptionService
+
+logger = logging.getLogger(__name__)
 
 ocr_router = APIRouter(prefix="/ocr", tags=["ocr"], dependencies=[Depends(get_request_user)])
 ocr_service = OCRService()
+prescription_service = PrescriptionService()
 
 # 업로드 디렉토리 설정
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
@@ -85,11 +90,24 @@ async def extract_prescription_ocr(
         is_valid=True if raw_text.strip() else False,
     )
 
+    # 4. LLM 파싱 실행 (안전성 확보: 저장된 데이터를 바탕으로 파싱 및 에러 핸들링)
+    parsed_prescription = None
+    try:
+        parsed_prescription = await prescription_service.process_prescription_parsing(
+            user=user, upload=upload_record, raw_text=ocr_record.raw_text
+        )
+    except Exception as e:
+        logger.error(f"LLM 처방전 파싱 실패 (원본 데이터 ID: {ocr_record.id}): {str(e)}")
+
     return {
         "ocr_id": ocr_record.id,
+        "prescription_id": parsed_prescription.id if parsed_prescription else None,
+        "hospital_name": parsed_prescription.hospital_name if parsed_prescription else None,
+        "prescribed_date": parsed_prescription.prescribed_date if parsed_prescription else None,
+        "drug_list_raw": parsed_prescription.drug_list_raw if parsed_prescription else None,
         "is_valid": ocr_record.is_valid,
-        "preview_text": raw_text[:50] + "..." if len(raw_text) > 50 else raw_text,
-        "message": "처방전 분석 완료",
+        "preview_text": ocr_record.raw_text[:50] + "..." if len(ocr_record.raw_text) > 50 else ocr_record.raw_text,
+        "message": "처방전 분석 및 파싱 완료" if parsed_prescription else "처방전 분석 완료 (파싱 실패)",
     }
 
 

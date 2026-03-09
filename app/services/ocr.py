@@ -4,6 +4,8 @@ import time
 import uuid
 from typing import TYPE_CHECKING
 
+from app.utils.ocr_processing import preprocess_image_for_ocr
+
 if TYPE_CHECKING:
     from pypdf import PdfReader
 else:
@@ -54,7 +56,7 @@ class OCRService:
         return None
 
     async def _extract_clova_ocr_text(self, image_bytes: bytes, file_name: str, file_ext: str) -> str:
-        """Naver Clova OCR API를 사용하여 텍스트를 추출합니다."""
+        """Naver Clova OCR API를 사용하여 텍스트를 추출합니다. 전처리를 포함합니다."""
         invoke_url = config.CLOVA_OCR_INVOKE_URL
         secret_key = config.CLOVA_OCR_SECRET_KEY
 
@@ -63,6 +65,9 @@ class OCRService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="OCR 서비스 설정이 누락되었습니다."
             )
+
+        # 이미지 전처리 시행 (OpenCV Utility 사용)
+        processed_bytes = preprocess_image_for_ocr(image_bytes)
 
         request_json = {
             "images": [{"format": file_ext.replace(".", ""), "name": file_name}],
@@ -73,7 +78,7 @@ class OCRService:
 
         headers = {"X-OCR-SECRET": secret_key}
         payload = {"message": json.dumps(request_json)}
-        files = {"file": (file_name, image_bytes)}
+        files = {"file": (file_name, processed_bytes)}
 
         try:
             client = http_client.client
