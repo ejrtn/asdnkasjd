@@ -242,8 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMainPreviews();
 
     // --- Upload Action ---
-
-    submitUploadBtn.addEventListener('click', () => {
+    submitUploadBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
 
         // Show loading
@@ -251,72 +250,112 @@ document.addEventListener('DOMContentLoaded', () => {
         submitUploadBtn.disabled = true;
         closeUploadModal.disabled = true;
 
-        // Process files for OCR and main view
-        const filesToUpload = selectedFiles
-            .filter(file => file.type.startsWith('image/') || file.type === 'application/pdf');
+        try {
+            if (currentUploadType === 'prescription') {
+                // --- [Case 1] 처방전: 각 파일을 개별적으로 순차 전송 ---
+                for (const file of selectedFiles) {
+                    const formData = new FormData();
+                    formData.append('file', file);
 
-        if (filesToUpload.length === 0) {
-            finishUpload();
-            return;
-        }
+                    const token = localStorage.getItem('access_token');
+                    const response = await fetch('/api/v1/ocr/prescription', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
 
-        const uploadPromises = filesToUpload.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || '처방전 분석 실패');
+                    }
 
-            try {
-                // OCR API 호출
-                const response = await fetch('/api/v1/ocr', {
+                    const data = await response.json();
+                    updateAnalysisUI('prescription', data.preview_text);
+                    addMainPreview('prescription', file);
+                }
+            } else {
+                // --- [Case 2] 알약: 앞/뒷면 두 장을 한 번에 전송 ---
+                if (selectedFiles.length < 2) {
+                    alert("알약 분석을 위해 앞면과 뒷면 사진 두 장을 모두 선택해주세요.");
+                    loadingOverlay.classList.remove('active');
+                    submitUploadBtn.disabled = false;
+                    closeUploadModal.disabled = false;
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('front_file', selectedFiles[0]);
+                formData.append('back_file', selectedFiles[1]);
+
+                const token = localStorage.getItem('access_token');
+                const response = await fetch('/api/v1/ocr/pill', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: formData
                 });
 
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || '알약 분석 실패');
+                }
+
                 const data = await response.json();
-                const rawText = data.raw_text || "분석된 텍스트가 없습니다.";
+                updateAnalysisUI('medication', data.preview_text);
 
-                // 화면에 결과 표시 (처방전 또는 복용약)
-                const targetBoxId = currentUploadType === 'prescription'
-                    ? 'prescription-analysis-box'
-                    : 'medication-analysis-box';
-
-                const targetBox = document.getElementById(targetBoxId);
-                if (targetBox) {
-                    const resultContainer = targetBox.querySelector('.analysis-result-text') || targetBox.querySelector('p');
-                    if (resultContainer) {
-                        resultContainer.textContent = rawText;
-                        resultContainer.style.color = '#333';
-                    }
-                }
-
-                // 이미지인 경우 미리보기를 위해 push
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    return new Promise((resolve) => {
-                        reader.onload = (e) => {
-                            uploadedImages[currentUploadType].push(e.target.result);
-                            resolve();
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                } else {
-                    uploadedImages[currentUploadType].push('FILE_TYPE_PDF');
-                }
-            } catch (error) {
-                console.error('OCR Error:', error);
-                alert(`${file.name} 분석 중 오류가 발생했습니다.`);
+                // 두 파일 모두 메인 뷰에 추가
+                addMainPreview('medication', selectedFiles[0]);
+                addMainPreview('medication', selectedFiles[1]);
             }
-        });
 
-        Promise.all(uploadPromises).then(() => {
+            // 전송 완료 후 모달 닫기
+            setTimeout(() => {
+                uploadOverlay.classList.remove('show');
+                finishUpload();
+            }, 500);
+
+        } catch (error) {
+            console.error('Upload Error:', error);
+            alert(`오류 발생: ${error.message}`);
             finishUpload();
-        });
-
-        function finishUpload() {
-            loadingOverlay.classList.remove('active');
-            uploadOverlay.classList.remove('show');
-            submitUploadBtn.disabled = false;
-            closeUploadModal.disabled = false;
-            renderMainPreviews();
         }
     });
+
+    // UI 업데이트 및 데이터 관리 헬퍼 함수
+    function updateAnalysisUI(type, text) {
+        const targetBoxId = type === 'prescription' ? 'prescription-analysis-box' : 'medication-analysis-box';
+        const targetBox = document.getElementById(targetBoxId);
+        if (targetBox) {
+            const resultText = targetBox.querySelector('.analysis-result-text') || targetBox.querySelector('p');
+            if (resultText) {
+                resultText.textContent = text || "분석 완료";
+                resultText.style.color = '#333';
+            }
+        }
+    }
+
+    function addMainPreview(type, file) {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImages[type].push(e.target.result);
+                renderMainPreviews();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            uploadedImages[type].push('FILE_TYPE_PDF');
+            renderMainPreviews();
+        }
+    }
+
+    function finishUpload() {
+        loadingOverlay.classList.remove('active');
+        submitUploadBtn.disabled = false;
+        closeUploadModal.disabled = false;
+        renderMainPreviews();
+    }
 });

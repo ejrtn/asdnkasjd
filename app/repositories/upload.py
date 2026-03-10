@@ -13,6 +13,6 @@ class UploadRepository:
         """
         여러 개의 복용 약물 정보를 한꺼번에 생성합니다.
         """
-        print(uploads)
+
         objs = [self._model(user_id=user_id, **data) for data in uploads]
         await self._model.bulk_create(objs)
