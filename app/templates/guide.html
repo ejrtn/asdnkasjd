@@ -156,14 +156,14 @@
 
     .guide-section-title-row {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 16px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
     }
 
     .guide-section-title {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 800;
         color: #1f2937;
         line-height: 1.4;
@@ -364,92 +364,120 @@
     }
 
     .guide-head-card {
-        padding: 18px 20px;
+        min-height: 84px;
+        padding: 0 24px;
         border-radius: 20px;
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .guide-head-card .c9-section-head {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
         margin-bottom: 0;
     }
 
     .guide-head-card .c9-btn {
-        flex-shrink: 0;
+        height: 42px;
+        padding: 0 18px;
+        font-size: 13px;
+        font-weight: 800;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
     }
 
     /* ===== Guide typography sync with alarm page ===== */
     .guide-page-container .c9-page-title {
         font-size: 22px;
         font-weight: 800;
-        line-height: 1.25;
+        line-height: 1.3;
         color: #1f2937;
+        letter-spacing: -0.01em;
     }
 
     .guide-page-container .guide-page-head-copy {
         margin-top: 8px;
         font-size: 15px;
         line-height: 1.7;
-        color: #6b7280;
+        color: #64748b;
     }
 
     .guide-head-card .c9-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         font-size: 18px;
         font-weight: 800;
-        line-height: 1.3;
         color: #1f2937;
-    }
-
-    .guide-mode-tab {
-        font-size: 14px;
-        font-weight: 800;
+        margin: 0;
     }
 
     .guide-section-title {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 800;
-        line-height: 1.35;
+        line-height: 1.4;
         color: #1f2937;
+        letter-spacing: -0.01em;
     }
 
     .guide-section-body {
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.8;
-        color: #4b5563;
+        color: #475569;
     }
 
     .guide-note-title {
         font-size: 13px;
         font-weight: 800;
+        color: #64748b;
     }
 
     .guide-note-list {
         font-size: 14px;
         line-height: 1.8;
+        color: #475569;
     }
 
     .guide-disease-title {
         font-size: 15px;
         font-weight: 800;
+        color: #1e293b;
     }
 
     .guide-disease-list {
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.7;
+        color: #475569;
     }
 
     .guide-check-title {
-        font-size: 15px;
-        font-weight: 800;
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
         line-height: 1.5;
     }
 
     .guide-check-sub {
         font-size: 11px;
         font-weight: 800;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
     }
 
-    .guide-reason-text {
-        font-size: 14px;
-        line-height: 1.9;
+    /* Success rate alignment */
+    .success-rate-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
     }
 
     .guide-header-meta {
@@ -466,7 +494,7 @@
         gap: 8px;
         padding: 6px;
         background: #f8fafc;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
         border-radius: 999px;
     }
 
@@ -517,7 +545,7 @@
     }
 
     .guide-accordion-icon {
-        color: #9ca3af;
+        color: #94a3b8;
         font-size: 18px;
         font-weight: 700;
         transition: transform 0.25s ease, color 0.2s ease;
@@ -535,7 +563,83 @@
         font-size: 18px;
         line-height: 1;
         flex-shrink: 0;
-        transform: translateY(-1px);
+    }
+
+    .guide-info-icon {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: default;
+        font-size: 14px;
+        color: #94a3b8;
+        margin-left: 6px;
+        width: 20px;
+        height: 20px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 50%;
+        font-weight: 800;
+        z-index: 200;
+        transition: all 0.2s ease;
+    }
+
+    .guide-info-icon:hover {
+        color: #6366f1;
+        border-color: #6366f1;
+        background: #f5f3ff;
+    }
+
+    .guide-tooltip {
+        position: absolute;
+        top: 36px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+
+        width: 400px;
+        padding: 18px;
+
+        background: #ffffff;
+        color: #475569;
+
+        font-size: 12px;
+        line-height: 1.7;
+
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 9999;
+    }
+
+    .guide-info-icon:hover .guide-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .guide-tooltip::after {
+        content: "";
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+
+        width: 10px;
+        height: 10px;
+
+        background: white;
+        border-left: 1px solid #e2e8f0;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .guide-head-card {
+        position: relative;
+        z-index: 100;
     }
 
     .accordion-content {
@@ -553,18 +657,23 @@
     }
 
     .guide-reason-box {
-        margin-top: 20px;
-        padding: 18px 20px;
+        margin-top: 0;
+        padding: 14px 18px;
         background: #f8fafc;
         border: 1px solid #edf2f7;
         border-radius: 18px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .guide-reason-text {
-        color: #6b7280;
-        font-size: 14px;
-        line-height: 1.9;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.8;
         font-style: italic;
+        text-align: center;
+        text-wrap: balance;
     }
 
     @media (max-width: 1024px) {
@@ -618,7 +727,7 @@
                     <div class="c9-soft-card guide-head-card">
                         <div class="c9-section-head">
                             <div class="c9-section-title">
-                                <span class="c9-section-title-icon" style="background:#3b82f6;">📈</span>
+                                <span class="c9-section-title-icon">📈</span>
                                 <span>나의 건강 요약</span>
                             </div>
                         </div>
@@ -696,10 +805,6 @@
                                 <div class="guide-med-list" id="medication-list"></div>
                             </div>
                         </div>
-
-                        <button id="update-btn" class="c9-btn c9-btn-primary w-full">
-                            🔄 가이드 새로고침
-                        </button>
                     </div>
                 </section>
 
@@ -707,18 +812,32 @@
                     <div class="c9-soft-card guide-head-card">
                         <div class="c9-section-head">
                             <div class="c9-section-title">
-                                <span class="c9-section-title-icon" style="background:#f43f5e;">✨</span>
+                                <span class="c9-section-title-icon">✨</span>
                                 <span>AI 맞춤 생활 안내 가이드</span>
+
+                                <span class="guide-info-icon">ⓘ
+                                    <span class="guide-tooltip">
+                                        <strong>💡 가이드 생성 기준</strong><br>
+                                        이 가이드는 사용자의 건강 프로필, 보유 질환,복용 중인 약물,
+                                        알레르기 정보 및 생활습관 데이터를 기반으로 생성된 맞춤 건강 가이드입니다.
+                                    </span>
+                                </span>
                             </div>
-                            <button id="tts-btn" class="c9-btn c9-btn-soft">
-                                <span id="tts-icon">📢</span>
-                                <span id="tts-text">가이드 읽어주기</span>
-                            </button>
+
+                            <div class="flex items-center gap-2">
+                                <button id="tts-btn" class="c9-btn c9-btn-soft">
+                                    <span id="tts-icon">📢</span>
+                                    <span id="tts-text">가이드 읽어주기</span>
+                                </button>
+
+                                <button id="update-btn" class="c9-btn c9-btn-primary">
+                                    🔄 가이드 새로고침
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <div id="guide-container" class="c9-stack-20 w-full min-h-[500px]">
-
                         <div id="guide-loading-state" class="guide-loading-state hidden">
                             <div id="guide-loading-note" class="guide-loading-note">
                                 <span>⏳</span>
@@ -757,9 +876,21 @@
                         </div>
 
                         <div id="guide-sections" class="hidden c9-stack-20 w-full">
+                            <div id="section-2" class="guide-section-card line-emerald">
+                                <h3 class="guide-section-title" style="margin-bottom:18px;">1) 질환 기반 생활습관 가이드</h3>
+                                <div id="disease-guides-container" class="guide-disease-grid"></div>
+                                <div class="guide-integrated-box">
+                                    <span class="text-emerald-500 text-xl font-bold">🔄</span>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-emerald-800 mb-1">통합 관리 포인트</h4>
+                                        <p id="integrated-point" class="text-sm text-emerald-700 leading-relaxed"></p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div id="section-1" class="guide-section-card line-emerald">
                                 <div class="guide-section-title-row">
-                                    <h3 class="guide-section-title">1) 복약 안전성 및 주의사항</h3>
+                                    <h3 class="guide-section-title">2) 복약 안전성 및 주의사항</h3>
                                     <span id="safety-status-tag" class="c9-badge c9-badge-success"></span>
                                 </div>
                                 <p id="safety-content" class="guide-section-body"></p>
@@ -768,18 +899,6 @@
                                         <span class="text-blue-500">⏰</span> 일반 주의사항
                                     </h4>
                                     <ul id="general-cautions-list" class="guide-note-list"></ul>
-                                </div>
-                            </div>
-
-                            <div id="section-2" class="guide-section-card line-emerald">
-                                <h3 class="guide-section-title" style="margin-bottom:18px;">2) 질환 기반 생활습관 가이드</h3>
-                                <div id="disease-guides-container" class="guide-disease-grid"></div>
-                                <div class="guide-integrated-box">
-                                    <span class="text-emerald-500 text-xl font-bold">🔄</span>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-emerald-800 mb-1">통합 관리 포인트</h4>
-                                        <p id="integrated-point" class="text-sm text-emerald-700 leading-relaxed"></p>
-                                    </div>
                                 </div>
                             </div>
 
@@ -793,31 +912,14 @@
                                         <span class="text-2xl font-black text-indigo-600"
                                             id="progress-percent">0%</span>
                                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-                                            SUCCESS RATE</p>
+                                            SUCCESS RATE
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="guide-progress-box">
                                     <div id="progress-bar" class="guide-progress-fill"></div>
                                 </div>
                                 <div id="checklist-container" class="guide-checklist"></div>
-                            </div>
-
-                            <div id="section-4" class="accordion guide-section-card line-slate">
-                                <button type="button" onclick="toggleAccordion('section-4')"
-                                    class="guide-accordion-btn">
-                                    <h3 class="guide-section-title"
-                                        style="display:flex; align-items:center; gap:10px; margin:0;">
-                                        <span class="guide-title-emoji">❓</span>
-                                        왜 이런 가이드가 생성되었나요?
-                                    </h3>
-                                    <span class="guide-accordion-icon">⌃</span>
-                                </button>
-
-                                <div class="accordion-content">
-                                    <div class="guide-reason-box">
-                                        <p id="explain-reason" class="guide-reason-text"></p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -842,60 +944,59 @@
                 </div>
             </section>
         </div>
-
-
     </div>
-    {% endblock %}
+</div>
+{% endblock %}
 
-    {% block scripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            initGuide();
-        });
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        initGuide();
+    });
 
-        let currentStatus = { diseases: [], allergies: [], meds: [], profile: null };
-        let guideData = null;
-        let isSpeaking2 = false;
-        const synthesis2 = window.speechSynthesis;
+    let currentStatus = { diseases: [], allergies: [], meds: [], profile: null };
+    let guideData = null;
+    let isSpeaking2 = false;
+    const synthesis2 = window.speechSynthesis;
 
-        async function initGuide() {
-            await fetchHealthProfile();
-            await generateNewGuide();
-            setupGuideEventListeners();
+    async function initGuide() {
+        await fetchHealthProfile();
+        await generateNewGuide();
+        setupGuideEventListeners();
+    }
+
+    async function fetchHealthProfile() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            showLoginRequired();
+            return;
         }
 
-        async function fetchHealthProfile() {
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                showLoginRequired();
-                return;
-            }
+        try {
+            const healthRes = await fetchWithAuth(`/api/v1/health`, { method: 'GET' });
 
-            try {
-                const healthRes = await fetchWithAuth(`/api/v1/health`, { method: 'GET' });
+            if (!healthRes || !healthRes.ok) throw new Error("Fetch failed");
+            const health = await healthRes.json();
 
-                if (!healthRes || !healthRes.ok) throw new Error("Fetch failed");
-                const health = await healthRes.json();
+            currentStatus.diseases = health.chronic_diseases || [];
+            currentStatus.allergies = health.allergies || [];
+            currentStatus.meds = health.current_meds || [];
+            currentStatus.profile = health.health_profile || null;
 
-                currentStatus.diseases = health.chronic_diseases || [];
-                currentStatus.allergies = health.allergies || [];
-                currentStatus.meds = health.current_meds || [];
-                currentStatus.profile = health.health_profile || null;
-
-                renderHealthProfile();
-            } catch (err) {
-                console.error("Profile Load Error:", err);
-                currentStatus.diseases = [];
-                currentStatus.allergies = [];
-                currentStatus.meds = [];
-                currentStatus.profile = null;
-                renderHealthProfile();
-            }
+            renderHealthProfile();
+        } catch (err) {
+            console.error("Profile Load Error:", err);
+            currentStatus.diseases = [];
+            currentStatus.allergies = [];
+            currentStatus.meds = [];
+            currentStatus.profile = null;
+            renderHealthProfile();
         }
+    }
 
-        function showLoginRequired() {
-            const container = document.getElementById('guide-container');
-            container.innerHTML = `
+    function showLoginRequired() {
+        const container = document.getElementById('guide-container');
+        container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px 20px;">
                 <div style="font-size:64px; margin-bottom:24px;">🔐</div>
                 <h3 style="font-size:20px; color:#333; margin-bottom:12px; font-weight:bold;">로그인이 필요합니다</h3>
@@ -903,152 +1004,153 @@
                 <a href="/" style="display:inline-block; padding:12px 32px; background:#4f46e5; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px;">로그인 하기</a>
             </div>
         `;
+    }
+
+    async function generateNewGuide() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            showLoginRequired();
+            return;
         }
 
-        async function generateNewGuide() {
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                showLoginRequired();
-                return;
-            }
+        const loadingState = document.getElementById('guide-loading-state');
+        const content = document.getElementById('guide-sections');
+        const loadingNote = document.getElementById('guide-loading-note');
 
-            const loadingState = document.getElementById('guide-loading-state');
-            const content = document.getElementById('guide-sections');
-            const loadingNote = document.getElementById('guide-loading-note');
+        if (loadingState) {
+            loadingState.classList.remove('hidden');
+        }
 
-            if (loadingState) {
-                loadingState.classList.remove('hidden');
-            }
+        if (content) {
+            content.classList.add('hidden');
+            content.style.display = 'none';
+        }
 
-            if (content) {
-                content.classList.add('hidden');
-                content.style.display = 'none';
-            }
-
-            if (loadingNote) {
-                loadingNote.innerHTML = `
+        if (loadingNote) {
+            loadingNote.innerHTML = `
                 <span>⏳</span>
                 <span>AI 맞춤 가이드를 새로 생성 중입니다. 잠시만 기다려주세요.</span>
             `;
+        }
+
+        try {
+            const res = await fetchWithAuth('/api/v1/guides', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!res || !res.ok) {
+                throw new Error("Guide request failed");
             }
 
-            try {
-                const res = await fetchWithAuth('/api/v1/guides', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            const data = await res.json();
 
-                if (!res || !res.ok) {
-                    throw new Error("Guide request failed");
+            if (data.guide_data) {
+                guideData = data.guide_data;
+                renderGuide();
+
+                if (loadingState) {
+                    loadingState.classList.add('hidden');
                 }
 
-                const data = await res.json();
-
-                if (data.guide_data) {
-                    guideData = data.guide_data;
-                    renderGuide();
-
-                    if (loadingState) {
-                        loadingState.classList.add('hidden');
-                    }
-
-                    if (content) {
-                        content.classList.remove('hidden');
-                        content.style.display = 'flex';
-                    }
+                if (content) {
+                    content.classList.remove('hidden');
+                    content.style.display = 'flex';
                 }
-            } catch (err) {
-                console.error("Guide Gen Error:", err);
+            }
+        } catch (err) {
+            console.error("Guide Gen Error:", err);
 
-                if (loadingNote) {
-                    loadingNote.innerHTML = `
+            if (loadingNote) {
+                loadingNote.innerHTML = `
                     <span>⚠️</span>
                     <span>가이드를 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.</span>
                 `;
-                }
             }
         }
+    }
 
-        function renderHealthProfile() {
-            const diseaseList = document.getElementById('chronic-disease-list');
-            diseaseList.innerHTML =
-                currentStatus.diseases.length > 0
-                    ? currentStatus.diseases.map(d => `<li class="c9-chip c9-chip-blue">${d.disease_name}</li>`).join('')
-                    : '<li class="c9-muted">등록된 질환이 없습니다.</li>';
+    function renderHealthProfile() {
+        const diseaseList = document.getElementById('chronic-disease-list');
+        diseaseList.innerHTML =
+            currentStatus.diseases.length > 0
+                ? currentStatus.diseases.map(d => `<li class="c9-chip c9-chip-blue">${d.disease_name}</li>`).join('')
+                : '<li class="c9-muted">등록된 질환이 없습니다.</li>';
 
-            const allergyList = document.getElementById('allergy-list');
-            allergyList.innerHTML =
-                currentStatus.allergies.length > 0
-                    ? currentStatus.allergies.map(a => `<li class="c9-chip c9-chip-amber">${a.any_allergy}</li>`).join('')
-                    : '<li class="c9-muted">등록된 알레르기가 없습니다.</li>';
+        const allergyList = document.getElementById('allergy-list');
+        allergyList.innerHTML =
+            currentStatus.allergies.length > 0
+                ? currentStatus.allergies.map(a => `<li class="c9-chip c9-chip-amber">${a.any_allergy}</li>`).join('')
+                : '<li class="c9-muted">등록된 알레르기가 없습니다.</li>';
 
-            const medList = document.getElementById('medication-list');
-            medList.innerHTML =
-                currentStatus.meds.length > 0
-                    ? currentStatus.meds.map(m => `
+        const medList = document.getElementById('medication-list');
+        medList.innerHTML =
+            currentStatus.meds.length > 0
+                ? currentStatus.meds.map(m => `
                     <div class="guide-med-item">
                         <span class="guide-med-name">${m.medication_name}</span>
                         <span class="guide-med-date">${m.start_date || '기록없음'}</span>
-                    </div>`).join('')
-                    : '<p class="c9-muted text-center py-2">등록된 약물이 없습니다.</p>';
+                    </div>
+                `).join('')
+                : '<p class="c9-muted text-center py-2">등록된 약물이 없습니다.</p>';
 
-            const prof = currentStatus.profile;
-            if (prof) {
-                document.getElementById('height-weight-text').innerText =
-                    (prof.height_cm && prof.weight_kg) ? `${prof.height_cm}cm / ${prof.weight_kg}kg` : '-';
+        const prof = currentStatus.profile;
+        if (prof) {
+            document.getElementById('height-weight-text').innerText =
+                (prof.height_cm && prof.weight_kg) ? `${prof.height_cm}cm / ${prof.weight_kg}kg` : '-';
 
-                const bmiText = document.getElementById('bmi-text');
-                if (prof.height_cm && prof.weight_kg) {
-                    const bmi = (prof.weight_kg / ((prof.height_cm / 100) ** 2)).toFixed(1);
-                    let status = '';
-                    if (bmi < 18.5) status = '(저체중)';
-                    else if (bmi < 23) status = '(정상)';
-                    else if (bmi < 25) status = '(과체중)';
-                    else status = '(비만)';
-                    bmiText.innerHTML = `${bmi} <span class="text-[10px] font-normal">${status}</span>`;
-                } else {
-                    bmiText.innerText = '-';
-                }
-
-                document.getElementById('sleep-text').innerText =
-                    prof.sleep_hours ? `${prof.sleep_hours}시간/일 (${prof.sleep_change || '변화없음'})` : '-';
-
-                const smoke = prof.smoking_status === 'NEVER' ? '비흡연' : '흡연';
-                const drink = prof.drinking_status === 'NEVER' ? '비음주' : '음주';
-                document.getElementById('smoking-drinking-text').innerText = `${smoke} / ${drink}`;
-                document.getElementById('exercise-text').innerText = prof.exercise_frequency || '-';
-                document.getElementById('diet-text').innerText = prof.diet_type || '-';
+            const bmiText = document.getElementById('bmi-text');
+            if (prof.height_cm && prof.weight_kg) {
+                const bmi = (prof.weight_kg / ((prof.height_cm / 100) ** 2)).toFixed(1);
+                let status = '';
+                if (bmi < 18.5) status = '(저체중)';
+                else if (bmi < 23) status = '(정상)';
+                else if (bmi < 25) status = '(과체중)';
+                else status = '(비만)';
+                bmiText.innerHTML = `${bmi} <span class="text-[10px] font-normal">${status}</span>`;
+            } else {
+                bmiText.innerText = '-';
             }
+
+            document.getElementById('sleep-text').innerText =
+                prof.sleep_hours ? `${prof.sleep_hours}시간/일 (${prof.sleep_change || '변화없음'})` : '-';
+
+            const smoke = prof.smoking_status === 'NEVER' ? '비흡연' : '흡연';
+            const drink = prof.drinking_status === 'NEVER' ? '비음주' : '음주';
+            document.getElementById('smoking-drinking-text').innerText = `${smoke} / ${drink}`;
+            document.getElementById('exercise-text').innerText = prof.exercise_frequency || '-';
+            document.getElementById('diet-text').innerText = prof.diet_type || '-';
+        }
+    }
+
+    function renderGuide() {
+        if (!guideData) return;
+
+        const s1 = guideData.section1;
+        const section1 = document.getElementById('section-1');
+        const statusTag = document.getElementById('safety-status-tag');
+
+        statusTag.innerText = s1.status;
+        section1.className = 'guide-section-card';
+
+        if (s1.status.includes('위험')) {
+            statusTag.className = 'c9-badge c9-badge-danger';
+            section1.classList.add('line-rose');
+        } else if (s1.status.includes('주의')) {
+            statusTag.className = 'c9-badge c9-badge-warn';
+            section1.classList.add('line-amber');
+        } else {
+            statusTag.className = 'c9-badge c9-badge-success';
+            section1.classList.add('line-emerald');
         }
 
-        function renderGuide() {
-            if (!guideData) return;
+        document.getElementById('safety-content').innerText = s1.content;
+        document.getElementById('general-cautions-list').innerHTML =
+            s1.general_cautions.map(c => `<li>${c}</li>`).join('');
 
-            const s1 = guideData.section1;
-            const section1 = document.getElementById('section-1');
-            const statusTag = document.getElementById('safety-status-tag');
-
-            statusTag.innerText = s1.status;
-            section1.className = 'guide-section-card';
-
-            if (s1.status.includes('위험')) {
-                statusTag.className = 'c9-badge c9-badge-danger';
-                section1.classList.add('line-rose');
-            } else if (s1.status.includes('주의')) {
-                statusTag.className = 'c9-badge c9-badge-warn';
-                section1.classList.add('line-amber');
-            } else {
-                statusTag.className = 'c9-badge c9-badge-success';
-                section1.classList.add('line-emerald');
-            }
-
-            document.getElementById('safety-content').innerText = s1.content;
-            document.getElementById('general-cautions-list').innerHTML =
-                s1.general_cautions.map(c => `<li>${c}</li>`).join('');
-
-            const s2 = guideData.section2;
-            document.getElementById('disease-guides-container').innerHTML =
-                s2.disease_guides.map(dg => `
+        const s2 = guideData.section2;
+        document.getElementById('disease-guides-container').innerHTML =
+            s2.disease_guides.map(dg => `
                 <div class="guide-disease-card">
                     <div class="guide-disease-title">
                         <span>${dg.name}</span>
@@ -1065,11 +1167,11 @@
                 </div>
             `).join('');
 
-            document.getElementById('integrated-point').innerText = s2.integrated_point;
+        document.getElementById('integrated-point').innerText = s2.integrated_point;
 
-            const s3 = guideData.section3;
-            document.getElementById('checklist-container').innerHTML =
-                s3.checklist.map(item => `
+        const s3 = guideData.section3;
+        document.getElementById('checklist-container').innerHTML =
+            s3.checklist.map(item => `
                 <label class="guide-check-item">
                     <input
                         type="checkbox"
@@ -1083,90 +1185,109 @@
                 </label>
             `).join('');
 
-            updateProgress();
-            document.getElementById('explain-reason').innerText = guideData.section4.reason;
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const checks = document.querySelectorAll('.plan-checkbox');
+        const checked = Array.from(checks).filter(c => c.checked).length;
+        const percent = checks.length > 0 ? Math.round((checked / checks.length) * 100) : 0;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-percent').innerText = percent + '%';
+    }
+
+    function toggleAccordion(id) {
+        document.getElementById(id).classList.toggle('accordion-active');
+    }
+
+    function switchGuideMode(mode, buttonEl) {
+        const tabs = document.querySelectorAll('.guide-mode-tab');
+        const panels = document.querySelectorAll('.guide-mode-panel');
+
+        tabs.forEach(tab => tab.classList.remove('is-active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+
+        if (buttonEl) {
+            buttonEl.classList.add('is-active');
         }
 
-        function updateProgress() {
-            const checks = document.querySelectorAll('.plan-checkbox');
-            const checked = Array.from(checks).filter(c => c.checked).length;
-            const percent = checks.length > 0 ? Math.round((checked / checks.length) * 100) : 0;
-            document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('progress-percent').innerText = percent + '%';
+        const target = document.getElementById(`guide-mode-${mode}`);
+        if (target) {
+            target.classList.add('active');
+        }
+    }
+
+    function setupGuideEventListeners() {
+        const updateBtn = document.getElementById('update-btn');
+        const ttsBtn = document.getElementById('tts-btn');
+
+        if (updateBtn) {
+            updateBtn.addEventListener('click', async () => {
+                const btn = document.getElementById('update-btn');
+                btn.innerHTML = `갱신 중...`;
+                btn.disabled = true;
+                await generateNewGuide();
+                btn.innerHTML = `🔄 가이드 새로고침`;
+                btn.disabled = false;
+            });
         }
 
-        function toggleAccordion(id) {
-            document.getElementById(id).classList.toggle('accordion-active');
+        if (ttsBtn) {
+            ttsBtn.addEventListener('click', toggleTTS);
+        }
+    }
+
+    function toggleTTS() {
+        if (!guideData) return;
+
+        const btnText = document.getElementById('tts-text');
+        const btnIcon = document.getElementById('tts-icon');
+
+        if (isSpeaking2) {
+            synthesis2.cancel();
+            isSpeaking2 = false;
+            btnText.innerText = '가이드 읽어주기';
+            btnIcon.innerText = '📢';
+            return;
         }
 
-        function switchGuideMode(mode, buttonEl) {
-            const tabs = document.querySelectorAll('.guide-mode-tab');
-            const panels = document.querySelectorAll('.guide-mode-panel');
+        const s1 = guideData.section1;
+        const s2 = guideData.section2;
+        const s3 = guideData.section3;
 
-            tabs.forEach(tab => tab.classList.remove('is-active'));
-            panels.forEach(panel => panel.classList.remove('active'));
+        const diseaseText = s2.disease_guides
+            .map(d => `${d.name} 관리 방법입니다. ${d.tips.join(', ')}`)
+            .join('. ');
 
-            if (buttonEl) {
-                buttonEl.classList.add('is-active');
-            }
+        const fullText = `
+            현재 등록된 질환, 복용 중인 약, 생활습관 등 건강 정보를 바탕으로 맞춤 생활 가이드를 안내드립니다.
 
-            const target = document.getElementById(`guide-mode-${mode}`);
-            if (target) {
-                target.classList.add('active');
-            }
-        }
+            먼저 질환 기반 생활습관 가이드입니다.
+            ${diseaseText}.
 
-        function setupGuideEventListeners() {
-            const updateBtn = document.getElementById('update-btn');
-            const ttsBtn = document.getElementById('tts-btn');
+            다음은 복약 안전성 안내입니다.
+            현재 상태는 ${s1.status} 입니다. ${s1.content}.
 
-            if (updateBtn) {
-                updateBtn.addEventListener('click', async () => {
-                    const btn = document.getElementById('update-btn');
-                    btn.innerHTML = `갱신 중...`;
-                    btn.disabled = true;
-                    await generateNewGuide();
-                    btn.innerHTML = `🔄 가이드 새로고침`;
-                    btn.disabled = false;
-                });
-            }
+            오늘의 실행 플랜입니다.
+            ${s3.checklist.join(', ')}를 실천해보세요.
+        `;
 
-            if (ttsBtn) {
-                ttsBtn.addEventListener('click', toggleTTS);
-            }
-        }
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.lang = 'ko-KR';
 
-        function toggleTTS() {
-            if (!guideData) return;
+        utterance.onstart = () => {
+            isSpeaking2 = true;
+            btnText.innerText = '읽기 중지';
+            btnIcon.innerText = '⏹';
+        };
 
-            const btnText = document.getElementById('tts-text');
-            const btnIcon = document.getElementById('tts-icon');
+        utterance.onend = () => {
+            isSpeaking2 = false;
+            btnText.innerText = '가이드 읽어주기';
+            btnIcon.innerText = '📢';
+        };
 
-            if (isSpeaking2) {
-                synthesis2.cancel();
-                isSpeaking2 = false;
-                btnText.innerText = '가이드 읽어주기';
-                btnIcon.innerText = '📢';
-                return;
-            }
-
-            const fullText = `복약 안전성 안내입니다. ${guideData.section1.status} 상태이며, ${guideData.section1.content}. 오늘의 실행 플랜입니다. ${guideData.section3.checklist.join(', ')}를 잊지 마세요.`;
-            const utterance = new SpeechSynthesisUtterance(fullText);
-            utterance.lang = 'ko-KR';
-
-            utterance.onstart = () => {
-                isSpeaking2 = true;
-                btnText.innerText = '읽기 중지';
-                btnIcon.innerText = '⏹';
-            };
-
-            utterance.onend = () => {
-                isSpeaking2 = false;
-                btnText.innerText = '가이드 읽어주기';
-                btnIcon.innerText = '📢';
-            };
-
-            synthesis2.speak(utterance);
-        }
-    </script>
-    {% endblock %}
+        synthesis2.speak(utterance);
+    }
+</script>
+{% endblock %}
