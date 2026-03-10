@@ -51,10 +51,15 @@ class ChatMemoryRepository:
         messages = await cursor.to_list(length=limit)
         return list(reversed(messages))  # 시간순 정렬
 
-    async def end_session(self, session_id: str) -> bool:
-        """세션 종료 (soft delete)"""
-        result = await self.collection.update_many({"session_id": session_id}, {"$set": {"is_deleted": True}})
-        return bool(result.modified_count > 0)
+    async def end_session(self, session_id: str, user_id: str | None = None) -> bool:
+        """세션 종료 (hard delete: MongoDB에서 완전 삭제)"""
+        filter_query = {"session_id": session_id}
+
+        if user_id:
+            filter_query["user_id"] = user_id
+
+        result = await self.collection.delete_many(filter_query)
+        return result.deleted_count > 0
 
     async def verify_session_owner(self, session_id: str, user_id: str) -> bool:
         """세션 소유자 검증"""

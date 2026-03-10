@@ -158,7 +158,7 @@ class ChatService:
         # 소유자 검증
         if user_id and not await self.memory_repo.verify_session_owner(session_id, user_id):
             return False
-        return bool(await self.memory_repo.end_session(session_id))
+        return await self.memory_repo.end_session(session_id, user_id)
 
     async def get_chat_history(self, session_id: str, user_id: str) -> list[dict[str, Any]]:
         """채팅 대화 내역 조회 (소유자 검증 포함)"""
