@@ -855,7 +855,7 @@
         list.forEach(item => {
             const tbody = document.getElementById("allergy-tbody");
             const tr = document.createElement("tr");
-            
+
             tr.innerHTML = `
                 <td>
                     <select class="allergie_type" name="allergies[${allergyIndex}][category]">
@@ -1239,6 +1239,11 @@
 
         if (response.ok) {
             alert("저장되었습니다.");
+            const guideRes = await fetchWithAuth("/api/v1/guides", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            console.log(guideRes);
         } else {
             alert("저장 실패");
         }

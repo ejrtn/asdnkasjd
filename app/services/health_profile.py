@@ -6,6 +6,7 @@ from app.repositories.blood_sugar_record import BloodSugarRecordRepository
 from app.repositories.chronic_disease import ChronicDiseaseRepository
 from app.repositories.current_med import CurrentMedRepository
 from app.repositories.health_profile import HealthProfileRepository
+from app.services.guide import GuideService
 
 
 class HealthProfileService:
@@ -20,6 +21,7 @@ class HealthProfileService:
         self.chronic_disease_repo = ChronicDiseaseRepository()
         self.current_med_repo = CurrentMedRepository()
         self.health_profile_repo = HealthProfileRepository()
+        self.guide_service = GuideService()
 
     async def generate_health_profile(self, user: User | None = None) -> dict:
         """
