@@ -90,9 +90,22 @@ class RagService:
 
     def extract_keywords_from_query(self, query: str) -> list[str]:
         medical_keywords = [
-            "고혈압", "당뇨병", "약", "복용", "복약", "처방",
-            "증상", "통증", "아픔", "혈압", "혈당", "운동",
-            "식단", "저염식", "알레르기", "부작용",
+            "고혈압",
+            "당뇨병",
+            "약",
+            "복용",
+            "복약",
+            "처방",
+            "증상",
+            "통증",
+            "아픔",
+            "혈압",
+            "혈당",
+            "운동",
+            "식단",
+            "저염식",
+            "알레르기",
+            "부작용",
         ]
 
         keywords = [kw for kw in medical_keywords if kw in query]

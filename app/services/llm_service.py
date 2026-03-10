@@ -1,5 +1,8 @@
 import json
+from typing import Any
+
 from openai import AsyncOpenAI
+
 from app.core.config import config
 
 
@@ -31,7 +34,7 @@ class LLMService:
         messages: list[dict],
         model: str | None = None,
         temperature: float = 0.4,
-    ) -> dict:
+    ) -> dict[str, Any]:
         if not self.client:
             raise RuntimeError("OpenAI API 키가 설정되지 않았습니다.")
 
@@ -42,4 +45,5 @@ class LLMService:
             temperature=temperature,
         )
 
-        return json.loads(response.choices[0].message.content or "{}")
+        content = response.choices[0].message.content or "{}"
+        return dict(json.loads(content))

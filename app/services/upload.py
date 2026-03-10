@@ -24,10 +24,10 @@ class UploadService:
 
         for file in files:
             # 1. 파일명 및 확장자 추출
-            filename = file.filename
-            name = os.path.split(filename)[0]
-            file_ext = os.path.split(filename)[1]
-            unique_filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{uuid.uuid4()}_{name}.{file_ext}"
+            filename = file.filename or "unknown"
+            name = os.path.splitext(filename)[0]
+            file_ext = os.path.splitext(filename)[1]
+            unique_filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{uuid.uuid4()}_{name}{file_ext}"
             file_path = os.path.join(upload_dir, unique_filename)
 
             # 2. 실제 파일 저장

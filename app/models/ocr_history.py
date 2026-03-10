@@ -22,7 +22,7 @@ class OCRHistory(models.Model):
     front_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
         "models.Upload", related_name="ocr_histories_front"
     )
-    back_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
+    back_upload: fields.OneToOneRelation["Upload"] | None = fields.OneToOneField(
         "models.Upload", related_name="ocr_histories_back", null=True
     )
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="ocr_histories")

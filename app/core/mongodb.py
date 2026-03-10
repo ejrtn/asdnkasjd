@@ -1,10 +1,11 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+
 from app.core.config import config
 
 
 class MongoDB:
-    client: AsyncIOMotorClient = None
-    database: AsyncIOMotorDatabase = None
+    client: AsyncIOMotorClient | None = None
+    database: AsyncIOMotorDatabase | None = None
 
 
 mongodb = MongoDB()
@@ -26,6 +27,8 @@ async def close_mongo_connection():
 
 def get_database() -> AsyncIOMotorDatabase:
     """MongoDB 데이터베이스 객체 반환"""
+    if mongodb.database is None:
+        raise RuntimeError("MongoDB is not connected. Please check connection.")
     return mongodb.database
 
 

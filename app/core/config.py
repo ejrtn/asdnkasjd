@@ -56,7 +56,7 @@ class Config(BaseSettings):
     MONGODB_URI: str = "mongodb://localhost:27017"
     MONGODB_DB_NAME: str = "cloud9care"
     MONGODB_CHAT_COLLECTION: str = "chat_messages"
-    
+
     # Chat Settings
     CHAT_MODEL: str = "gpt-4o-mini"
     CHAT_HISTORY_LIMIT: int = 8

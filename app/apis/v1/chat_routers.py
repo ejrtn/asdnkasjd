@@ -46,7 +46,7 @@ async def end_chat(
     """
     chat_service = ChatService()
     success = await chat_service.end_chat_session(request.session_id, user.id)
-    
+
     if success:
         return {"detail": "채팅이 종료되었습니다.", "session_id": request.session_id}
     else:

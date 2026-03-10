@@ -275,7 +275,8 @@ class DefaultData:
         print(bp_records)
         if await BloodPressureRecord.filter(user=user).count() == 0:
             for bp in bp_records:
-                await BloodPressureRecord.create(user=user, **bp)
+                bp_record = BloodPressureRecord(user=user, **bp)
+                await bp_record.save()
 
         # 혈당 기록 (히스토리 생성)
         # 현재 시간 기준
@@ -317,7 +318,8 @@ class DefaultData:
             )
         if await BloodSugarRecord.filter(user=user).count() == 0:
             for bs in bs_records:
-                await BloodSugarRecord.create(user=user, **bs)
+                bs_record = BloodSugarRecord(user=user, **bs)
+                await bs_record.save()
 
     async def _create_service_data(self, user: User, uinfo: dict, clinical_data: dict):
         # 업로드 어셋

@@ -9,10 +9,10 @@ from fastapi.templating import Jinja2Templates
 from tortoise import Tortoise  # 추가됨
 
 from app.apis.v1 import api_v1_router
-from app.core.http_client import http_client
-from app.core.mongodb import connect_to_mongo, close_mongo_connection
 from app.core.config import config
-from app.db.databases import TORTOISE_ORM, initialize_tortoise
+from app.core.http_client import http_client
+from app.core.mongodb import close_mongo_connection, connect_to_mongo
+from app.db.databases import TORTOISE_ORM
 from app.utils.default_data import DefaultData
 
 logger = logging.getLogger("seed")

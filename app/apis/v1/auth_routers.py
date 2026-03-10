@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.responses import ORJSONResponse as Response
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -58,7 +58,7 @@ async def google_authorize() -> Response:
 async def google_callback(
     code: str,
     user_service: Annotated[UserManageService, Depends(UserManageService)],
-) -> Response:
+) -> HTMLResponse:
     """
     [USER] 구글 로그인 콜백. service access_token 발급.
     """
@@ -87,7 +87,7 @@ async def naver_authorize() -> Response:
 @auth_router.get("/naver/callback", response_model=SocialLoginResponse)
 async def naver_callback(
     code: str, user_service: Annotated[UserManageService, Depends(UserManageService)], state: str | None = None
-) -> Response:
+) -> HTMLResponse:
     """
     [USER] 네이버 로그인 콜백. service access_token 발급.
     """
