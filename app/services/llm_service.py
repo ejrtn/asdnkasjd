@@ -51,8 +51,20 @@ class LLMService:
         content = response.choices[0].message.content or "{}"
         return dict(json.loads(content))
 
-    async def get_by_user_id(self, user_id: str) -> LlmLifeGuideResponse:
-        return cast(LlmLifeGuideResponse, await self._repo.get_by_user_id(user_id=user_id))
+    def _to_dto(self, model: Any) -> LlmLifeGuideResponse | None:
+        if not model:
+            return None
+        return LlmLifeGuideResponse(
+            user_current_status=model.user_current_status,
+            generated_content=model.generated_content,
+            activity=model.activity,
+            created_at=model.created_at,
+        )
+
+    async def get_by_user_id(self, user_id: str) -> LlmLifeGuideResponse | None:
+        model = await self._repo.get_by_user_id(user_id=user_id)
+        return self._to_dto(model)
 
     async def update_or_create(self, user_id: str, data: dict) -> LlmLifeGuideResponse:
-        return cast(LlmLifeGuideResponse, await self._repo.update_or_create(user_id=user_id, data=data))
+        model = await self._repo.update_or_create(user_id=user_id, data=data)
+        return cast(LlmLifeGuideResponse, self._to_dto(model))

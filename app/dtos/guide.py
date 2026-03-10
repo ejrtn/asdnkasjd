@@ -1,3 +1,4 @@
+# guide.py : 프론트 응답용 / llm_life_guide.py : DB 저장용
 from pydantic import BaseModel, Field
 
 
@@ -35,3 +36,4 @@ class GuideGenerateResponse(BaseModel):
     user_summary: str
     retrieved_docs: list[str]
     guide: str
+

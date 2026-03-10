@@ -1035,8 +1035,7 @@
 
         try {
             const res = await fetchWithAuth('/api/v1/guides', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                method: 'GET',
             });
 
             if (!res || !res.ok) {
@@ -1044,9 +1043,17 @@
             }
 
             const data = await res.json();
+            console.log("Guide API Data:", data);
 
-            if (data.guide_data) {
-                guideData = data.guide_data;
+            // activity가 true면 아직 생성 중인 상태 -> 5초 후 다시 확인
+            if (data.activity === true) {
+                console.log("Currently generating... checking again in 5s.");
+                setTimeout(initGuide, 5000);
+                return;
+            }
+
+            if (data.generated_content) {
+                guideData = data.generated_content;
                 renderGuide();
 
                 if (loadingState) {
@@ -1060,13 +1067,14 @@
             }
         } catch (err) {
             console.error("Guide Gen Error:", err);
-
+            // 에러 발생 시에도 일정 시간 후 재시도할 수 있도록 처리 (옵션)
             if (loadingNote) {
                 loadingNote.innerHTML = `
                     <span>⚠️</span>
-                    <span>가이드를 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.</span>
+                    <span>가이드를 불러오는 중 문제가 발생했습니다. 잠시 후 자동으로 다시 시도합니다.</span>
                 `;
             }
+            setTimeout(initGuide, 5000);
         }
     }
 

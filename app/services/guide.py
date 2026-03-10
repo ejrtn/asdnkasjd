@@ -8,6 +8,7 @@ from app.models.current_med import CurrentMed
 from app.models.user import User
 from app.services.llm_service import LLMService
 from app.services.rag_service import RagService
+from app.dtos.llm_life_guide import LlmLifeGuideResponse
 
 
 class GuideService:
@@ -18,7 +19,7 @@ class GuideService:
     # ==========================================
     # 필수 1: LLM 기반 안내 가이드 생성
     # ==========================================
-    async def generate_guide(self, user: User | None = None) -> dict:
+    async def generate_guide(self, user_id: str) -> dict:
         """
         [GUIDE] 맞춤 가이드 생성(RAG 핵심).
         실제 사용자의 기저질환, 알러지, 복용약을 바탕으로 OpenAI를 통해 구조화된 가이드를 생성합니다.
@@ -28,71 +29,60 @@ class GuideService:
         if not self.llm_service.client:
             # If API key is missing, return a dummy JSON directly to show the UI
             return {
-                "id": 1,
-                "guide_data": {
+                "user_current_status": "API Key Missing",
+                "generated_content": {
                     "section1": {
                         "title": "복약 안전성 및 주의사항",
                         "status": "주의 필요",
-                        "content": "API 키가 설정되지 않아 예시 데이터를 표시합니다. 평소 드시는 약과 알레르기 반응을 주의하세요.",
-                        "general_cautions": ["권장 용량을 준수하세요.", "불편함이 느껴지면 즉시 복용을 중단하세요."],
+                        "content": "API 키가 설정되지 않아 예시 데이터를 표시합니다.",
+                        "general_cautions": ["권장 용량을 준수하세요."],
                     },
                     "section2": {
                         "title": "질환 기반 생활습관 가이드",
-                        "disease_guides": [
-                            {
-                                "name": "내 기저질환",
-                                "tips": ["충분한 수분을 섭취하세요.", "규칙적인 식습관이 중요합니다."],
-                            }
-                        ],
+                        "disease_guides": [{"name": "내 기저질환", "tips": ["충분한 수분을 섭취하세요."]}],
                         "integrated_point": "균형 잡힌 생활 패턴 유지를 권장합니다.",
                     },
-                    "section3": {
-                        "title": "오늘의 실행 플랜",
-                        "checklist": ["물 2L 마시기", "가벼운 스트레칭", "제시간에 약 복용"],
-                    },
-                    "section4": {
-                        "title": "왜 이런 가이드가 생성되었나요?",
-                        "reason": "사용자의 건강 정보를 종합적으로 분석하여 생성되었습니다.",
-                    },
-                    "disclaimer": "본 서비스는 의료 진단이나 처방을 제공하지 않으며, 참고용 안내입니다.",
                 },
-                "created_at": "2026-03-01T20:00:00",
+                "activity": True,
+                "created_at": datetime.now(),
             }
 
-        # 1. 실제 사용자 데이터 조회 (연결 실패 시 빈 데이터 처리)
+        # 1. 즉시 로딩 상태 저장 (프론트엔드 피드백용)
         try:
-            if user is None:
-                # Try to get first user but don't fail if DB is down
-                try:
-                    user = await User.first()
-                except Exception:
-                    user = None
-
-            if user:
-                diseases = await ChronicDisease.filter(user=user).all()
-                allergies = await Allergy.filter(user=user).all()
-                meds = await CurrentMed.filter(user=user).all()
-
-                # 최근 혈압, 혈당 데이터
-                bp_records = await BloodPressureRecord.filter(user=user).limit(5)
-                bs_records = await BloodSugarRecord.filter(user=user).limit(5)
-
-                bp_list = [f"{r.systolic}/{r.diastolic} mmHg" for r in bp_records]
-                bs_list = [f"{r.glucose_mg_dl} mg/dL ({r.measure_type})" for r in bs_records]
-
-                disease_list = [d.disease_name for d in diseases]
-                allergy_list = [a.allergy_name for a in allergies]
-                med_list = [m.medication_name for m in meds]
-
-            else:
-                disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
-                bp_list = ["120/80 mmHg"]
-                bs_list = ["95 mg/dL (FASTING)"]
+            # 기존 데이터가 있으면 유지, 없으면 기본값으로 생성
+            await self.llm_service.update_or_create(
+                user_id=user_id,
+                data={
+                    "activity": True,
+                    "user_current_status": "가이드 생성 중...",
+                    "generated_content": (await self.llm_service.get_by_user_id(user_id)).generated_content if await self.llm_service.get_by_user_id(user_id) else {}
+                }
+            )
         except Exception:
-            # DB connection error or other DB issues
-            disease_list, allergy_list, med_list = ["고혈압"], ["땅콩"], ["타이레놀"]
-            bp_list = ["120/80 mmHg"]
-            bs_list = ["95 mg/dL (FASTING)"]
+            pass
+
+        # 2. 실제 사용자 데이터 조회 (연결 실패 시 빈 데이터 처리)
+        try:
+            diseases = await ChronicDisease.filter(user_id=user_id).all()
+            allergies = await Allergy.filter(user_id=user_id).all()
+            meds = await CurrentMed.filter(user_id=user_id).all()
+
+            # 최근 혈압, 혈당 데이터
+            bp_records = await BloodPressureRecord.filter(user_id=user_id).order_by("-created_at").limit(1)
+            bs_records = await BloodSugarRecord.filter(user_id=user_id).order_by("-created_at").limit(1)
+
+            bp_list = [f"{r.systolic}/{r.diastolic} mmHg" for r in bp_records]
+            bs_list = [f"{r.glucose_mg_dl} mg/dL ({r.measure_type})" for r in bs_records]
+
+            disease_list = [d.disease_name for d in diseases]
+            allergy_list = [a.allergy_name for a in allergies]
+            med_list = [m.medication_name for m in meds]
+
+        except Exception:
+            # DB 오류 발생 시 빈 데이터로 처리
+            disease_list, allergy_list, med_list = [], [], []
+            bp_list = []
+            bs_list = []
 
         keywords = self.rag_service.build_health_keywords(disease_list, med_list)
 
@@ -182,32 +172,59 @@ class GuideService:
             except Exception:
                 pass
 
+            data={
+                'user_current_status' : prompt,
+                'generated_content': content_json,
+                'activity': False
+            }
+            llm_life_guide:LlmLifeGuideResponse =  await self.llm_service.update_or_create(user_id=user_id,data=data)
+
             return {
-                "id": 1,
-                "guide_data": content_json,
-                "created_at": datetime.now().isoformat(),
-                "rag_docs_used": [f"{doc['filename']}: {doc['text'][:120]}..." for doc in selected_docs],
+                "user_current_status": prompt,
+                "generated_content": content_json,
+                "activity": False,
+                "created_at": datetime.now(),
             }
         except Exception as e:
             print(f"OpenAI Error: {e}")
-            # Return fallback dummy even if OpenAI fails
+            # 에러 발생 시 activity를 False로 설정하여 무한 폴링 방지
+            try:
+                await self.llm_service.update_or_create(
+                    user_id=user_id,
+                    data={
+                        "activity": False,
+                        "user_current_status": "Error occurred during generation",
+                        "generated_content": {
+                            "section1": {"title": "오류 안내", "status": "데이터 확인 불가", "content": f"오류: {str(e)}"},
+                        }
+                    }
+                )
+            except:
+                pass
+
             return {
-                "id": 1,
-                "guide_data": {
-                    "section1": {
-                        "title": "오류 안내",
-                        "status": "데이터 확인 불가",
-                        "content": "네트워크 연결 불안정으로 기본 정보를 제공합니다.",
-                        "general_cautions": ["약물 오남용 주의"],
-                    },
-                    "section2": {
-                        "title": "일반 관리",
-                        "disease_guides": [{"name": "일반", "tips": ["건강한 수면 취하기"]}],
-                        "integrated_point": "병원 방문을 권장합니다.",
-                    },
-                    "section3": {"title": "실행 플랜", "checklist": ["규칙적 식사", "수분 섭취"]},
-                    "section4": {"title": "출처", "reason": "시스템 연결 문제로 기본 가이드가 생성되었습니다."},
-                    "disclaimer": "본 정보는 참고용입니다.",
+                "user_current_status": "Error occurred",
+                "generated_content": {
+                    "section1": {"title": "오류 안내", "status": "데이터 확인 불가", "content": "네트워크 연결 불안정 또는 API 오류"},
                 },
-                "created_at": "2026-03-01T20:00:00",
+                "activity": False,
+                "created_at": datetime.now(),
             }
+
+    async def get_saved_guide(self, user: User | None = None) -> dict:
+        """
+        저장된 생활가이드를 조회합니다.
+        - 저장된 가이드가 있으면 그대로 반환
+        - 없으면 새로 생성해서 저장 후 반환
+        """
+
+        saved = await self.llm_service.get_by_user_id(str(user.id))
+        if saved:
+            return {
+                "user_current_status": saved.user_current_status,
+                "generated_content": saved.generated_content,
+                "activity": saved.activity,
+                "created_at": saved.created_at,
+            }
+
+        return await self.generate_guide(str(user.id))

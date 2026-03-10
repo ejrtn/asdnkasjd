@@ -6,22 +6,22 @@ from app.dependencies.security import get_optional_user
 from app.dtos.guide import GuideResponse
 from app.models.user import User
 from app.services.guide import GuideService
+from app.dtos.llm_life_guide import LlmLifeGuideResponse
 
 guide_router = APIRouter(prefix="/guides", tags=["guide"])
 
 
-@guide_router.post("", response_model=GuideResponse)
+@guide_router.post("", response_model=LlmLifeGuideResponse)
 async def generate_guide(
-    user: Annotated[User | None, Depends(get_optional_user)] = None,
-    refresh: bool = False,
-):
+    user: Annotated[User | None, Depends(get_optional_user)] = None):
     service = GuideService()
-    return await service.generate_guide(user)
+    return await service.generate_guide(str(user.id) if user else None)
 
 
-@guide_router.get("")
-async def get_guides(user: Annotated[User | None, Depends(get_optional_user)] = None):
-    return {"items": []}
+@guide_router.get("", response_model=LlmLifeGuideResponse)
+async def get_guide(user: Annotated[User | None, Depends(get_optional_user)] = None):
+    service = GuideService()
+    return await service.get_saved_guide(user)
 
 
 @guide_router.get("/{id}")

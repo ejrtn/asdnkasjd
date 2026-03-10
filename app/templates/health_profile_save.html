@@ -21,7 +21,7 @@
         display: none;
     }
 
-    .health-profile-page-container .section-card.open{
+    .health-profile-page-container .section-card.open {
         display: grid;
     }
 
@@ -76,7 +76,7 @@
         font-weight: 600;
     }
 
-    .health-profile-page-container .category-title span{
+    .health-profile-page-container .category-title span {
         color: red;
     }
 
@@ -326,7 +326,8 @@
         margin-bottom: 15px;
         display: none;
     }
-    .health-profile-page-container .med-guide-box.opne{
+
+    .health-profile-page-container .med-guide-box.opne {
         display: grid;
     }
 
@@ -371,12 +372,14 @@
         font-size: 14px;
         line-height: 1.6;
     }
-    .health-profile-page-container .tab{
+
+    .health-profile-page-container .tab {
         display: flex;
         gap: 16px;
         margin-bottom: 20px;
     }
-    .health-profile-page-container .tab button{
+
+    .health-profile-page-container .tab button {
         position: relative;
         border: 1px solid var(--c9-border);
         background: rgba(255, 255, 255, 0.92);
@@ -395,7 +398,8 @@
         box-shadow: var(--c9-shadow-sm);
         flex: 1;
     }
-    .health-profile-page-container .tab button.is-active{
+
+    .health-profile-page-container .tab button.is-active {
         background: #eef2ff;
         border-color: #c7d2fe;
         color: #4338ca;
@@ -406,7 +410,7 @@
 
 {% block content %}
 <div class="page-wrap">
-    
+
     <div class="health-profile-page-container">
 
         <div class="health-guide-notice">
@@ -657,7 +661,7 @@
             </table>
             <button type="button" onclick="addMed()">+ 약 추가</button>
         </div>
-        
+
         <div class="save-button-container">
             <button type="submit" class="save-btn">건강정보 저장하기</button>
         </div>
@@ -714,7 +718,7 @@
         list.forEach(item => {
             const tbody = document.getElementById("allergy-tbody");
             const tr = document.createElement("tr");
-            
+
             tr.innerHTML = `
                 <td>
                     <select class="allergie_type" name="allergies[${allergyIndex}][category]">
@@ -986,55 +990,55 @@
         return response;
     }
 
-    document.querySelector("[name='family_history']").addEventListener("click",(e)=>{
-        if(document.querySelector("[name='family_history']").value == '없음' ||
-            document.querySelector("[name='family_history']").value == '모름'){
+    document.querySelector("[name='family_history']").addEventListener("click", (e) => {
+        if (document.querySelector("[name='family_history']").value == '없음' ||
+            document.querySelector("[name='family_history']").value == '모름') {
 
             document.querySelector("[name='family_history_note']").value = ''
         }
     })
 
-    document.querySelector("[name='smoking_status']").addEventListener("click",(e)=>{
-        if(document.querySelector("[name='smoking_status']").value == '비흡연'){
+    document.querySelector("[name='smoking_status']").addEventListener("click", (e) => {
+        if (document.querySelector("[name='smoking_status']").value == '비흡연') {
             document.querySelector("[name='smoking_years']").value = ''
             document.querySelector("[name='smoking_per_week']").value = ''
         }
     })
 
-    document.querySelector("[name='drinking_status']").addEventListener("click",(e)=>{
-        if(document.querySelector("[name='drinking_status']").value == '비음주'){
+    document.querySelector("[name='drinking_status']").addEventListener("click", (e) => {
+        if (document.querySelector("[name='drinking_status']").value == '비음주') {
             document.querySelector("[name='drinking_years']").value = ''
             document.querySelector("[name='drinking_per_week']").value = ''
         }
     })
 
-    document.querySelector(".health-profile-page-container .health_profile").addEventListener("click",()=>{
+    document.querySelector(".health-profile-page-container .health_profile").addEventListener("click", () => {
         document.querySelector(".health-profile-page-container .health_profile").classList.add("is-active")
         document.querySelector(".health-profile-page-container .allergy_disease").classList.remove("is-active")
         document.querySelector(".health-profile-page-container .pill").classList.remove("is-active")
         document.querySelector('.health-profile-page-container .med-guide-box').classList.remove("open")
-        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el=>{
+        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el => {
             el.classList.remove('open')
         })
         document.querySelectorAll(".health-profile-page-container .section-card")[0].classList.add("open")
     })
-    document.querySelector(".health-profile-page-container .allergy_disease").addEventListener("click",()=>{
+    document.querySelector(".health-profile-page-container .allergy_disease").addEventListener("click", () => {
         document.querySelector(".health-profile-page-container .health_profile").classList.remove("is-active")
         document.querySelector(".health-profile-page-container .allergy_disease").classList.add("is-active")
         document.querySelector(".health-profile-page-container .pill").classList.remove("is-active")
         document.querySelector('.health-profile-page-container .med-guide-box').classList.remove("open")
-        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el=>{
+        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el => {
             el.classList.remove('open')
         })
         document.querySelectorAll(".health-profile-page-container .section-card")[1].classList.add("open")
         document.querySelectorAll(".health-profile-page-container .section-card")[2].classList.add("open")
     })
-    document.querySelector(".health-profile-page-container .pill").addEventListener("click",()=>{
+    document.querySelector(".health-profile-page-container .pill").addEventListener("click", () => {
         document.querySelector(".health-profile-page-container .health_profile").classList.remove("is-active")
         document.querySelector(".health-profile-page-container .allergy_disease").classList.remove("is-active")
         document.querySelector(".health-profile-page-container .pill").classList.add("is-active")
-        
-        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el=>{
+
+        document.querySelectorAll(".health-profile-page-container .section-card").forEach(el => {
             el.classList.remove('open')
         })
         document.querySelectorAll(".health-profile-page-container .section-card")[3].classList.add("open")
@@ -1226,6 +1230,11 @@
 
         if (response.ok) {
             alert("저장되었습니다.");
+            const guideRes = await fetchWithAuth("/api/v1/guides", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            console.log(guideRes);
         } else {
             alert("저장 실패");
         }
