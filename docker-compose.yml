@@ -49,6 +49,11 @@ services:
     image: mongo:7
     container_name: mongodb
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ozcoding_chat
+      MONGO_INITDB_ROOT_PASSWORD: passwordpassword!@
+      MONGO_INITDB_DATABASE: ai_health_chat
+      TZ: 'Asia/Seoul'
     ports:
       - "27017:27017"
     networks:
@@ -56,10 +61,20 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--host", "localhost",
+          "-u", "ozcoding_chat",
+          "-p", "passwordpassword!@",
+          "--authenticationDatabase", "admin",
+          "--eval", "db.adminCommand('ping')"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   # 3. API Server (FastAPI)
   fastapi:
