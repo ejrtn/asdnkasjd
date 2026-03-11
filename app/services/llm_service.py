@@ -41,6 +41,13 @@ class LLMService:
         )
         return response.choices[0].message.content or ""
 
+    async def generate_summary(self, prompt: str) -> str:
+        """Convenience wrapper for generating a summary from a prompt using the LLM.
+
+        It forwards the prompt as a single user message to `generate_text`.
+        """
+        return await self.generate_text(messages=[{"role": "user", "content": prompt}])
+
     async def generate_json(
         self,
         messages: list[dict],

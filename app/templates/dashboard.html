@@ -3,7 +3,7 @@
 {% block title %}대시보드 - Cloud9 Care{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/dashboard.css">
+<link rel="stylesheet" href="/static/dashboard.css?v=1">
 <style>
 /* 확대 기능 */
 body.zoom-large .hero-slider {
@@ -226,7 +226,9 @@ body.zoom-large .dashboard-card {
     <div class="card-content">
       <div class="analysis-status">
         <div class="analysis-title">처방전 분석 완료</div>
-        <div class="analysis-result safe">약물 상호작용 없음</div>
+        <div class="analysis-result"></div>
+        <div class="analysis-summary"></div>
+        <div class="analysis_pill"></div>
       </div>
     </div>
   </div>
@@ -260,6 +262,26 @@ body.zoom-large .dashboard-card {
 {% block scripts %}
 <script src="/static/dashboard.js"></script>
 <script>
+    async function get_latest_day_uploads() {
+        const res = await fetchWithAuth('/api/v1/uploads', { method: 'GET' });
+        if (res.ok) {
+            data = await res.json()
+            console.log(data)
+            document.querySelector(".analysis-result").innerHTML = data.content.severity_display
+            if(data.content.severity_display == '안전'){
+                document.querySelector(".analysis-result").classList.add("safe")
+            }if(data.content.severity_display == '주의'){
+                document.querySelector(".analysis-result").classList.add("caution")
+            }if(data.content.severity_display == '위험'){
+                document.querySelector(".analysis-result").classList.add("danger")
+            }
+            document.querySelector(".analysis-summary").innerHTML = data.content.summary
+            document.querySelector(".analysis_pill").innerHTML = `<p>${data.content.pill_names}</p>`
+            return;
+        }
+    }
+    
+    
 async function fetchWeather(url) {
   console.log('[Weather] Fetching:', url);
   const response = await fetch(url);
@@ -330,6 +352,7 @@ async function loadWeatherInfo() {
 document.addEventListener('DOMContentLoaded', () => {
   loadWeatherInfo();
   loadHealthInsights();
+  get_latest_day_uploads();
 });
 </script>
 {% endblock %}

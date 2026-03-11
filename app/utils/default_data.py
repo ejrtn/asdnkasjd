@@ -471,10 +471,10 @@ class DefaultData:
         ocr_texts = ["AMLO 5", "METFO 500", "LIPITOR 10"]
         for i, text in enumerate(ocr_texts):
             past_front, _ = await Upload.get_or_create(
-                user=user, file_path=f"/static/past_front_{i}.png", file_type="png", category="pill_front"
+                user=user, file_path=f"/static/past_{i}_front.png", file_type="png", category="pill_front"
             )
             past_back, _ = await Upload.get_or_create(
-                user=user, file_path=f"/static/past_back_{i}.png", file_type="png", category="pill_back"
+                user=user, file_path=f"/static/past_{i}_back.png", file_type="png", category="pill_back"
             )
             await OCRHistory.get_or_create(
                 user=user,

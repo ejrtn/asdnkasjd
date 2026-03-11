@@ -256,10 +256,20 @@
   border-radius: 4px;
   display: inline-block;
 }
-
-.analysis-result.safe {
-  background: #d4edda;
-  color: #155724;
+.analysis-result.safe{
+  background: green;
+  margin-bottom: 7px;
+}
+.analysis-result.caution{
+  background: orange;
+  margin-bottom: 7px;
+}
+.analysis-result.danger{
+  background: red;
+  margin-bottom: 7px;
+}
+.analysis-summary{
+  margin-bottom: 7px;
 }
 
 /* Insights */
