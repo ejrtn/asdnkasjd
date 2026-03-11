@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.dependencies.security import get_request_user
+from app.dtos.health import DashboardHealthMetricSummaryResponse
 from app.models.user import User
 from app.repositories.health_profile import HealthProfileRepository
 from app.services.dashboard import DashboardService
@@ -84,6 +85,15 @@ async def get_dashboard_summary(user: Annotated[User, Depends(get_request_user)]
         "next_alarm_minutes": 192,
         "analysis": {"title": "처방전 분석 완료", "result": "약물 상호작용 없음", "status": "safe"},
     }
+
+
+@router.get("/health-metric-summary", response_model=DashboardHealthMetricSummaryResponse)
+async def get_health_metric_summary(
+    user: Annotated[User, Depends(get_request_user)],
+):
+    """오늘 혈압/혈당 기록 요약"""
+    service = DashboardService()
+    return await service.generate_health_metric_summary(user)
 
 
 @router.get("/insights")

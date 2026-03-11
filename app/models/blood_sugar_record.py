@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class GlucoseMeasureType(StrEnum):
     FASTING = "공복"  # 공복
-    AFTER_MEAL = "점심 후 2시간"  # 식후 2시간
+    AFTER_MEAL = "식후 2시간"  # 식후 2시간
     BEDTIME = "취침 전"  # 취침 전
     RANDOM = "임의"  # 임의
 

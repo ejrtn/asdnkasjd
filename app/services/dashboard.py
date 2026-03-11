@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
 from openai import AsyncOpenAI
 
@@ -10,6 +11,43 @@ from app.models.health_profile import HealthProfile
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
+
+KST = timezone(timedelta(hours=9))
+
+
+def get_bp_value_class(systolic: int, diastolic: int) -> str:
+    """혈압 값 상태 클래스 반환"""
+    if systolic >= 140 or diastolic >= 90:
+        return "danger"
+    if systolic >= 120 or diastolic >= 80:
+        return "caution"
+    return "normal"
+
+
+def get_bs_value_class(measure_type: str, glucose: float) -> str:
+    """혈당 값 상태 클래스 반환"""
+    if measure_type == "공복":
+        if 70 <= glucose <= 100:
+            return "normal"
+        if 101 <= glucose <= 125:
+            return "caution"
+        return "danger"
+
+    if measure_type == "식후 2시간":
+        if glucose < 140:
+            return "normal"
+        if glucose < 200:
+            return "caution"
+        return "danger"
+
+    if measure_type == "취침 전":
+        if 100 <= glucose <= 140:
+            return "normal"
+        if 141 <= glucose <= 180:
+            return "caution"
+        return "danger"
+
+    return "pending"
 
 
 class DashboardService:
@@ -92,4 +130,93 @@ class DashboardService:
                     "스트레칭 3분이면 몸이 훨씬 편해져요.",
                     "잠들기 30분 전 화면을 줄이면 숙면에 도움돼요.",
                 ],
+            }
+
+    async def generate_health_metric_summary(self, user: User) -> dict:
+        """오늘 혈압/혈당 기록 요약 반환"""
+        try:
+            today_kst = datetime.now(KST).date()
+
+            bp_records = await BloodPressureRecord.filter(user=user).order_by("-created_at").limit(30)
+            bs_records = await BloodSugarRecord.filter(user=user).order_by("-created_at").limit(45)
+
+            def is_today_kst(dt):
+                return dt.astimezone(KST).date() == today_kst
+
+            today_bp = [r for r in bp_records if r.measure_type != "임의" and is_today_kst(r.created_at)]
+            today_bs = [r for r in bs_records if r.measure_type != "임의" and is_today_kst(r.created_at)]
+
+            def latest_by_type(records, measure_type):
+                for r in records:
+                    if r.measure_type == measure_type:
+                        return r
+                return None
+
+            morning = latest_by_type(today_bp, "아침")
+            evening = latest_by_type(today_bp, "저녁")
+
+            fasting = latest_by_type(today_bs, "공복")
+            postmeal = latest_by_type(today_bs, "식후 2시간")
+            bedtime = latest_by_type(today_bs, "취침 전")
+
+            return {
+                "blood_pressure": {
+                    "title": "오늘 혈압 기록",
+                    "items": [
+                        {
+                            "label": "아침",
+                            "value": f"{morning.systolic} / {morning.diastolic} mmHg" if morning else "미기록",
+                            "status": "recorded" if morning else "pending",
+                            "value_class": get_bp_value_class(morning.systolic, morning.diastolic) if morning else "pending",
+                        },
+                        {
+                            "label": "저녁",
+                            "value": f"{evening.systolic} / {evening.diastolic} mmHg" if evening else "미기록",
+                            "status": "recorded" if evening else "pending",
+                            "value_class": get_bp_value_class(evening.systolic, evening.diastolic) if evening else "pending",
+                        },
+                    ],
+                },
+                "blood_sugar": {
+                    "title": "오늘 혈당 기록",
+                    "items": [
+                        {
+                            "label": "공복",
+                            "value": f"{int(fasting.glucose_mg_dl)} mg/dL" if fasting else "미기록",
+                            "status": "recorded" if fasting else "pending",
+                            "value_class": get_bs_value_class("공복", fasting.glucose_mg_dl) if fasting else "pending",
+                        },
+                        {
+                            "label": "식후 2시간",
+                            "value": f"{int(postmeal.glucose_mg_dl)} mg/dL" if postmeal else "미기록",
+                            "status": "recorded" if postmeal else "pending",
+                            "value_class": get_bs_value_class("식후 2시간", postmeal.glucose_mg_dl) if postmeal else "pending",
+                        },
+                        {
+                            "label": "취침 전",
+                            "value": f"{int(bedtime.glucose_mg_dl)} mg/dL" if bedtime else "미기록",
+                            "status": "recorded" if bedtime else "pending",
+                            "value_class": get_bs_value_class("취침 전", bedtime.glucose_mg_dl) if bedtime else "pending",
+                        },
+                    ],
+                },
+            }
+        except Exception as e:
+            logger.error(f"Failed to generate health metric summary: {e}")
+            return {
+                "blood_pressure": {
+                    "title": "오늘 혈압 기록",
+                    "items": [
+                        {"label": "아침", "value": "미기록", "status": "pending", "value_class": "pending"},
+                        {"label": "저녁", "value": "미기록", "status": "pending", "value_class": "pending"},
+                    ],
+                },
+                "blood_sugar": {
+                    "title": "오늘 혈당 기록",
+                    "items": [
+                        {"label": "공복", "value": "미기록", "status": "pending", "value_class": "pending"},
+                        {"label": "식후 2시간", "value": "미기록", "status": "pending", "value_class": "pending"},
+                        {"label": "취침 전", "value": "미기록", "status": "pending", "value_class": "pending"},
+                    ],
+                },
             }

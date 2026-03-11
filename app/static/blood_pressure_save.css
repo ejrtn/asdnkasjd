@@ -1,0 +1,16 @@
+/* =========================
+   Blood Pressure Specific Styles
+   혈압 전용 스타일 (아이콘만)
+========================= */
+
+.pressure-icon-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+}
+
+.pressure-icon-chart {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.pressure-icon-record {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}

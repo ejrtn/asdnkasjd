@@ -121,6 +121,26 @@ body.zoom-large .dashboard-card {
   min-height: 220px;
   padding: 24px;
 }
+
+body.zoom-large .metric-card-title {
+  font-size: 16px;
+}
+
+body.zoom-large .metric-stream-badge {
+  font-size: 14px;
+  padding: 8px 14px;
+  min-height: 32px;
+}
+
+body.zoom-large .metric-stream-value {
+  font-size: 16px;
+}
+
+body.zoom-large .metric-select {
+  font-size: 15px;
+  min-height: 42px;
+  padding: 0 42px 0 16px;
+}
 </style>
 {% endblock %}
 
@@ -182,16 +202,49 @@ body.zoom-large .dashboard-card {
     </div>
     <div class="card-content">
       <div id="blood-pressure-data" class="metric-data active">
-        <div class="metric-value">132 / 84 mmHg</div>
-        <div class="metric-label">최근 7일 평균</div>
-        <div class="metric-chart">📊</div>
-        <div class="metric-status">지난주 대비 큰 변동 없음</div>
+        <div class="metric-block">
+          <div class="metric-card-title">오늘 혈압 기록</div>
+          <div class="metric-stream" id="dashboard-bp-list">
+            <div class="metric-stream-item">
+              <div class="metric-stream-main">
+                <div class="metric-stream-badge">아침</div>
+                <div class="metric-stream-value pending">미기록</div>
+              </div>
+            </div>
+            <div class="metric-stream-item">
+              <div class="metric-stream-main">
+                <div class="metric-stream-badge">저녁</div>
+                <div class="metric-stream-value pending">미기록</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
       <div id="blood-sugar-data" class="metric-data">
-        <div class="metric-value">108 mg/dL</div>
-        <div class="metric-label">최근 7일 평균 공복</div>
-        <div class="metric-chart">📊</div>
-        <div class="metric-status">최근 3일 소폭 상승</div>
+        <div class="metric-block">
+          <div class="metric-card-title">오늘 혈당 기록</div>
+          <div class="metric-stream" id="dashboard-bs-list">
+            <div class="metric-stream-item">
+              <div class="metric-stream-main">
+                <div class="metric-stream-badge">공복</div>
+                <div class="metric-stream-value pending">미기록</div>
+              </div>
+            </div>
+            <div class="metric-stream-item">
+              <div class="metric-stream-main">
+                <div class="metric-stream-badge">식후 2시간</div>
+                <div class="metric-stream-value pending">미기록</div>
+              </div>
+            </div>
+            <div class="metric-stream-item">
+              <div class="metric-stream-main">
+                <div class="metric-stream-badge">취침 전</div>
+                <div class="metric-stream-value pending">미기록</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

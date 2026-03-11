@@ -1,344 +1,192 @@
 {% extends "base.html" %}
 
-{% block title %}Cloud9 Care - 혈압 기록{% endblock %}
+{% block title %}Cloud9 Care - 혈압 수첩{% endblock %}
 
 {% block head %}
-<style>
-    .health-profile-page-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-    
-    .health-profile-page-container .bp-chart-card{
-        height: 500px;
-        width: 500px;
-    }
-    .health-profile-page-container .bp-chart-card #bpChart{
-        height: 500px;
-        width: 500px;
-        background-color: white;
-        padding: 10px;
-    }
-
-    .health-profile-page-container .section-card {
-        background: #ffffff;
-        padding: 25px;
-        margin-bottom: 47px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .health-profile-page-container h3 {
-        margin-bottom: 20px;
-        color: #1e293b;
-    }
-
-    .health-profile-page-container .form-group {
-        margin-bottom: 15px;
-    }
-
-    .health-profile-page-container label {
-        font-weight: 600;
-        display: block;
-        margin-bottom: 5px;
-        color: #475569;
-    }
-
-    .health-profile-page-container input,
-    .health-profile-page-container select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        box-sizing: border-box;
-        font-size: 16px;
-    }
-
-    .health-profile-page-container .blood_pressure_save {
-        padding: 12px 24px;
-        border-radius: 8px;
-        border: none;
-        background-color: #2d6cdf;
-        color: white;
-        font-weight: 600;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .health-profile-page-container .blood_pressure_save:hover {
-        background-color: #1e4ea1;
-    }
-
-    .back-link {
-        margin-bottom: 20px;
-        display: inline-flex;
-        align-items: center;
-        color: #64748b;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .back-link:hover {
-        color: #2d6cdf;
-    }
-</style>
+<link rel="stylesheet" href="/static/blood_notebook.css">
+<link rel="stylesheet" href="/static/blood_pressure_save.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="health-profile-page-container">
-    <!-- 왼쪽 그래프 -->
-    <div class="bp-chart-card">
-        <h3>최근 15일 혈압</h3>
-        <canvas id="bpChart"></canvas>
+<div class="page-wrap notebook-page pressure-page">
+  <section class="c9-page-header">
+    <div>
+      <h1 class="c9-page-title">혈압 수첩</h1>
+      <p class="c9-muted pressure-page-desc">
+        아침 · 저녁 혈압 기록을 저장하고 최근 변화를 확인해 혈압 관리 루틴을 꾸준히 이어가세요.
+      </p>
     </div>
-    
 
-    <div class="bp-layout">
+    <div class="notebook-header-meta pressure-header-meta">
+      <div class="notebook-mode-tabs pressure-mode-tabs" role="tablist" aria-label="혈압 수첩 화면 모드">
+        <button
+          type="button"
+          class="notebook-mode-tab pressure-mode-tab is-active"
+          id="pressure-mode-tab-save"
+          onclick="switchPressureMode('save', this)">
+          기록 저장
+        </button>
+        <button
+          type="button"
+          class="notebook-mode-tab pressure-mode-tab"
+          id="pressure-mode-tab-view"
+          onclick="switchPressureMode('view', this)">
+          기록 보기
+        </button>
+      </div>
+    </div>
+  </section>
 
-        <!-- 오른쪽 입력 -->
-        <div class="section-card">
-            <h3>혈압 기록 추가</h3>
-
-            <div class="form-group">
-                <label>수축기 (mmHg)</label>
-                <input type="number" class="systolic" placeholder="예: 120">
-            </div>
-
-            <div class="form-group">
-                <label>이완기 (mmHg)</label>
-                <input type="number" class="diastolic" placeholder="예: 80">
-            </div>
-
-            <div class="form-group">
-                <label>측정 시각</label>
-                <select class="bp_measure_type">
-                    <option style="display:none;">측정 시각 선택</option>
-                    <option>아침</option>
-                    <option>저녁</option>
-                    <option>임의</option>
-                </select>
-            </div>
-
-            <button class="blood_pressure_save">저장하기</button>
+  <!-- 저장 모드 -->
+  <div id="pressure-mode-save" class="notebook-mode-panel pressure-mode-panel active">
+    <div class="notebook-save-grid pressure-save-grid two-col">
+      <!-- 좌측: 기록 추가 -->
+      <section class="c9-soft-card notebook-card pressure-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon pressure-icon-primary">🩺</span>
+            혈압 기록 추가
+          </h3>
+          <span class="c9-badge c9-badge-primary">빠른 저장</span>
         </div>
 
+        <div class="notebook-form-grid two-col pressure-form-grid">
+          <div class="notebook-field pressure-field">
+            <label for="systolic-input">수축기 (mmHg)</label>
+            <input
+              id="systolic-input"
+              class="notebook-input pressure-input"
+              type="number"
+              placeholder="예: 120">
+          </div>
+
+          <div class="notebook-field pressure-field">
+            <label for="diastolic-input">이완기 (mmHg)</label>
+            <input
+              id="diastolic-input"
+              class="notebook-input pressure-input"
+              type="number"
+              placeholder="예: 80">
+          </div>
+
+          <div class="notebook-field pressure-field full-row">
+            <label>측정 시각</label>
+            <div class="notebook-chip-group pressure-chip-group" id="save-pressure-chip-group">
+              <button type="button" class="notebook-chip pressure-chip" data-value="아침" onclick="selectSavePressureType('아침', this)">아침</button>
+              <button type="button" class="notebook-chip pressure-chip" data-value="저녁" onclick="selectSavePressureType('저녁', this)">저녁</button>
+            </div>
+          </div>
+
+          <div class="full-row">
+            <button type="button" class="notebook-submit-btn pressure-submit-btn" onclick="submitBloodPressure()">혈압 기록 저장</button>
+            <div id="pressure-save-feedback" class="notebook-feedback inline-feedback"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 우측: 정보 카드 -->
+      <section class="c9-soft-card notebook-card notebook-guide-card">
+        <div class="guide-section">
+          <h4>오늘 기록 상태</h4>
+          <div class="guide-row">
+            <span>아침</span>
+            <span class="guide-badge pending" id="guide-morning">미기록</span>
+          </div>
+          <div class="guide-row">
+            <span>저녁</span>
+            <span class="guide-badge pending" id="guide-evening">미기록</span>
+          </div>
+        </div>
+
+        <div class="guide-divider"></div>
+
+        <div class="guide-section">
+          <h4>혈압 정상 범위</h4>
+          <div class="guide-row">
+            <span>정상</span>
+            <span>&lt; 120 / &lt; 80 mmHg</span>
+          </div>
+          <div class="guide-row">
+            <span>높을 정상</span>
+            <span>120-139 / 80-89 mmHg</span>
+          </div>
+          <div class="guide-row">
+            <span>고혈압</span>
+            <span>≥ 140 / ≥ 90 mmHg</span>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
+
+  <!-- 보기 모드 -->
+  <div id="pressure-mode-view" class="notebook-mode-panel pressure-mode-panel">
+    <div class="notebook-view-grid pressure-view-grid">
+      <section class="notebook-summary-cards">
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">가장 최근 기록</div>
+          <div class="notebook-summary-value" id="pressure-summary-latest-value">-</div>
+          <div class="notebook-summary-sub" id="pressure-summary-latest-meta">최근 기록이 없습니다.</div>
+        </div>
+
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">최근 7건 평균</div>
+          <div class="notebook-summary-value" id="pressure-summary-average-value">-</div>
+          <div class="notebook-summary-sub" id="pressure-summary-average-meta">측정 시각을 선택하면 평균을 확인할 수 있어요.</div>
+        </div>
+
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">현재 필터</div>
+          <div class="notebook-summary-value" id="pressure-summary-filter-value">전체</div>
+          <div class="notebook-summary-sub">전체 · 아침 · 저녁</div>
+        </div>
+      </section>
+
+      <section class="c9-soft-card notebook-chart-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon pressure-icon-chart">📈</span>
+            최근 혈압 추이
+          </h3>
+          <span class="c9-badge c9-badge-slate">최근 기록 기준</span>
+        </div>
+
+        <div class="notebook-filter-row" id="view-pressure-filter-chip-group">
+          <button type="button" class="notebook-chip pressure-chip is-active" data-filter="전체" onclick="applyPressureFilter('전체', this)">전체</button>
+          <button type="button" class="notebook-chip pressure-chip" data-filter="아침" onclick="applyPressureFilter('아침', this)">아침</button>
+          <button type="button" class="notebook-chip pressure-chip" data-filter="저녁" onclick="applyPressureFilter('저녁', this)">저녁</button>
+        </div>
+
+        <div class="notebook-chart-wrap">
+          <canvas id="pressureChart"></canvas>
+        </div>
+      </section>
+
+      <section class="c9-soft-card notebook-card pressure-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon pressure-icon-record">🗂️</span>
+            최근 기록
+          </h3>
+          <span class="c9-badge c9-badge-slate" id="pressure-record-list-badge">아침 보기</span>
+        </div>
+
+        <div class="notebook-record-filter-row" id="pressure-record-filter-chip-group">
+          <button type="button" class="notebook-chip pressure-chip is-active" onclick="applyPressureRecordFilter('아침', this)">아침</button>
+          <button type="button" class="notebook-chip pressure-chip" onclick="applyPressureRecordFilter('저녁', this)">저녁</button>
+        </div>
+
+        <div id="pressure-record-list" class="notebook-record-list">
+          <div class="notebook-empty">혈압 기록을 불러오는 중입니다.</div>
+        </div>
+      </section>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // 공통 API 요청 함수는 base.html에서 제공됨
-    let bpChart = null;
-    document.querySelector(".blood_pressure_save").addEventListener("click", async () => {
-        const systolic = document.querySelector(".systolic").value;
-        const diastolic = document.querySelector(".diastolic").value;
-        const measure_type = document.querySelector(".bp_measure_type").value;
-
-        if (!systolic) {
-            alert("수축기 (mmHg) 기록해주세요.")
-            return;
-        }
-        if (!diastolic) {
-            alert("이완기 (mmHg) 기록해주세요.")
-            return;
-        }
-        if (measure_type == '측정 시각 선택' || !measure_type) {
-            alert("측정 시각 선택해주세요.")
-            return;
-        }
-
-        const data = {
-            systolic: systolic,
-            diastolic: diastolic,
-            measure_type: measure_type
-        }
-
-        const response = await fetchWithAuth('/api/v1/health/blood-pressure', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response) return;
-
-        if (response.status === 409) {
-            const result = await response.json();
-            alert(result.detail);
-            return;
-        }
-
-        if (!response.ok) {
-            console.error("API Error:", response.status);
-            alert("에러가 발생했습니다.");
-            return;
-        }
-
-        const result = await response.json();
-        alert("혈압 기록이 저장되었습니다.");
-        loadBloodPressureChart();
-    })
-    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
-    async function fetchWithAuth(url, options = {}) {
-        let accessToken = localStorage.getItem("access_token");
-        const id = localStorage.getItem("user_id");
-        if (!options.headers) options.headers = {};
-        if (accessToken) {
-            options.headers["Authorization"] = `Bearer ${accessToken}`;
-        }
-        let response = await fetch(url, options);
-        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
-        if (response.status === 401) {
-            console.log("액세스 토큰 만료, 갱신 시도 중...");
-            const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
-            if (refreshResponse.ok) {
-                const result = await refreshResponse.json();
-                accessToken = result.access_token;
-                localStorage.setItem("access_token", accessToken);
-                // 새 토큰으로 원래 요청 재시도
-                options.headers["Authorization"] = `Bearer ${accessToken}`;
-                response = await fetch(url, options);
-            } else {
-                // 리프레시 토큰도 만료된 경우
-                alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("user_id");
-                location.href = "/login";
-                return null;
-            }
-        }
-        return response;
-    }
-
-    async function loadBloodPressureChart() {
-        const token = localStorage.getItem("access_token");
-
-        const response = await fetchWithAuth(`/api/v1/health/blood-pressure`, { method: 'GET' });
-
-        if (!response || !response.ok) {
-            console.error("혈압 데이터 조회 실패");
-            return;
-        }
-
-        const result = await response.json();
-
-        const labels = result.map((v, index) => {
-            // 5개 단위(0, 5, 10...)로만 라벨을 표시하고 나머지는 빈값
-            if (index % 5 !== 0 && index !== result.length - 1) return ""; 
-
-            return new Intl.DateTimeFormat('ko-KR', {
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            }).format(new Date(v.created_at));
-        });
-        const systolic = result.map(v => v.systolic);
-        const diastolic = result.map(v => v.diastolic);
-
-        const ctx = document.getElementById('bpChart');
-
-        // 기존 차트 삭제
-        if (bpChart) {
-            bpChart.destroy();
-        }
-        
-        bpChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels, // 위에서 가공한 ["03.01", "", "", "", "03.06"] 형태의 배열
-                datasets: [
-                    {
-                        label: '수축기',
-                        data: systolic,
-                        borderColor: '#ef4444', // 빨간색
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 3
-                    },
-                    {
-                        label: '이완기',
-                        data: diastolic,
-                        borderColor: '#3b82f6', // 파란색
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 10,
-                        callbacks: {
-                            // 마우스 올렸을 때 날짜/시간 상세 표시
-                            title: function(context) {
-                                const index = context[0].dataIndex;
-                                const data = result[index]; // API로 받아온 원본 데이터 배열
-                                const date = new Date(data.created_at);
-                                return date.toLocaleString('ko-KR', {
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                });
-                            },
-                            // 측정 타입(오전/오후)과 수치 표시
-                            label: function(context) {
-                                const index = context.dataIndex;
-                                const data = result[index];
-                                const type = data.measure_type === 'MORNING' ? '오전' : '오후';
-                                return ` ${context.dataset.label} (${type}): ${context.parsed.y} mmHg`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: true,          // 세로줄 표시
-                            color: 'rgba(0, 0, 0, 0.1)', // 아주 연한 회색 (투명도 0.05)
-                            lineWidth: 0.5,         // 선 두께를 0.5로 매우 얇게
-                            drawTicks: false,       // 축 바깥으로 튀어나오는 짧은 선 제거
-                        },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 6,
-                            maxRotation: 0,
-                            padding: 10             // 라벨과 그래프 사이 간격
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)', // 가로줄도 동일하게 얇고 연하게
-                            lineWidth: 0.5,
-                            drawBorder: false       // 맨 왼쪽 테두리 선 제거 (선택 사항)
-                        },
-                        suggestedMin: 60,
-                        suggestedMax: 140,
-                        ticks: {
-                            padding: 10
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    loadBloodPressureChart();
-</script>
+<script src="/static/blood_notebook.js"></script>
+<script src="/static/blood_pressure_save.js"></script>
 {% endblock %}

@@ -1,317 +1,189 @@
 {% extends "base.html" %}
 
-{% block title %}Cloud9 Care - 혈당 기록{% endblock %}
+{% block title %}Cloud9 Care - 혈당 수첩{% endblock %}
 
 {% block head %}
-<style>
-    .health-profile-page-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .health-profile-page-container .bp-chart-card{
-        height: 500px;
-        width: 500px;
-    }
-    .health-profile-page-container .bp-chart-card #bpChart{
-        height: 500px;
-        width: 500px;
-        background-color: white;
-        padding: 10px;
-    }
-
-    .health-profile-page-container .section-card {
-        background: #ffffff;
-        padding: 25px;
-        margin-bottom: 126px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .health-profile-page-container h3 {
-        margin-bottom: 20px;
-        color: #1e293b;
-    }
-
-    .health-profile-page-container .form-group {
-        margin-bottom: 15px;
-    }
-
-    .health-profile-page-container label {
-        font-weight: 600;
-        display: block;
-        margin-bottom: 5px;
-        color: #475569;
-    }
-
-    .health-profile-page-container input,
-    .health-profile-page-container select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        box-sizing: border-box;
-        font-size: 16px;
-    }
-
-    .health-profile-page-container .blood_sugar_save {
-        padding: 12px 24px;
-        border-radius: 8px;
-        border: none;
-        background-color: #2d6cdf;
-        color: white;
-        font-weight: 600;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .health-profile-page-container .blood_sugar_save:hover {
-        background-color: #1e4ea1;
-    }
-
-    .back-link {
-        margin-bottom: 20px;
-        display: inline-flex;
-        align-items: center;
-        color: #64748b;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .back-link:hover {
-        color: #2d6cdf;
-    }
-</style>
+<link rel="stylesheet" href="/static/blood_notebook.css">
+<link rel="stylesheet" href="/static/blood_sugar_save.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="health-profile-page-container">
-    <!-- 왼쪽 그래프 -->
-    <div class="bp-chart-card">
-        <h3>최근 15일 혈당</h3>
-        <canvas id="bpChart"></canvas>
+<div class="page-wrap notebook-page sugar-page">
+  <section class="c9-page-header">
+    <div>
+      <h1 class="c9-page-title">혈당 수첩</h1>
+      <p class="c9-muted sugar-page-desc">
+        혈당 기록을 저장하고 공복 · 식후 · 취침 전 패턴을 확인해 더 정확한 건강 관리를 이어가세요.
+      </p>
     </div>
-    
-    <div class="bp-layout">
 
-        <div class="section-card">
-            <h3>혈당 기록 추가</h3>
+    <div class="notebook-header-meta sugar-header-meta">
+      <div class="notebook-mode-tabs sugar-mode-tabs" role="tablist" aria-label="혈당 수첩 화면 모드">
+        <button
+          type="button"
+          class="notebook-mode-tab sugar-mode-tab is-active"
+          id="sugar-mode-tab-save"
+          onclick="switchSugarMode('save', this)">
+          기록 저장
+        </button>
+        <button
+          type="button"
+          class="notebook-mode-tab sugar-mode-tab"
+          id="sugar-mode-tab-view"
+          onclick="switchSugarMode('view', this)">
+          기록 보기
+        </button>
+      </div>
+    </div>
+  </section>
 
-            <div class="form-group">
-                <label>혈당 (mg/dL)</label>
-                <input type="number" step="0.1" class="glucose_mg_dl" name="glucose_mg_dl" placeholder="예: 95" required>
-            </div>
-            <div class="form-group">
-                <label>측정 상황</label>
-                <select name="measure_type" required>
-                    <option style="display: none;">측정 상황 선택</option>
-                    <option>임의</option>
-                    <option>공복</option>
-                    <option>점심 후 2시간</option>
-                    <option>취침 전</option>
-                </select>
-            </div>
-            <button class="blood_sugar_save">저장하기</button>
+  <!-- 저장 모드 -->
+  <div id="sugar-mode-save" class="notebook-mode-panel sugar-mode-panel active">
+    <div class="notebook-save-grid sugar-save-grid two-col">
+      <!-- 좌측: 기록 추가 -->
+      <section class="c9-soft-card notebook-card sugar-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon sugar-icon-primary">🩸</span>
+            혈당 기록 추가
+          </h3>
+          <span class="c9-badge c9-badge-primary">빠른 저장</span>
         </div>
+
+        <div class="notebook-form-grid sugar-form-grid">
+          <div class="notebook-field sugar-field">
+            <label for="glucose-input">혈당 (mg/dL)</label>
+            <input
+              id="glucose-input"
+              class="notebook-input sugar-input"
+              type="number"
+              step="0.1"
+              placeholder="예: 95">
+          </div>
+
+          <div class="notebook-field sugar-field">
+            <label>측정 상황</label>
+            <div class="notebook-chip-group sugar-chip-group" id="save-measure-chip-group">
+              <button type="button" class="notebook-chip sugar-chip" data-value="공복" onclick="selectSaveMeasureType('공복', this)">공복</button>
+              <button type="button" class="notebook-chip sugar-chip" data-value="식후 2시간" onclick="selectSaveMeasureType('식후 2시간', this)">식후 2시간</button>
+              <button type="button" class="notebook-chip sugar-chip" data-value="취침 전" onclick="selectSaveMeasureType('취침 전', this)">취침 전</button>
+            </div>
+          </div>
+
+          <button type="button" class="notebook-submit-btn sugar-submit-btn" onclick="submitBloodSugar()">혈당 기록 저장</button>
+
+          <div id="sugar-save-feedback" class="notebook-feedback inline-feedback"></div>
+        </div>
+      </section>
+
+      <!-- 우측: 정보 카드 -->
+      <section class="c9-soft-card notebook-card notebook-guide-card">
+        <div class="guide-section">
+          <h4>오늘 기록 상태</h4>
+          <div class="guide-row">
+            <span>공복</span>
+            <span class="guide-badge pending" id="guide-fasting">미기록</span>
+          </div>
+          <div class="guide-row">
+            <span>식후 2시간</span>
+            <span class="guide-badge pending" id="guide-postmeal">미기록</span>
+          </div>
+          <div class="guide-row">
+            <span>취침 전</span>
+            <span class="guide-badge pending" id="guide-bedtime">미기록</span>
+          </div>
+        </div>
+
+        <div class="guide-divider"></div>
+
+        <div class="guide-section">
+          <h4>혈당 정상 범위</h4>
+          <div class="guide-row">
+            <span>공복</span>
+            <span>70 ~ 100 mg/dL</span>
+          </div>
+          <div class="guide-row">
+            <span>식후 2시간</span>
+            <span>&lt; 140 mg/dL</span>
+          </div>
+          <div class="guide-row">
+            <span>취침 전</span>
+            <span>100 ~ 140 mg/dL</span>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
+
+  <div id="sugar-mode-view" class="notebook-mode-panel sugar-mode-panel">
+    <div class="notebook-view-grid sugar-view-grid">
+      <section class="notebook-summary-cards">
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">가장 최근 기록</div>
+          <div class="notebook-summary-value" id="summary-latest-value">-</div>
+          <div class="notebook-summary-sub" id="summary-latest-meta">최근 기록이 없습니다.</div>
+        </div>
+
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">최근 7건 평균</div>
+          <div class="notebook-summary-value" id="summary-average-value">-</div>
+          <div class="notebook-summary-sub" id="summary-average-meta">측정 상황을 선택하면 평균을 확인할 수 있어요.</div>
+        </div>
+
+        <div class="notebook-summary-card">
+          <div class="notebook-summary-label">현재 필터</div>
+          <div class="notebook-summary-value" id="summary-filter-value">전체</div>
+          <div class="notebook-summary-sub">공복 · 식후 2시간 · 취침 전</div>
+        </div>
+      </section>
+
+      <section class="c9-soft-card notebook-chart-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon sugar-icon-chart">📈</span>
+            최근 혈당 추이
+          </h3>
+          <span class="c9-badge c9-badge-slate">최근 기록 기준</span>
+        </div>
+
+        <div class="notebook-filter-row" id="view-filter-chip-group">
+          <button type="button" class="notebook-chip sugar-chip is-active" data-filter="전체" onclick="applySugarFilter('전체', this)">전체</button>
+          <button type="button" class="notebook-chip sugar-chip" data-filter="공복" onclick="applySugarFilter('공복', this)">공복</button>
+          <button type="button" class="notebook-chip sugar-chip" data-filter="식후 2시간" onclick="applySugarFilter('식후 2시간', this)">식후 2시간</button>
+          <button type="button" class="notebook-chip sugar-chip" data-filter="취침 전" onclick="applySugarFilter('취침 전', this)">취침 전</button>
+        </div>
+
+        <div class="notebook-chart-wrap">
+          <canvas id="sugarChart"></canvas>
+        </div>
+      </section>
+
+      <section class="c9-soft-card notebook-card sugar-card">
+        <div class="c9-section-head">
+          <h3 class="c9-section-title">
+            <span class="c9-section-title-icon sugar-icon-record">🗂️</span>
+            최근 기록
+          </h3>
+          <span class="c9-badge c9-badge-slate" id="record-list-badge">공복 보기</span>
+        </div>
+
+        <div class="notebook-record-filter-row" id="sugar-record-filter-chip-group">
+          <button type="button" class="notebook-chip sugar-chip is-active" onclick="applySugarRecordFilter('공복', this)">공복</button>
+          <button type="button" class="notebook-chip sugar-chip" onclick="applySugarRecordFilter('식후 2시간', this)">식후 2시간</button>
+          <button type="button" class="notebook-chip sugar-chip" onclick="applySugarRecordFilter('취침 전', this)">취침 전</button>
+        </div>
+
+        <div id="sugar-record-list" class="notebook-record-list">
+          <div class="notebook-empty">혈당 기록을 불러오는 중입니다.</div>
+        </div>
+      </section>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // 공통 API 요청 함수는 base.html에서 제공됨
-    let bpChart = null
-    document.querySelector(".blood_sugar_save").addEventListener("click", async () => {
-        const glucose_mg_dl = document.querySelector(".glucose_mg_dl").value;
-        const measure_type = document.querySelector("select[name='measure_type']").value;
-
-        if (!glucose_mg_dl) {
-            alert("혈당 (mg/dL) 기록해주세요.")
-            return;
-        }
-        if (measure_type == '측정 상황 선택' || !measure_type) {
-            alert("측정 상황 선택해주세요.")
-            return;
-        }
-
-        const data = {
-            glucose_mg_dl: glucose_mg_dl,
-            measure_type: measure_type
-        }
-
-        const response = await fetchWithAuth('/api/v1/health/blood-sugar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response) return;
-
-        if (response.status === 409) {
-            const result = await response.json();
-            alert(result.detail);
-            return;
-        }
-
-        if (!response.ok) {
-            console.error("API Error:", response.status);
-            alert("에러가 발생했습니다.");
-            return;
-        }
-
-        const result = await response.json();
-        alert("혈당 기록이 저장되었습니다.");
-        loadBloodSugarChart();
-    })
-
-    // 공통 API 요청 함수 (토큰 만료 시 자동 갱신 로직 포함)
-    async function fetchWithAuth(url, options = {}) {
-        let accessToken = localStorage.getItem("access_token");
-        const id = localStorage.getItem("user_id");
-        if (!options.headers) options.headers = {};
-        if (accessToken) {
-            options.headers["Authorization"] = `Bearer ${accessToken}`;
-        }
-        let response = await fetch(url, options);
-        // 토큰이 만료되었을 때 (401) 자동 갱신 시도
-        if (response.status === 401) {
-            console.log("액세스 토큰 만료, 갱신 시도 중...");
-            const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
-            if (refreshResponse.ok) {
-                const result = await refreshResponse.json();
-                accessToken = result.access_token;
-                localStorage.setItem("access_token", accessToken);
-                // 새 토큰으로 원래 요청 재시도
-                options.headers["Authorization"] = `Bearer ${accessToken}`;
-                response = await fetch(url, options);
-            } else {
-                // 리프레시 토큰도 만료된 경우
-                alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("user_id");
-                location.href = "/login";
-                return null;
-            }
-        }
-        return response;
-    }
-
-    async function loadBloodSugarChart() {
-        const token = localStorage.getItem("access_token");
-
-        // 1. API 호출 (혈당 데이터)
-        const response = await fetchWithAuth(`/api/v1/health/blood-sugar`, { method: 'GET' });
-
-        if (!response || !response.ok) {
-            console.error("데이터 조회 실패");
-            return;
-        }
-
-        const result = await response.json();
-
-        // 2. 라벨 가공 (30개 데이터 대응)
-        const labels = result.map((v, index) => {
-            const date = new Date(v.created_at);
-            
-            // 데이터가 30개이므로 5개 단위(약 2~3일 간격)로만 라벨을 표시
-            if (index % 5 !== 0 && index !== result.length - 1) return "";
-
-            return new Intl.DateTimeFormat('ko-KR', {
-                month: '2-digit',
-                day: '2-digit'
-            }).format(date);
-        });
-
-        // 3. 데이터 추출 (변수명 일치시킴)
-        const glucoseValues = result.map(v => v.glucose_mg_dl);
-
-        const ctx = document.getElementById('bpChart'); // ID가 bpChart라면 그대로 유지
-
-        // 기존 차트 삭제
-        if (bpChart) {
-            bpChart.destroy();
-        }
-
-        // 4. 차트 생성
-        bpChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '혈당 (mg/dL)',
-                        data: glucoseValues, // 위에서 정의한 변수명과 일치시켜야 함
-                        borderColor: '#3b82f6', // 혈당은 보통 파란색 계열 사용
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 2 // 점 크기를 줄여서 30개가 덜 복잡해보이게 함
-                    },
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                        // 툴팁 디자인 및 내용 설정
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)', // 배경색 진하게
-                        padding: 10,
-                        callbacks: {
-                            // 1. 툴팁 제목: 날짜와 시간을 상세히 표시
-                            title: function(context) {
-                                const index = context[0].dataIndex;
-                                const data = result[index];
-                                const date = new Date(data.created_at);
-                                
-                                // 포맷 예시: 2026. 03. 06. 오후 01:18
-                                return date.toLocaleString('ko-KR', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                });
-                            },
-                            // 2. 툴팁 본문: 측정 타입(공복/식후)과 수치 표시
-                            label: function(context) {
-                                const index = context.dataIndex;
-                                const data = result[index];
-                                const label = data.measure_type || "기록"; // '공복' 또는 '점심 후 2시간' 등
-                                const value = context.parsed.y;
-                                
-                                return ` ${label}: ${value} mg/dL`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            maxRotation: 0,
-                            autoSkip: true,
-                            maxTicksLimit: 7 // X축 라벨 개수 제한 (겹침 방지)
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        suggestedMin: 70
-                    }
-                }
-            }
-        });
-    }
-
-    loadBloodSugarChart();
-</script>
+<script src="/static/blood_notebook.js"></script>
+<script src="/static/blood_sugar_save.js"></script>
 {% endblock %}

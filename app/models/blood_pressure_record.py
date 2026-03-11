@@ -39,7 +39,7 @@ class BloodPressureRecord(models.Model):
 
     class Meta:
         table = "blood_pressure_records"
-        table_description = "혈압 기록(수축기/이완기/맥박)"
+        table_description = "혈압 기록(수축기/이완기)"
 
     def __str__(self) -> str:
         return f"BP(user={getattr(self, 'user_id', 'N/A')}, {self.systolic}/{self.diastolic})"

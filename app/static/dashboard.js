@@ -92,6 +92,60 @@ function getTrendClass(changeText = '') {
   return 'stable';
 }
 
+// Dashboard Health Metric Summary
+async function loadDashboardHealthMetricSummary() {
+  const token = localStorage.getItem('access_token');
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/v1/dashboard/health-metric-summary', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      console.error('[Dashboard Health Metric Summary] Failed:', response.status, response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+
+    renderMetricSummaryGroup('dashboard-bp-list', data.blood_pressure);
+    renderMetricSummaryGroup('dashboard-bs-list', data.blood_sugar);
+  } catch (error) {
+    console.error('[Dashboard Health Metric Summary] Error:', error);
+  }
+}
+
+function renderMetricSummaryGroup(listId, group) {
+  const listEl = document.getElementById(listId);
+
+  if (!listEl || !group) return;
+
+  const items = Array.isArray(group.items) ? group.items : [];
+
+  listEl.innerHTML = items.map(item => {
+    const accentClass =
+      item.label === '저녁' || item.label === '식후 2시간'
+        ? 'accent'
+        : '';
+
+    return `
+      <div class="metric-stream-item">
+        <div class="metric-stream-main">
+          <div class="metric-stream-badge ${accentClass}">
+            ${item.label}
+          </div>
+          <div class="metric-stream-value ${item.value_class || item.status}">
+            ${item.value}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // indicator 클릭 연결
   getIndicators().forEach((indicator, idx) => {
@@ -106,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
   startSlideTimer();
   loadDashboardAlarmSummary();
   loadDashboardSummary();
+  loadDashboardHealthMetricSummary();
 });
 
 // 탭 숨김이면 멈췄다가 돌아오면 재시작

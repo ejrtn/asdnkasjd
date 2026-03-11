@@ -53,7 +53,7 @@ class BloodPressureRecordResponse(BaseModel):
     id: int
     systolic: int
     diastolic: int
-    pulse: int | None = None
+    measure_type: str
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -134,8 +134,8 @@ class BloodSugarRequest(BaseModel):
 
 
 class BloodPressureRequest(BaseModel):
-    systolic: str
-    diastolic: str
+    systolic: int
+    diastolic: int
     measure_type: str
 
 
@@ -169,3 +169,20 @@ class FullHealthProfileSaveRequest(BaseModel):
     allergies: list[AllergySaveRequest] = Field(default_factory=list)
     chronic_diseases: list[ChronicDiseaseSaveRequest] = Field(default_factory=list)
     medications: list[CurrentMedSaveRequest] = Field(default_factory=list)
+
+
+class DashboardMetricItemResponse(BaseModel):
+    label: str
+    value: str
+    status: str  # recorded | pending
+    value_class: str  # normal | caution | danger | pending
+
+
+class DashboardMetricGroupResponse(BaseModel):
+    title: str
+    items: list[DashboardMetricItemResponse]
+
+
+class DashboardHealthMetricSummaryResponse(BaseModel):
+    blood_pressure: DashboardMetricGroupResponse
+    blood_sugar: DashboardMetricGroupResponse
