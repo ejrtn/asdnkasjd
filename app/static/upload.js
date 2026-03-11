@@ -201,18 +201,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBox(container, type) {
+        // 이미지가 없으면 빈 상태(업로드 안내) 표시
         if (uploadedImages[type].length === 0) {
             container.classList.add('empty-state');
             container.innerHTML = `
-                <div class="drop-zone-icon">📁</div>
-                <div class="drop-zone-text">파일 업로드</div>
-                <div class="drop-zone-subtext">지원 형식: JPG, PNG, PDF (최대 10MB, 다중 선택 가능)</div>
+                <div style="font-size: 48px; margin-bottom: 10px;">📁</div>
+                <div style="font-weight: 700; color: #475569; font-size: 16px;">파일 업로드</div>
+                <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">지원 형식: JPG, PNG, PDF (최대 10MB, 다중 선택 가능)</div>
             `;
             return;
         }
 
+        // 이미지가 있으면 리스트 렌더링
         container.classList.remove('empty-state');
         container.innerHTML = '';
+
+        // 업로드 버튼 역할을 할 빈 박스 하나 추가 (다시 업로드 가능하도록)
+        const addBtn = document.createElement('div');
+        addBtn.className = 'main-preview-item add-more-btn';
+        addBtn.style.cssText = 'border: 2px dashed #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #3b82f6; cursor: pointer; background: #f8fbff;';
+        addBtn.innerHTML = '+';
+        addBtn.onclick = (e) => {
+            e.stopPropagation();
+            currentUploadType = type;
+            uploadOverlay.classList.add('show');
+            resetUpload();
+        };
+        container.appendChild(addBtn);
+
         uploadedImages[type].forEach((imageData, index) => {
             const previewItem = document.createElement('div');
             previewItem.className = 'main-preview-item';
@@ -279,7 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const data = await response.json();
-                    updateAnalysisUI('prescription_drugs', data);
+                    updateAnalysisUI('prescription', data);
+
+                    // 파일 메인 뷰에 추가 (기존 selectedFiles가 아닌 서버 성공 시점에 추가되도록 보장)
+                    addMainPreview('prescription', file);
                 }
             } else {
                 // --- [Case 2] 알약: 앞/뒷면 두 장을 한 번에 전송 ---
@@ -355,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (drugList.length > 0) {
                 drugListHtml = drugList.map(d => {
+                    // standard_drug_name을 최우선으로 사용 (prescription_drug 테이블 연동)
                     const name = d.standard_drug_name || d.drug_name || d.name || '알 수 없는 약품';
                     const dosage = d.dosage_amount || d.dosage || '';
                     const frequency = d.daily_frequency || d.frequency || '';
@@ -431,16 +451,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addMainPreview(type, file) {
-        if (file.type.startsWith('image/')) {
+        if (!file) return;
+
+        if (file.type && file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                uploadedImages[type].push(e.target.result);
-                renderMainPreviews();
+                // 중복 추가 방지 (같은 데이터가 이미 있으면 추가 안함 - 선택적)
+                if (!uploadedImages[type].includes(e.target.result)) {
+                    uploadedImages[type].push(e.target.result);
+                    renderMainPreviews();
+                }
             };
+            reader.onerror = (err) => console.error("FileReader Error:", err);
             reader.readAsDataURL(file);
-        } else {
+        } else if (file.type === 'application/pdf') {
             uploadedImages[type].push('FILE_TYPE_PDF');
             renderMainPreviews();
+        } else {
+            // 타입이 명확하지 않을 경우 확장자로 판단 시도
+            const fileName = (file.name || '').toLowerCase();
+            if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (!uploadedImages[type].includes(e.target.result)) {
+                        uploadedImages[type].push(e.target.result);
+                        renderMainPreviews();
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedImages[type].push('FILE_TYPE_UNKNOWN');
+                renderMainPreviews();
+            }
         }
     }
 
