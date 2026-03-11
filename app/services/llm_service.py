@@ -7,8 +7,8 @@ from pydantic import BaseModel
 
 from app.core.config import config
 from app.dtos.llm_life_guide import LlmLifeGuideResponse
-from app.repositories.llm_life_guide import LLMLifeGuideRepository
 from app.dtos.ocr import DrugInfo
+from app.repositories.llm_life_guide import LLMLifeGuideRepository
 
 
 class PrescriptionOCRResult(BaseModel):

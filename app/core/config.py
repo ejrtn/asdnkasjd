@@ -91,6 +91,8 @@ class Config(BaseSettings):
     CLOVA_OCR_INVOKE_URL: str = ""
     CLOVA_OCR_SECRET_KEY: str = ""
 
+    DEBUG_SAVE_PREPROCESSED_IMAGES: bool = False
+
     UPLOAD_DIR: str = ""
 
 

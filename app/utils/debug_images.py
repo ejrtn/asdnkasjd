@@ -2,8 +2,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
-import cv2
-import numpy as np
+
 from app.core.config import config
 
 logger = logging.getLogger(__name__)
@@ -43,5 +42,3 @@ def save_debug_image(image_bytes: bytes, prefix: str = "ocr_debug") -> str | Non
         print(f"!!! 디버그 이미지 저장 오류 발생: {e}")
         logger.error(f"디버그 이미지 저장 중 오류 발생: {e}")
         return None
-
-       
