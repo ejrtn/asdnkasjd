@@ -17,7 +17,7 @@ class LLMLifeGuide(models.Model):
     # 생성 시점의 환자 상태(기저질환+알러지+현재약물) 요약 (RAG Context)
     user_current_status = fields.TextField()
     # [대시보드 하단] AI가 생성한 맞춤 가이드 전문
-    generated_content = fields.JSONField()
+    generated_content: fields.JSONField = fields.JSONField()
     activity = fields.BooleanField(default=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 
