@@ -17,3 +17,6 @@ wheels/
 # Firebase 서비스 계정 JSON 키 (private key 포함)
 Firebase*/
 *firebase-adminsdk*.json
+
+# ChromaDB vector store
+app/rag/chroma_db/

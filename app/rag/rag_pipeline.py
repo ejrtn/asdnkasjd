@@ -13,7 +13,7 @@ def generate_rag_context(
     other_disease: str | None,
     lifestyle: dict,
     max_queries: int = 5,
-    top_k: int = 2,
+    top_k: int = 3,
 ) -> str:
     """
     사용자 건강정보 기반 RAG context 생성
@@ -39,7 +39,7 @@ def generate_rag_context(
         results_list=results_list,
         selected_diseases=selected_diseases,
         max_docs=5,
-        include_metadata=False,
+        include_metadata=True,
     )
 
     return rag_context
