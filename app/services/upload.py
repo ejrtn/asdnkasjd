@@ -91,17 +91,19 @@ class UploadService:
     # ==================================================
 
     async def file_save(self, user: Any, files: list[UploadFile]):
-        Path(self.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+        upload_dir = self.UPLOAD_DIR
+        Path(upload_dir).mkdir(parents=True, exist_ok=True)
         uploaded_db_params = []
 
         for i, file in enumerate(files):
             suffix = "_front" if i == 0 else "_back"
             category = "pill_front" if i == 0 else "pill_back"
 
-            ext = Path(file.filename).suffix
-            clean_name = Path(file.filename).stem.replace(" ", "_")
+            filename = file.filename or "unknown"
+            ext = Path(filename).suffix
+            clean_name = Path(filename).stem.replace(" ", "_")
             unique_filename = f"{uuid.uuid4().hex}_{clean_name}{suffix}{ext}"
-            file_path = os.path.join(self.UPLOAD_DIR, unique_filename)
+            file_path = os.path.join(upload_dir, unique_filename)
 
             async with await anyio.open_file(file_path, "wb") as f:
                 while chunk := await file.read(1024 * 1024):
@@ -110,7 +112,7 @@ class UploadService:
             uploaded_db_params.append(
                 {
                     "file_path": file_path,
-                    "original_name": file.filename,
+                    "original_name": filename,
                     "file_type": file.content_type,
                     "category": category,
                 }

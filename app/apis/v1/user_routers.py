@@ -20,6 +20,7 @@ from app.services.users import UserManageService
 class AlarmMasterToggleRequest(BaseModel):
     alarm_tf: bool
 
+
 user_router = APIRouter(prefix="/users", tags=["users"])
 
 
