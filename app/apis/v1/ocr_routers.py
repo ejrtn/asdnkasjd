@@ -3,8 +3,8 @@ import os
 import uuid
 from typing import Annotated
 
-from pydantic import BaseModel
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from pydantic import BaseModel
 
 from app.dependencies.security import get_request_user
 from app.models.ocr_history import OCRHistory
@@ -219,6 +219,7 @@ async def extract_pill_ocr(
         "message": "알약 분석 완료",
     }
 
+
 @ocr_router.post("/pill/select", status_code=status.HTTP_200_OK)
 async def select_pill_candidate(
     recognition_id: Annotated[int, Form()],
@@ -230,12 +231,13 @@ async def select_pill_candidate(
     사용자가 여러 후보 중 최종적으로 선택한 알약 정보를 업데이트합니다.
     """
     from app.models.pill_recognition import PillRecognition
+
     recognition = await PillRecognition.get_or_none(id=recognition_id, user=user)
     if not recognition:
         raise HTTPException(status_code=404, detail="식별 레코드를 찾을 수 없습니다.")
-    
+
     recognition.pill_name = pill_name
     recognition.pill_description = pill_description
     await recognition.save()
-    
+
     return {"message": "알약 정보가 업데이트되었습니다.", "pill_name": pill_name}

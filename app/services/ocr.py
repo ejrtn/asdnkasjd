@@ -150,15 +150,15 @@ class OCRService:
         top = candidates[0]
         return PillAnalyzeResponse(candidates=candidates, top_candidate=top, multimodal_assets=[], suggestion=None)
 
-    async def identify_pill_with_llm(
-        self, front_image: bytes, back_image: bytes | None = None
-    ) -> dict[str, Any]:
+    async def identify_pill_with_llm(self, front_image: bytes, back_image: bytes | None = None) -> dict[str, Any]:
         """
         GPT-4o-mini Vision을 사용하여 알약의 이미지를 분석하여 특성을 추출하고,
         MFDS API를 통해 실제 의약품 후보군을 검색합니다.
         """
         import base64
+
         from app.services.mfds_service import MFDSService
+
         mfds_service = MFDSService()
 
         front_b64 = base64.b64encode(front_image).decode("utf-8")
@@ -194,8 +194,9 @@ class OCRService:
 
         try:
             from openai import AsyncOpenAI
+
             client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
-            
+
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": contents}],  # type: ignore[arg-type]
@@ -209,22 +210,22 @@ class OCRService:
             # 2. MFDS API 검색 수행
             candidates = await mfds_service.get_identified_candidates(traits)
             default_logger.info(f"[MFDS API] Found {len(candidates)} candidates.")
-            
+
             # 3. 최종 결과 구성
             top_candidate = candidates[0] if candidates else None
-            
+
             return {
                 "name": top_candidate.pill_name if top_candidate else traits.get("name", "식별 실패"),
                 "efficacy": top_candidate.medication_info if top_candidate else "N/A",
                 "appearance": {
                     "marking": f"{traits.get('marking_front', '')}/{traits.get('marking_back', '')}",
                     "color": traits.get("color"),
-                    "shape": traits.get("shape")
+                    "shape": traits.get("shape"),
                 },
                 "candidates": [c.dict() for c in candidates],
                 "confidence": top_candidate.confidence if top_candidate else 0.0,
                 "display_text": traits.get("display_text", "분석 완료"),
-                "caution": "식약처 정보를 바탕으로 검색된 결과입니다."
+                "caution": "식약처 정보를 바탕으로 검색된 결과입니다.",
             }
         except Exception as e:
             default_logger.error(f"Pill Identification Error: {str(e)}")
@@ -235,5 +236,5 @@ class OCRService:
                 "candidates": [],
                 "confidence": 0.0,
                 "display_text": f"오류 발생: {str(e)}",
-                "caution": "분석 중 오류가 발생했습니다."
+                "caution": "분석 중 오류가 발생했습니다.",
             }
