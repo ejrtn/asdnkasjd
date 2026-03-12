@@ -63,7 +63,7 @@ def filter_documents_by_disease(
 def build_rag_context(
     documents: list[dict[str, Any]],
     max_docs: int = 5,
-    include_metadata: bool = False,
+    include_metadata: bool = True,
 ) -> str:
     """
     검색된 문서 목록을 LLM prompt에 넣기 좋은 rag_context 문자열로 만든다.
@@ -79,10 +79,8 @@ def build_rag_context(
         text = doc["text"].strip()
 
         if include_metadata:
-            disease = doc["metadata"].get("disease", "알 수 없음")
-            topic = doc["metadata"].get("topic", "알 수 없음")
             source = doc["metadata"].get("source", "알 수 없음")
-            lines.append(f"{idx}. ({disease} / {topic} / {source}) {text}")
+            lines.append(f"{idx}. [출처: {source}] {text}")
         else:
             lines.append(f"{idx}. {text}")
 
@@ -93,7 +91,7 @@ def build_context_from_search_results(
     results_list: list[dict[str, Any]],
     selected_diseases: list[str] | None = None,
     max_docs: int = 5,
-    include_metadata: bool = False,
+    include_metadata: bool = True,
 ) -> str:
     """
     여러 query 검색 결과를 받아

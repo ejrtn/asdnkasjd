@@ -64,9 +64,9 @@ def reset_collection() -> None:
 
 def build_sample_vector_store() -> None:
     """
-    sample_documents.jsonl을 읽어서 Chroma collection에 저장한다.
+    merged_documents.jsonl을 읽어서 Chroma collection에 저장한다.
     """
-    file_path = DATA_DIR / "sample_documents.jsonl"
+    file_path = DATA_DIR / "merged_documents.jsonl"
     docs = load_jsonl_documents(file_path)
 
     reset_collection()
