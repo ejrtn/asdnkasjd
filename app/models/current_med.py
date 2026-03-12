@@ -40,7 +40,7 @@ class CurrentMed(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="current_meds")
 
     # 약물 식별(PillRecognition)과의 1:1 관계
-    pill_recognition: fields.OneToOneRelation["PillRecognition"] = fields.OneToOneField(
+    pill_recognition: fields.OneToOneRelation["PillRecognition"] | None = fields.OneToOneField(
         "models.PillRecognition", related_name="current_med", null=True
     )
 

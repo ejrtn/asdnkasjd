@@ -24,7 +24,7 @@ class PillRecognition(models.Model):
     front_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
         "models.Upload", related_name="pill_recognition_front"
     )
-    back_upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField(
+    back_upload: fields.OneToOneRelation["Upload"] | None = fields.OneToOneField(
         "models.Upload", related_name="pill_recognition_back", null=True
     )
 

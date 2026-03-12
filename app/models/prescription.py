@@ -23,7 +23,7 @@ class Prescription(models.Model):
     # 1개의 이미지는 1개의 처방전 결과 (1:1)
     upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField("models.Upload", related_name="prescription")
     # OCR 원본 이력과의 1:1 연결
-    ocr_history: fields.OneToOneRelation["OCRHistory"] = fields.OneToOneField(
+    ocr_history: fields.OneToOneRelation["OCRHistory"] | None = fields.OneToOneField(
         "models.OCRHistory", related_name="prescription", null=True
     )
     created_at = fields.DatetimeField(auto_now_add=True)

@@ -25,7 +25,7 @@ class PrescriptionDrug(models.Model):
     )
 
     # CurrentMed와의 N:1 관계 (처방전 약품이 실제 복용 목록과 연동될 때 사용)
-    current_med: fields.ForeignKeyRelation["CurrentMed"] = fields.ForeignKeyField(
+    current_med: fields.ForeignKeyRelation["CurrentMed"] | None = fields.ForeignKeyField(
         "models.CurrentMed", related_name="prescription_drugs", null=True
     )
 
