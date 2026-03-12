@@ -1,53 +1,270 @@
+import base64
 import os
 import re
 import uuid
-from datetime import datetime
+from pathlib import Path
 from typing import Any
 
+import anyio
+import pandas as pd
 from fastapi import UploadFile
 
-from app.models.user import User
 from app.repositories.upload import UploadRepository
 from app.services.llm_service import LLMService
 
 
 class UploadService:
+    UPLOAD_DIR = "/app/uploads/"
+    CHROMA_DB_PATH = "./data/chroma_db"
+    CSV_PATH = "app/data/docs/nedrug_data.csv"
+    EMBEDDING_MODEL = "text-embedding-3-small"
+    VISION_MODEL = "gpt-4o-mini"
+    COLLECTION_NAME = "pill_database"
+
     def __init__(self):
         self._repo = UploadRepository()
         self.llm_service = LLMService()
 
-    async def file_save(self, user: User, files: list[UploadFile]):
-        upload_dir = "/app/uploads"
+        # CSV 로드 및 데이터 정제
+        if os.path.exists(self.CSV_PATH):
+            self.db_df = pd.read_csv(self.CSV_PATH, encoding="utf-8-sig", low_memory=False)
+            # 검색 성능을 위해 결측치를 빈 문자열로 대체하고 대문자로 통일
+            self.db_df["표시앞"] = self.db_df["표시앞"].fillna("").astype(str).str.upper()
+            self.db_df["표시뒤"] = self.db_df["표시뒤"].fillna("").astype(str).str.upper()
+            self.db_df["성상"] = self.db_df["성상"].fillna("").astype(str)
+            self.db_df["색상앞"] = self.db_df["색상앞"].fillna("").astype(str)
+            self.db_df["제형코드명"] = self.db_df["제형코드명"].fillna("").astype(str)
+            print(f"✅ DB Loaded: {len(self.db_df)} rows")
+        else:
+            print(f"⚠️ Warning: CSV not found at {self.CSV_PATH}")
 
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
+        # 1. 약학정보원 기준 색상 그룹화 (대표색 기준 통합)
+        self.COLOR_GROUPS = {
+            "하양": ["백색", "투명", "무색"],
+            "노랑": ["황색", "연황", "레몬색"],
+            "주황": ["주황", "단주황"],
+            "분홍": ["분홍", "연분홍", "담분홍"],
+            "빨강": ["적색", "담적색", "진적색"],
+            "갈색": ["갈색", "연갈", "황갈", "다갈"],
+            "연두": ["연두"],
+            "초록": ["녹색", "연녹", "진녹"],
+            "청록": ["청록"],
+            "파랑": ["청색", "연란", "소라", "물색"],
+            "남색": ["남색", "진청"],
+            "보라": ["보라", "자색"],
+            "회색": ["회색"],
+            "검정": ["검정"],
+        }
 
-        os.makedirs(upload_dir, exist_ok=True)
+        # 2. OCR 유사 문자 그룹
+        self.OCR_GROUPS = [{"T", "I", "1", "L"}, {"Q", "O", "D", "0"}, {"5", "S"}, {"8", "B"}]
 
-        uploaded_results = []
+    def _get_expanded_imprints(self, text):
+        """OCR 오차 및 구분자(콤마, 공백) 처리 포함 확장"""
+        if not text:
+            return []
 
-        for file in files:
-            # 1. 파일명 및 확장자 추출
-            filename = file.filename or "unknown"
-            name = os.path.splitext(filename)[0]
-            file_ext = os.path.splitext(filename)[1]
-            unique_filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{uuid.uuid4()}_{name}{file_ext}"
-            file_path = os.path.join(upload_dir, unique_filename)
+        # 1. 콤마나 공백 제거 및 정규화
+        raw_text = text.upper().replace(",", "").replace(" ", "")
+        chars = list(raw_text)
+        results = {raw_text}  # 세트로 중복 방지
 
-            # 2. 실제 파일 저장
-            content = await file.read()
-            with open(file_path, "wb") as buffer:
-                buffer.write(content)
+        # 2. 유사 문자 그룹 확장
+        for i, char in enumerate(chars):
+            for group in self.OCR_GROUPS:
+                if char in group:
+                    for replacement in group:
+                        new_text_list = chars.copy()
+                        new_text_list[i] = replacement
+                        results.add("".join(new_text_list))
 
-            # 3. 결과 리스트에 추가
-            uploaded_results.append(
-                {"file_path": f"/uploads/{unique_filename}", "original_name": filename, "file_type": file.content_type}
+        # 3. (추가) 원본 텍스트에 콤마가 포함된 경우 각각의 조각도 후보에 추가
+        if "," in text:
+            parts = text.upper().split(",")
+            for p in parts:
+                results.add(p.strip())
+
+        return list(results)
+
+    # ==================================================
+    # File Operations
+    # ==================================================
+
+    async def file_save(self, user: Any, files: list[UploadFile]):
+        Path(self.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+        uploaded_db_params = []
+
+        for i, file in enumerate(files):
+            suffix = "_front" if i == 0 else "_back"
+            category = "pill_front" if i == 0 else "pill_back"
+
+            ext = Path(file.filename).suffix
+            clean_name = Path(file.filename).stem.replace(" ", "_")
+            unique_filename = f"{uuid.uuid4().hex}_{clean_name}{suffix}{ext}"
+            file_path = os.path.join(self.UPLOAD_DIR, unique_filename)
+
+            async with await anyio.open_file(file_path, "wb") as f:
+                while chunk := await file.read(1024 * 1024):
+                    await f.write(chunk)
+
+            uploaded_db_params.append(
+                {
+                    "file_path": file_path,
+                    "original_name": file.filename,
+                    "file_type": file.content_type,
+                    "category": category,
+                }
             )
 
-        await self._repo.create_file(user.id, uploaded_results)
+        created_uploads = await self._repo.create_file(user.id, uploaded_db_params)
+        return await self.pill_name_result(created_uploads)
 
-        # 모든 파일 업로드 결과 반환
-        return uploaded_results
+    # ==================================================
+    # Identification Logic
+    # ==================================================
+
+    async def pill_name_result(self, uploaded_results):
+        # 1. 이미지 Base64 인코딩
+        base64_imgs = {}
+        for row in uploaded_results:
+            with open(row.file_path, "rb") as f:
+                base64_imgs[row.category] = base64.b64encode(f.read()).decode("utf-8")
+
+        # 2. Vision 분석 요청 (필드 4개로 고정)
+        prompt = """
+        의약품 식별 전문가로서 이미지를 분석하여 알약의 특징을 추출해줘.
+        반드시 아래의 **JSON** 구조로만 답변해야 해.
+
+        [출력 규칙]
+        1. text: image1, image2의 OCR 문자(영어, 숫자 조합). 없으면 빈 문자열.
+        2. text: 문자가 위/아래 또는 좌/우로 나뉘어 있으면 ','로 구분 (예: 'SK,T')
+        4. text: {'T', 'I', '1', 'L'},
+            {'Q', 'O', 'D', '0'},
+            {'5', 'S'},
+            {'8', 'B'} 이렇게 그룹화 된 부분의 인식이 어려울 거라 특히 확실히 체크해줘 각각 특징을 보고
+        3. color: [하양,노랑,주황,분홍,빨강,갈색,연두,초록,청록,파랑,남색,자주,보라,회색,검정,투명] 중 선택
+        4. formulation: [정제,경질캡슐,연질캡슐,기타] 중 선택
+           - 투명하고 액체가 들어있으면 '연질캡슐', 조립된 형태면 '경질캡슐'.
+        5. shape: [원형,타원형,장방형,반원형,삼각형,사각형,마름모형,오각형,육각형,팔각형,기타] 중 선택
+
+        {{
+            "image1" : {{
+                "text" : "",
+                "color": "",
+                "formulation": "",
+                "shape": ""
+            }},
+            "image2" : {{
+                "text" : "",
+                "color": "",
+                "formulation": "",
+                "shape": ""
+            }}
+        }}
+        """
+
+        ai_analysis = await self.llm_service.generate_json(
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{base64_imgs.get('pill_front')}"},
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{base64_imgs.get('pill_back')}"},
+                        },
+                    ],
+                }
+            ],
+            model=self.VISION_MODEL,
+            temperature=0.1,
+        )
+
+        ai_feat = ai_analysis.get("content", ai_analysis) if isinstance(ai_analysis, dict) else ai_analysis
+
+        img1 = ai_feat.get("image1", {})
+        img2 = ai_feat.get("image2", {})
+
+        # --- [1] 각인(text) 처리 ---
+        t1 = (img1.get("text") or "").strip().upper()
+        t2 = (img2.get("text") or "").strip().upper()
+
+        # OCR 오차 보정 포함 후보 생성
+        cands1 = self._get_expanded_imprints(t1)
+        cands2 = self._get_expanded_imprints(t2)
+        combined_cands = self._get_expanded_imprints(t1 + t2) + self._get_expanded_imprints(t2 + t1)
+        all_imprints = list(set(cands1 + cands2 + combined_cands))
+
+        # --- [2] 색상(color) 처리 ---
+        ai_color = img1.get("color", "하양")
+        search_colors = self.COLOR_GROUPS.get(ai_color, [ai_color])
+
+        # --- [3] 모양(shape) 처리 ---
+        ai_shape = img1.get("shape", "")
+        standard_shapes = ["원형", "타원형", "장방형"]
+        if ai_shape in standard_shapes:
+            shape_condition = self.db_df["성상"].str.contains(ai_shape, na=False)
+        else:
+            shape_condition = ~self.db_df["성상"].str.contains("|".join(standard_shapes), na=False)
+
+        # --- [4] 제형(formulation) 처리 ---
+        ai_form = img1.get("formulation", "")
+        if "경질" in ai_form:
+            form_condition = self.db_df["제형코드명"].str.contains("경질캡슐", na=False)
+        elif "연질" in ai_form:
+            form_condition = self.db_df["제형코드명"].str.contains("연질캡슐", na=False)
+        elif "정제" in ai_form:
+            form_condition = self.db_df["제형코드명"].str.contains("정제", na=False)
+        else:
+            form_condition = True
+
+        # --- [5] 필터링 ---
+        df = self.db_df.copy()
+        imprint_mask = (
+            df["표시앞"].isin(all_imprints)
+            | df["표시뒤"].isin(all_imprints)
+            | (df["표시앞"] + df["표시뒤"]).isin(all_imprints)
+        )
+
+        # 1차 필터 (각인 & 모양 & 제형)
+        candidates = df[imprint_mask & shape_condition & form_condition].copy()
+
+        # 결과 부족 시 각인만으로 확장
+        if len(candidates) == 0:
+            candidates = df[imprint_mask].copy()
+
+        # --- [6] 스코어링 및 TOP 3 추출 ---
+        final_list = []
+        for _, row in candidates.iterrows():
+            score = 0.5  # 각인 통과 기본점수
+
+            # 색상 일치 가점 (+0.3)
+            db_color = str(row["색상앞"]) + str(row["색상뒤"])
+            if any(c in db_color for c in search_colors):
+                score += 0.3
+
+            # 제형 정확도 가점 (+0.2)
+            if ai_form[:2] in str(row["제형코드명"]):
+                score += 0.2
+
+            final_list.append(
+                {
+                    "name": row["품목명"],
+                    "company": row["업소명"],
+                    "score": round(score, 2),
+                    "image_path": row["큰제품이미지"],
+                    "reason": "분석 결과 가장 일치하는 의약품",
+                }
+            )
+
+        # 점수순 정렬 후 상위 3개만 반환
+        final_list = sorted(final_list, key=lambda x: x["score"], reverse=True)[:3]
+
+        return {"status": "success", "ai_extracted": ai_feat, "candidates": final_list}
 
     async def get_upload_file(self, user: Any | None) -> dict[str, Any]:
         """

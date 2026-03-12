@@ -122,20 +122,20 @@
         border-radius: 10px;
     }
 
-    .pill-identifier .modal-content .select_none{
+    .pill-identifier .modal-content .select_none {
         width: 244px;
         height: 244px;
         background-color: #ccc;
         margin: 0 auto;
         text-align: center;
-        display:none;
-        align-items:center;
-        justify-content:center;
-        font-weight:600;
-        color:#666;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #666;
     }
-    
-    .pill-identifier .modal-content .select_none.open{
+
+    .pill-identifier .modal-content .select_none.open {
         display: flex;
     }
 
@@ -234,11 +234,10 @@
         cursor: pointer;
     }
 
-    .pill-identifier .modal-content .file-list.dragover{
-        border:2px dashed #007bff;
-        background:#f0f7ff;
+    .pill-identifier .modal-content .file-list.dragover {
+        border: 2px dashed #007bff;
+        background: #f0f7ff;
     }
-
 </style>
 {% endblock %}
 
@@ -339,7 +338,7 @@
         modal.style.display = "block"
     }
 
-    function handleFiles(files){
+    function handleFiles(files) {
 
         files.forEach((file, idx) => {
             let result = null
@@ -375,7 +374,7 @@
     })
     document.getElementById("file").addEventListener("change", (e) => {
         handleFiles(Array.from(e.target.files))
-        
+
     })
 
     function img_or_pdf_change(el) {
@@ -384,12 +383,12 @@
             document.querySelector(".pill-identifier .select_img").classList.add("open")
             document.querySelector(".pill-identifier .select_pdf").classList.remove("open")
             document.querySelector(".pill-identifier .select_none").classList.remove("open")
-        } else if(el.className.includes("pdf")) {
+        } else if (el.className.includes("pdf")) {
             document.querySelector(".pill-identifier .select_pdf iframe").src = file_list[el.className]['src']
             document.querySelector(".pill-identifier .select_img").classList.remove("open")
             document.querySelector(".pill-identifier .select_pdf").classList.add("open")
             document.querySelector(".pill-identifier .select_none").classList.remove("open")
-        }else{
+        } else {
             document.querySelector(".pill-identifier .select_img").classList.remove("open")
             document.querySelector(".pill-identifier .select_pdf").classList.remove("open")
             document.querySelector(".pill-identifier .select_none").classList.add("open")
@@ -402,6 +401,7 @@
     }
 
     document.querySelector(".pill-identifier .ok").addEventListener("click", async () => {
+        alert("분석 시작합니다.")
         const formData = new FormData();
         Object.keys(file_list).forEach(key => {
             formData.append('files', file_list[key]['file']);
@@ -420,16 +420,16 @@
 
     const modalContent = document.querySelector(".pill-identifier .file-list")
 
-    modalContent.addEventListener("dragover", (e)=>{
+    modalContent.addEventListener("dragover", (e) => {
         e.preventDefault()
         modalContent.classList.add("dragover")
     })
 
-    modalContent.addEventListener("dragleave", ()=>{
+    modalContent.addEventListener("dragleave", () => {
         modalContent.classList.remove("dragover")
     })
 
-    modalContent.addEventListener("drop",(e)=>{
+    modalContent.addEventListener("drop", (e) => {
         e.preventDefault()
         modalContent.classList.remove("dragover")
 
