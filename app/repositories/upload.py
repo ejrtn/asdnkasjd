@@ -31,5 +31,5 @@ class UploadRepository:
         end = start + timedelta(days=1)
 
         return await self._model.filter(user_id=user_id, created_at__gte=start, created_at__lt=end).prefetch_related(
-            "prescription__drugs", "pill_front_asset__back_upload", "pill_back_asset__front_upload"
+            "prescription__drugs", "pill_recognition_front", "pill_recognition_back"
         )

@@ -266,15 +266,15 @@ function renderPressureChart() {
           backgroundColor: 'rgba(15, 23, 42, 0.92)',
           padding: 10,
           callbacks: {
-            title: function(context) {
+            title: function (context) {
               const index = context[0].dataIndex;
               return BloodNotebook.formatDateTime(filtered[index].created_at);
             },
-            afterTitle: function(context) {
+            afterTitle: function (context) {
               const index = context[0].dataIndex;
               return `${filtered[index].measure_type || '기록'}`;
             },
-            label: function(context) {
+            label: function (context) {
               return ` ${context.dataset.label}: ${context.parsed.y} mmHg`;
             }
           }
@@ -340,17 +340,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadBloodPressureRecords();
 });
 
-document.querySelector("#pressure-record-list").addEventListener("click", async (e)=>{
-  if(e.target.className == 'data-del'){
+document.querySelector("#pressure-record-list").addEventListener("click", async (e) => {
+  if (e.target.className == 'data-del') {
     if (confirm("정말 삭제하시겠습니까?")) {
-        const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-pressure/'+e.target.title, {
-          method: 'DELETE',
-        });
-        const result = await response.json();
-        if(result.status == 'success'){
-          e.target.parentNode.parentNode.remove()
-        }
+      const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-pressure/' + e.target.title, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+      if (result.status == 'success') {
+        e.target.parentNode.parentNode.remove()
+        loadBloodPressureRecords()
+      }
     }
-    
+
   }
 })

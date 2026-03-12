@@ -325,8 +325,8 @@ class UploadService:
                 continue
 
             # [Mypy] getattr를 사용하여 안전하게 속성 접근
-            front_asset = getattr(front, "pill_front_asset", None) if front else None
-            back_asset = getattr(back, "pill_back_asset", None) if back else None
+            front_asset = getattr(front, "pill_recognition_front", None) if front else None
+            back_asset = getattr(back, "pill_recognition_back", None) if back else None
             recognition = front_asset or back_asset
 
             if recognition:

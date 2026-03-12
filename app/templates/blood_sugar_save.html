@@ -165,7 +165,12 @@
             <span class="c9-section-title-icon sugar-icon-record">🗂️</span>
             최근 기록
           </h3>
-          <span class="c9-badge c9-badge-slate" id="record-list-badge">공복 보기</span>
+          <div class="c9-section-head-actions">
+            <span class="c9-badge c9-badge-slate" id="record-list-badge">공복 보기</span>
+            <button type="button" class="notebook-refresh-btn" onclick="loadBloodSugarRecords()" title="새로고침">
+              <span class="refresh-icon">🔄</span>
+            </button>
+          </div>
         </div>
 
         <div class="notebook-record-filter-row" id="sugar-record-filter-chip-group">

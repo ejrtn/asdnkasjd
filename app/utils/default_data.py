@@ -478,7 +478,7 @@ class DefaultData:
                 },
             )
 
-        ocr_history, _ = await OCRHistory.get_or_create(
+        await OCRHistory.get_or_create(
             user=user,
             front_upload=upload_front,
             back_upload=upload_back,
@@ -486,7 +486,6 @@ class DefaultData:
         )
         await PillRecognition.get_or_create(
             user=user,
-            ocr_history=ocr_history,
             front_upload=upload_front,
             back_upload=upload_back,
             defaults={

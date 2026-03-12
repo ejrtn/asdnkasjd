@@ -243,11 +243,11 @@ function renderSugarChart() {
           backgroundColor: 'rgba(15, 23, 42, 0.92)',
           padding: 10,
           callbacks: {
-            title: function(context) {
+            title: function (context) {
               const index = context[0].dataIndex;
               return BloodNotebook.formatDateTime(filtered[index].created_at);
             },
-            label: function(context) {
+            label: function (context) {
               const index = context.dataIndex;
               const item = filtered[index];
               return ` ${item.measure_type}: ${context.parsed.y} mg/dL`;
@@ -314,15 +314,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadBloodSugarRecords();
 });
 
-document.querySelector("#sugar-record-list").addEventListener("click", async (e)=>{
-  if(e.target.className == 'data-del'){
+document.querySelector("#sugar-record-list").addEventListener("click", async (e) => {
+  if (e.target.className == 'data-del') {
     if (confirm("정말 삭제하시겠습니까?")) {
-      const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-sugar/'+e.target.title, {
+      const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-sugar/' + e.target.title, {
         method: 'DELETE',
       });
       const result = await response.json();
-      if(result.status == 'success'){
+      if (result.status == 'success') {
         e.target.parentNode.parentNode.remove()
+        loadBloodSugarRecords()
       }
     }
   }
