@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 from tortoise import fields, models
 
 if TYPE_CHECKING:
+    from app.models.pill_recognitions import PillRecognition
+    from app.models.prescription_drug import PrescriptionDrug
     from app.models.user import User
 
 
@@ -33,9 +35,17 @@ class CurrentMed(models.Model):
     daily_dose_count = fields.CharField(max_length=255, null=True)  # 1일 복용 횟수
     one_dose_count = fields.CharField(max_length=255, null=True)  # 1회 복용 개수 (예: 1정)
     dose_time = fields.CharEnumField(DoseTime, description="복용 시간")
-    added_from = fields.CharEnumField(AddedFrom, description="복용 시간")  # 출처 (약국, 처방전)
+    added_from = fields.CharEnumField(AddedFrom, description="출처")  # 출처 (약국, 처방전)
     start_date = fields.CharField(max_length=255, null=True)  # 복용 시작 시점
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="current_meds")
+
+    # 약물 식별(PillRecognition)과의 1:1 관계
+    pill_recognition: fields.OneToOneRelation["PillRecognition"] = fields.OneToOneField(
+        "models.PillRecognition", related_name="current_med", null=True
+    )
+
+    # 처방전 약물(PrescriptionDrug)과의 1:N 관계 (역방향)
+    prescription_drugs: fields.ReverseRelation["PrescriptionDrug"]
 
     class Meta:
         table = "current_meds"

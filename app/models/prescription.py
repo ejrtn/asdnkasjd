@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from tortoise import fields, models
 
 if TYPE_CHECKING:
+    from app.models.ocr_history import OCRHistory
     from app.models.upload import Upload
     from app.models.user import User
 
@@ -21,6 +22,10 @@ class Prescription(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="prescriptions")
     # 1개의 이미지는 1개의 처방전 결과 (1:1)
     upload: fields.OneToOneRelation["Upload"] = fields.OneToOneField("models.Upload", related_name="prescription")
+    # OCR 원본 이력과의 1:1 연결
+    ocr_history: fields.OneToOneRelation["OCRHistory"] = fields.OneToOneField(
+        "models.OCRHistory", related_name="prescription", null=True
+    )
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:

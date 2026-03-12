@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from tortoise import fields, models
 
 if TYPE_CHECKING:
+    from app.models.current_med import CurrentMed
     from app.models.prescription import Prescription
 
 
@@ -21,6 +22,11 @@ class PrescriptionDrug(models.Model):
     is_linked_to_meds = fields.BooleanField(default=False)
     prescription: fields.ForeignKeyRelation["Prescription"] = fields.ForeignKeyField(
         "models.Prescription", related_name="drugs"
+    )
+
+    # CurrentMed와의 N:1 관계 (처방전 약품이 실제 복용 목록과 연동될 때 사용)
+    current_med: fields.ForeignKeyRelation["CurrentMed"] = fields.ForeignKeyField(
+        "models.CurrentMed", related_name="prescription_drugs", null=True
     )
 
     class Meta:

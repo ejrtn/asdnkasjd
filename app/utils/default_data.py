@@ -9,7 +9,7 @@ from app.models.blood_pressure_record import BloodPressureRecord, RecordTime
 from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
-from app.models.cnn_history import CNNHistory
+from app.models.pill_recognitions import PillRecognition
 from app.models.current_med import AddedFrom, CurrentMed, DoseTime
 from app.models.health_profile import (
     DietType,
@@ -24,7 +24,7 @@ from app.models.health_profile import (
 from app.models.llm_life_guide import LLMLifeGuide
 from app.models.multimodal_asset import MultimodalAsset
 from app.models.ocr_history import OCRHistory
-from app.models.pill_recognition import PillRecognition
+# Removed app.models.pill_recognition import
 from app.models.upload import Upload
 from app.models.user import User
 from app.utils.security import hash_password
@@ -457,16 +457,6 @@ class DefaultData:
         )
 
         # 알약 식별
-        cnn_history, _ = await CNNHistory.get_or_create(
-            user=user,
-            front_upload=upload_front,
-            back_upload=upload_back,
-            defaults={
-                "model_version": "gpt-4o-mini",
-                "confidence": 0.95,
-                "raw_result": {"모양": "장방형", "색상": "흰색"},
-            },
-        )
         # 과거 OCR History 데이터 (더미)
         ocr_texts = ["AMLO 5", "METFO 500", "LIPITOR 10"]
         for i, text in enumerate(ocr_texts):
@@ -495,13 +485,14 @@ class DefaultData:
         )
         await PillRecognition.get_or_create(
             user=user,
-            cnn_history=cnn_history,
             ocr_history=ocr_history,
             front_upload=upload_front,
             back_upload=upload_back,
             defaults={
                 "pill_name": "타이레놀정 500mg",
                 "pill_description": "아세트아미노펜 단일 성분의 해열 진통제입니다.",
-                "is_linked_to_meds": True,
+                "model_version": "gpt-4o-mini",
+                "confidence": 0.95,
+                "raw_result": {"모양": "장방형", "색상": "흰색"},
             },
         )
