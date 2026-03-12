@@ -78,19 +78,15 @@
 
 .notebook-save-grid.two-col {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
   gap: 20px;
+  align-items: start;
 }
 
 .notebook-card {
   padding: 24px;
   width: 100%;
   margin: 0;
-}
-
-.notebook-save-grid > .notebook-card,
-.notebook-save-grid > section.notebook-card {
-  max-width: 960px;
 }
 
 .notebook-chart-card {

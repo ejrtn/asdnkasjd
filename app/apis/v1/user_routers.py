@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import ORJSONResponse as Response
+from pydantic import BaseModel
 
 from app.dependencies.security import get_request_user
 from app.dtos.users import (
@@ -14,6 +15,11 @@ from app.dtos.users import (
 )
 from app.models.user import User
 from app.services.users import UserManageService
+
+
+class AlarmMasterToggleRequest(BaseModel):
+    alarm_tf: bool
+
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 
@@ -130,6 +136,30 @@ async def update_fcm_token(
     user.fcm_token = data.fcm_token
     await user.save()
     return Response(content={"detail": "FCM 토큰이 등록되었습니다."}, status_code=status.HTTP_200_OK)
+
+
+@user_router.patch("/me/alarm-toggle", status_code=status.HTTP_200_OK)
+async def update_alarm_master_toggle(
+    data: AlarmMasterToggleRequest,
+    user: Annotated[User, Depends(get_request_user)],
+) -> Response:
+    """
+    [USER] 전체 알람 ON/OFF 토글
+    """
+    from app.models.alarm import Alarm
+
+    user.alarm_tf = data.alarm_tf
+    await user.save()
+
+    await Alarm.filter(user=user).update(is_active=data.alarm_tf)
+
+    return Response(
+        content={
+            "detail": "전체 알람 설정이 변경되었습니다.",
+            "alarm_tf": user.alarm_tf,
+        },
+        status_code=status.HTTP_200_OK,
+    )
 
 
 @user_router.get("/id-check")

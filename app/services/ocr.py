@@ -157,17 +157,19 @@ class OCRService:
         """
         import base64
 
+        from openai.types.chat import ChatCompletionUserMessageParam
+
         from app.services.mfds_service import MFDSService
 
         mfds_service = MFDSService()
 
         front_b64 = base64.b64encode(front_image).decode("utf-8")
-        contents = [
-            {"type": "text", "text": "이 알약 이미지를 분석해서 검색을 위한 특징을 추출해줘."},
+        contents: list[ChatCompletionUserMessageParam] = [
+            {"type": "text", "text": "이 알약 이미지를 분석해서 검색을 위한 특징을 추출해줘."},  # type: ignore[typeddict-item]
             {
                 "type": "image_url",
                 "image_url": {"url": f"data:image/jpeg;base64,{front_b64}"},
-            },
+            },  # type: ignore[typeddict-item]
         ]
 
         if back_image:
@@ -176,7 +178,7 @@ class OCRService:
                 {
                     "type": "image_url",
                     "image_url": {"url": f"data:image/jpeg;base64,{back_b64}"},
-                }
+                }  # type: ignore[typeddict-item]
             )
 
         prompt = """
@@ -190,16 +192,16 @@ class OCRService:
 
         반드시 지정된 옵션 내에서 선택하고 JSON 형식만 출력하세요.
         """
-        contents[0]["text"] = prompt  # type: ignore[index]
+        contents[0]["text"] = prompt  # type: ignore[typeddict-item]
 
         try:
             from openai import AsyncOpenAI
 
             client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
 
-            response = await client.chat.completions.create(
+            response = await client.chat.completions.create(  # type: ignore[call-overload]
                 model="gpt-4o-mini",
-                messages=[{"role": "user", "content": contents}],  # type: ignore[arg-type]
+                messages=[{"role": "user", "content": contents}],
                 response_format={"type": "json_object"},
                 temperature=0,
             )

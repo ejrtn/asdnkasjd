@@ -640,6 +640,7 @@
         /* ===== MAIN ===== */
         .main {
             flex: 1;
+            min-width: 0;
             padding: 0;
             overflow-y: auto;
             background: #f8fafc;
@@ -648,6 +649,7 @@
 
         /* ===== PAGE LAYOUT ===== */
         .page-wrap {
+            width: 100%;
             max-width: 1180px;
             margin: 0 auto;
             padding: 24px 24px 40px;
@@ -676,6 +678,21 @@
 
         body.zoom-large .page-wrap {
             padding: 32px 32px 48px;
+        }
+
+        /* ===== Page wrapper consistency ===== */
+        .mypage-page,
+        .alarm-page,
+        .health-page,
+        .notebook-page,
+        .guide-page-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .guide-page-container > * + * {
+            margin-top: 0;
         }
 
         body.zoom-large .page-wrap h1 {
@@ -722,7 +739,7 @@
             border: 1px solid var(--c9-border-soft);
             border-radius: var(--c9-radius-xl);
             box-shadow: var(--c9-shadow-sm);
-            margin-bottom: 24px;
+            margin-bottom: 0;
         }
 
         .c9-page-title {
