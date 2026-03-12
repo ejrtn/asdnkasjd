@@ -2,7 +2,7 @@ import io
 import json
 import time
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.utils.ocr_processing import preprocess_image_for_ocr
 
@@ -139,28 +139,101 @@ class OCRService:
     # ==========================================
     async def analyze_pill_image(self, image_bytes: bytes) -> PillAnalyzeResponse:
         """
-        단일 약품 이미지를 분석하여 CNN 모델 기반으로 약품명을 식별합니다.
-        식별 신뢰도가 낮을 경우 재촬영 안내 메시지를 포함합니다.
-
-        Args:
-            image_bytes (bytes): 분석할 약품 사진 바이너리 데이터
-
-        Returns:
-            PillAnalyzeResponse: 식별된 후보군 리스트와 최적 후보 정보
+        단일 약품 이미지를 분석하여 CNN 모델 기반으로 약품명을 식별합니다. (기존 더미 유지 필수 시)
         """
-        # 1. CNN Transfer Learning 모델 기반 인식 (더미)
-        # 2. 상위 3개 후보 추출 및 신뢰도 판단
+        # (기존 더미 로직 생략 또는 유지)
         candidates = [
             PillCandidate(pill_name="타이레놀정500mg", confidence=0.85, medication_info="진통제"),
             PillCandidate(pill_name="에어탈정", confidence=0.10, medication_info="소염제"),
             PillCandidate(pill_name="노바스크정", confidence=0.03, medication_info="혈압약"),
         ]
-
         top = candidates[0]
-        suggestion = None
-        if top.confidence < 0.60:
-            suggestion = "약품 인식 신뢰도가 낮습니다. 직접 입력하시거나 다시 촬영해 주세요."
+        return PillAnalyzeResponse(candidates=candidates, top_candidate=top, multimodal_assets=[], suggestion=None)
 
-        return PillAnalyzeResponse(
-            candidates=candidates, top_candidate=top, suggestion=suggestion, multimodal_assets=[]
-        )
+    async def identify_pill_with_llm(
+        self, front_image: bytes, back_image: bytes | None = None
+    ) -> dict[str, Any]:
+        """
+        GPT-4o-mini Vision을 사용하여 알약의 이미지를 분석하여 특성을 추출하고,
+        MFDS API를 통해 실제 의약품 후보군을 검색합니다.
+        """
+        import base64
+        from app.services.mfds_service import MFDSService
+        mfds_service = MFDSService()
+
+        front_b64 = base64.b64encode(front_image).decode("utf-8")
+        contents = [
+            {"type": "text", "text": "이 알약 이미지를 분석해서 검색을 위한 특징을 추출해줘."},
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{front_b64}"},
+            },
+        ]
+
+        if back_image:
+            back_b64 = base64.b64encode(back_image).decode("utf-8")
+            contents.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{back_b64}"},
+                }
+            )
+
+        prompt = """
+        알약의 사진을 보고 검색 필터링을 위한 정보를 JSON 형식으로 추출해세요:
+        1. name: 알약의 이름 (추정되는 제품명)
+        2. marking_front: 알약 앞면의 각인 (글자, 숫자, 기호 등)
+        3. marking_back: 알약 뒷면의 각인 (글자, 숫자, 기호 등)
+        4. color: 색상 (하양, 노랑, 주황, 분홍, 빨강, 갈색, 연두, 초록, 청록, 파랑, 보라, 회색, 검정, 투명 중 선택)
+        5. shape: 모양 (원형, 타원형, 반원형, 삼각형, 사각형, 오각형, 육각형, 팔각형, 마름모형, 기타 중 선택)
+        6. display_text: 사용자에게 보여줄 간단한 외형 묘사 (예: 노란색의 타원형 정제, 앞면 각인 AT)
+
+        반드시 지정된 옵션 내에서 선택하고 JSON 형식만 출력하세요.
+        """
+        contents[0]["text"] = prompt  # type: ignore[index]
+
+        try:
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
+            
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": contents}],  # type: ignore[arg-type]
+                response_format={"type": "json_object"},
+                temperature=0,
+            )
+
+            traits = json.loads(response.choices[0].message.content or "{}")
+            default_logger.info(f"[LLM Vision] Extracted Traits for MFDS Search: {traits}")
+
+            # 2. MFDS API 검색 수행
+            candidates = await mfds_service.get_identified_candidates(traits)
+            default_logger.info(f"[MFDS API] Found {len(candidates)} candidates.")
+            
+            # 3. 최종 결과 구성
+            top_candidate = candidates[0] if candidates else None
+            
+            return {
+                "name": top_candidate.pill_name if top_candidate else traits.get("name", "식별 실패"),
+                "efficacy": top_candidate.medication_info if top_candidate else "N/A",
+                "appearance": {
+                    "marking": f"{traits.get('marking_front', '')}/{traits.get('marking_back', '')}",
+                    "color": traits.get("color"),
+                    "shape": traits.get("shape")
+                },
+                "candidates": [c.dict() for c in candidates],
+                "confidence": top_candidate.confidence if top_candidate else 0.0,
+                "display_text": traits.get("display_text", "분석 완료"),
+                "caution": "식약처 정보를 바탕으로 검색된 결과입니다."
+            }
+        except Exception as e:
+            default_logger.error(f"Pill Identification Error: {str(e)}")
+            return {
+                "name": "식별 실패",
+                "efficacy": "N/A",
+                "appearance": {"marking": "N/A", "color": "N/A", "shape": "N/A"},
+                "candidates": [],
+                "confidence": 0.0,
+                "display_text": f"오류 발생: {str(e)}",
+                "caution": "분석 중 오류가 발생했습니다."
+            }

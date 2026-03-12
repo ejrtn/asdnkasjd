@@ -127,9 +127,12 @@ class PrescriptionService:
 
         return prescription
 
-    async def sync_to_current_meds(self, prescription_id: int, user: User) -> list[Any]:
+    async def sync_to_current_meds(
+        self, prescription_id: int, user: User, drug_names: list[str] | None = None
+    ) -> list[Any]:
         """
         [Step 6] 처방전의 약물들을 현재 복용 중인 약물(CurrentMed) 테이블로 복사(연동)합니다.
+        drug_names가 제공될 경우 해당 약물들만 선택하여 연동합니다.
         """
         from app.models.current_med import AddedFrom, CurrentMed, DoseTime
 
@@ -141,6 +144,10 @@ class PrescriptionService:
         created_meds = []
 
         for drug in drugs:
+            # 선택된 약물 리스트가 있다면 필터링
+            if drug_names is not None and drug.standard_drug_name not in drug_names:
+                continue
+
             # 기본적으로 아침 복용으로 설정 (사용자가 나중에 수정 가능하도록 가이드)
             med = await CurrentMed.create(
                 user=user,

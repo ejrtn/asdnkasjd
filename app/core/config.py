@@ -93,6 +93,10 @@ class Config(BaseSettings):
 
     DEBUG_SAVE_PREPROCESSED_IMAGES: bool = False
 
+    # MFDS Pill Identification API (data.go.kr)
+    MFDS_API_SERVICE_KEY: str = ""
+    MFDS_API_URL: str = "http://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService01/getMdcinGrnIdntfcInfoList01"
+
     UPLOAD_DIR: str = ""
 
 

@@ -23,7 +23,13 @@ class OCRExtractResponse(BaseModel):
 class PillCandidate(BaseModel):
     pill_name: str
     confidence: float
-    medication_info: str
+    medication_info: str = ""
+    image_url: str | None = None
+    item_seq: str | None = None
+    color: str | None = None
+    shape: str | None = None
+    marking_front: str | None = None
+    marking_back: str | None = None
 
 
 class PillAnalyzeResponse(BaseModel):
