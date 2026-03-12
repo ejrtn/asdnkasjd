@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from pydantic import BaseModel
 
 from app.dependencies.security import get_request_user
-from app.models.ocr_history import OCRHistory
 from app.models.upload import Upload
 from app.models.user import User
 from app.repositories.pill import PillRepository
@@ -69,45 +68,33 @@ async def extract_prescription_ocr(
     user: Annotated[User, Depends(get_request_user)],
 ):
     """
-    [OCR] 처방전 이미지/PDF 업로드 및 텍스트 추출
+    [OCR] 처방전 이미지/PDF 업로드 및 Vision 기반 데이터 추출
     """
     # 1. 파일 저장 및 DB 등록
     upload_record = await save_file(file, user, category="prescription")
 
-    # 2. OCR 실행
-    # OCRService 내부에서 에러 시 HTTPException 발생
+    # 2. 파일 바이트 읽기
     with open(upload_record.file_path, "rb") as f:
         image_bytes = f.read()
 
-    filename = upload_record.original_name or "prescription.jpg"
-    file_ext = os.path.splitext(filename)[1] or ".jpg"
-
-    raw_text = await ocr_service.extract_raw_text(image_bytes=image_bytes, file_name=filename, file_ext=file_ext)
-
-    # 3. OCRHistory 저장
-    ocr_record = await OCRHistory.create(
-        user=user,
-        raw_text=raw_text,
-        front_upload=upload_record,
-        back_upload=None,
-        is_valid=True if raw_text.strip() else False,
-    )
-
-    # 4. LLM 파싱 실행 (안전성 확보: 저장된 데이터를 바탕으로 파싱 및 에러 핸들링)
+    # 3. Vision 기반 분석 실행 (OCR + LLM 파싱 통합)
     parsed_prescription = None
     drugs = []
     try:
-        parsed_prescription = await prescription_service.process_prescription_parsing(
-            user=user, upload=upload_record, raw_text=ocr_record.raw_text
+        parsed_prescription = await prescription_service.process_prescription_vision_parsing(
+            user=user, upload=upload_record, image_bytes=image_bytes
         )
+
         if parsed_prescription:
             # 연관된 약물 목록 가져오기
             drugs = await parsed_prescription.drugs.all()
     except Exception as e:
-        logger.error(f"LLM 처방전 파싱 실패 (원본 데이터 ID: {ocr_record.id}): {str(e)}")
+        logger.error(f"Vision 처방전 파싱 실패 (Upload ID: {upload_record.id}): {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"처방전 분석 중 오류 발생: {str(e)}"
+        ) from e
 
     return {
-        "ocr_id": ocr_record.id,
         "prescription_id": parsed_prescription.id if parsed_prescription else None,
         "hospital_name": parsed_prescription.hospital_name if parsed_prescription else None,
         "prescribed_date": parsed_prescription.prescribed_date if parsed_prescription else None,
@@ -127,9 +114,7 @@ async def extract_prescription_ocr(
             }
             for d in drugs
         ],
-        "is_valid": ocr_record.is_valid,
-        "preview_text": ocr_record.raw_text[:50] + "..." if len(ocr_record.raw_text) > 50 else ocr_record.raw_text,
-        "message": "처방전 분석 및 파싱 완료" if parsed_prescription else "처방전 분석 완료 (파싱 실패)",
+        "message": "처방전 Vision 분석 완료",
     }
 
 
@@ -189,13 +174,11 @@ async def extract_pill_ocr(
 
     # 4. 히스토리 및 식별 레코드 저장
     # user 요청 사항: 보여지는 텍스트(display_text)를 CNNHistory.raw_result에 저장
-    ocr_history, cnn_history = await pill_repo.create_history(
+    ocr_history = await pill_repo.create_history(
         user=user,
         front_upload=front_upload,
         back_upload=back_upload,
         raw_text=pill_data.get("name", ""),
-        cnn_result=pill_data,  # 전체 결과를 저장 (display_text 포함)
-        confidence=pill_data.get("confidence", 0.0),
     )
 
     recognition = await pill_repo.create_recognition(
@@ -203,9 +186,10 @@ async def extract_pill_ocr(
         pill_name=pill_data.get("name", "알 수 없는 약품"),
         pill_description=pill_data.get("efficacy", ""),
         ocr_history=ocr_history,
-        cnn_history=cnn_history,
         front_upload=front_upload,
         back_upload=back_upload,
+        cnn_result=pill_data,  # 전체 결과를 저장 (display_text 포함)
+        confidence=pill_data.get("confidence", 0.0),
     )
 
     return {
@@ -230,7 +214,7 @@ async def select_pill_candidate(
     """
     사용자가 여러 후보 중 최종적으로 선택한 알약 정보를 업데이트합니다.
     """
-    from app.models.pill_recognition import PillRecognition
+    from app.models.pill_recognitions import PillRecognition
 
     recognition = await PillRecognition.get_or_none(id=recognition_id, user=user)
     if not recognition:

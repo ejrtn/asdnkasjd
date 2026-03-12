@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from app.models.ocr_history import OCRHistory
 from app.models.prescription import Prescription
 from app.models.prescription_drug import PrescriptionDrug
 from app.models.upload import Upload
@@ -18,6 +19,7 @@ class PrescriptionRepository:
         self,
         user: User,
         upload: Upload,
+        ocr_history: OCRHistory | None = None,
         hospital_name: str | None = None,
         prescribed_date: Any | None = None,
         drug_list_raw: str | None = None,
@@ -28,6 +30,7 @@ class PrescriptionRepository:
         return await Prescription.create(  # type: ignore[no-any-return]
             user=user,
             upload=upload,
+            ocr_history=ocr_history,
             hospital_name=hospital_name,
             prescribed_date=prescribed_date,
             drug_list_raw=drug_list_raw,

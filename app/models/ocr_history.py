@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 from tortoise import fields, models
 
 if TYPE_CHECKING:
+    from app.models.prescription import Prescription
     from app.models.upload import Upload
     from app.models.user import User
 
@@ -25,6 +26,7 @@ class OCRHistory(models.Model):
     back_upload: fields.OneToOneRelation["Upload"] | None = fields.OneToOneField(
         "models.Upload", related_name="ocr_histories_back", null=True
     )
+    prescription: fields.ReverseRelation["Prescription"]
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="ocr_histories")
 
     class Meta:
