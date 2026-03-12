@@ -174,7 +174,7 @@ async def extract_pill_ocr(
 
     # 4. 히스토리 및 식별 레코드 저장
     # user 요청 사항: 보여지는 텍스트(display_text)를 CNNHistory.raw_result에 저장
-    ocr_history = await pill_repo.create_history(
+    await pill_repo.create_history(
         user=user,
         front_upload=front_upload,
         back_upload=back_upload,
@@ -185,7 +185,6 @@ async def extract_pill_ocr(
         user=user,
         pill_name=pill_data.get("name", "알 수 없는 약품"),
         pill_description=pill_data.get("efficacy", ""),
-        ocr_history=ocr_history,
         front_upload=front_upload,
         back_upload=back_upload,
         cnn_result=pill_data,  # 전체 결과를 저장 (display_text 포함)
