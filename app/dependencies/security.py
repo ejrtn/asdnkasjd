@@ -7,7 +7,7 @@ from jwt.exceptions import InvalidTokenError  # type: ignore[import-untyped, imp
 
 from app.core import config
 from app.models.user import User
-from app.repositories.user_repository import UserRepository
+from app.repositories.user import UserRepository
 from app.utils.common import redis_client
 
 # OAuth2PasswordBearer specifies that the client must send the token in an Authorization header with Bearer scheme.

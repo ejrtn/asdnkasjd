@@ -634,6 +634,52 @@
     padding: 24px;
   }
 
+  .is-disabled {
+    opacity: 0.6;
+  }
+
+  input:disabled,
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .alarm-add-box.is-disabled,
+  .alarm-time-item.is-disabled {
+    opacity: 0.6;
+  }
+
+  .is-master-disabled {
+    pointer-events: none !important;
+  }
+
+  button:disabled,
+  input:disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
+  .alarm-slot.is-disabled .alarm-slot-right,
+  .alarm-time-item.is-disabled .alarm-time-right,
+  .alarm-add-box.is-disabled {
+    pointer-events: none !important;
+  }
+
+  .alarm-time-right.is-master-disabled,
+  .alarm-add-box.is-master-disabled,
+  .alarm-slot.is-disabled .alarm-slot-right {
+    pointer-events: none !important;
+  }
+
+  .med-item .toggle-switch:disabled,
+  .alarm-time-right button:disabled,
+  .alarm-add-box button:disabled,
+  .alarm-slot-right button:disabled,
+  .alarm-slot-right input:disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+  }
+
   @media (max-width: 1024px) {
     .history-item {
       flex-direction: column;
@@ -770,7 +816,7 @@
           </div>
 
           <div class="save-row">
-            <button class="btn-add-time" onclick="saveBpAlarms()">혈압 알람 저장</button>
+            <button id="save-bp-alarms-btn" class="btn-add-time" onclick="saveBpAlarms()">혈압 알람 저장</button>
           </div>
         </section>
       </div>
@@ -838,7 +884,7 @@
           </div>
 
           <div class="save-row">
-            <button class="btn-add-time" onclick="saveBsAlarms()">혈당 알람 저장</button>
+            <button id="save-bs-alarms-btn" class="btn-add-time" onclick="saveBsAlarms()">혈당 알람 저장</button>
           </div>
         </section>
       </div>

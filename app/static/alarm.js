@@ -3,6 +3,55 @@ let alarms = [];
 let selectedMedId = null;
 let healthAlarms = {};
 let alarmHistories = [];
+let masterAlarmEnabled = true;
+
+function getMasterDisabledAttr() {
+    return !masterAlarmEnabled ? 'disabled' : '';
+}
+
+function getMasterBlockedClass() {
+    return !masterAlarmEnabled ? 'is-master-disabled' : '';
+}
+
+function getToggleAlarmClick(alarmId, isActive) {
+    return masterAlarmEnabled ? `onclick="toggleAlarm(${alarmId}, ${isActive})"` : '';
+}
+
+function getDeleteAlarmClick(alarmId) {
+    return masterAlarmEnabled ? `onclick="deleteAlarm(${alarmId})"` : '';
+}
+
+function getAddAlarmClick(medId) {
+    return masterAlarmEnabled ? `onclick="addAlarmTime(${medId})"` : '';
+}
+
+function getToggleMedClick(medId, isActive) {
+    return masterAlarmEnabled
+        ? `onclick="event.stopPropagation(); toggleMedAlarms(${medId}, ${isActive})"`
+        : '';
+}
+
+async function refreshAlarmPageState() {
+    await loadMasterAlarmState();
+    await Promise.all([loadAlarms(), loadHealthAlarms()]);
+    applyHealthAlarmState();
+    renderMeds();
+}
+
+async function loadMasterAlarmState() {
+    try {
+        const response = await fetchAlarmWithAuth('/api/v1/users/me');
+        if (response && response.ok) {
+            const user = await response.json();
+            masterAlarmEnabled = user.alarm_tf !== false;
+        } else {
+            masterAlarmEnabled = true;
+        }
+    } catch (error) {
+        console.error('Error loading master alarm state:', error);
+        masterAlarmEnabled = true;
+    }
+}
 
 async function fetchAlarmWithAuth(url, options = {}) {
     let token = localStorage.getItem("access_token");
@@ -84,13 +133,26 @@ function switchAlarmMode(mode, el) {
 window.addEventListener('DOMContentLoaded', async () => {
     if (!checkLoginStatus()) return;
 
-    await Promise.all([loadMeds(), loadAlarms(), loadHealthAlarms()]);
-    renderMeds();
+    await loadMeds();
+    await refreshAlarmPageState();
+});
+
+window.addEventListener('pageshow', async () => {
+    if (!checkLoginStatus()) return;
+    await refreshAlarmPageState();
+});
+
+document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible') return;
+    if (!checkLoginStatus()) return;
+    await refreshAlarmPageState();
 });
 
 async function loadHealthAlarms() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
+
+    healthAlarms = {};
 
     const types = ['BP_MORNING', 'BP_EVENING', 'BS_FASTING', 'BS_POSTMEAL', 'BS_BEDTIME'];
 
@@ -106,25 +168,72 @@ async function loadHealthAlarms() {
     results.forEach(({ type, data }) => {
         if (data.length > 0) healthAlarms[type] = data[0];
     });
+}
 
-    applyHealthAlarmState();
+function lockHealthControls() {
+    const selectors = [
+        '#bp-morning-time', '#bp-evening-time',
+        '#bs-fasting-time', '#bs-postmeal-time', '#bs-bedtime-time',
+        '#bp-morning-toggle', '#bp-evening-toggle',
+        '#bs-fasting-toggle', '#bs-postmeal-toggle', '#bs-bedtime-toggle',
+        '#save-bp-alarms-btn', '#save-bs-alarms-btn'
+    ];
+
+    selectors.forEach((selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return;
+
+        if (!masterAlarmEnabled) {
+            el.setAttribute('disabled', 'disabled');
+            el.classList.add('is-master-disabled');
+        } else {
+            el.removeAttribute('disabled');
+            el.classList.remove('is-master-disabled');
+        }
+    });
+
+    document.querySelectorAll('.alarm-slot').forEach((slot) => {
+        if (!masterAlarmEnabled) slot.classList.add('is-disabled');
+        else slot.classList.remove('is-disabled');
+    });
 }
 
 function applyHealthAlarmState() {
     const map = {
-        'BP_MORNING': 'bp-morning', 'BP_EVENING': 'bp-evening',
-        'BS_FASTING': 'bs-fasting', 'BS_POSTMEAL': 'bs-postmeal', 'BS_BEDTIME': 'bs-bedtime'
+        'BP_MORNING': 'bp-morning',
+        'BP_EVENING': 'bp-evening',
+        'BS_FASTING': 'bs-fasting',
+        'BS_POSTMEAL': 'bs-postmeal',
+        'BS_BEDTIME': 'bs-bedtime'
     };
+
     for (const [type, prefix] of Object.entries(map)) {
         const alarm = healthAlarms[type];
         const timeEl = document.getElementById(prefix + '-time');
         const toggleEl = document.getElementById(prefix + '-toggle');
-        if (alarm && timeEl && toggleEl) {
+
+        if (!timeEl || !toggleEl) continue;
+
+        toggleEl.classList.remove('active');
+        toggleEl.disabled = !masterAlarmEnabled;
+        timeEl.disabled = !masterAlarmEnabled;
+
+        if (alarm) {
             timeEl.value = alarm.alarm_time;
-            if (alarm.is_active) toggleEl.classList.add('active');
-            else toggleEl.classList.remove('active');
+            const finalActive = masterAlarmEnabled && alarm.is_active;
+            if (finalActive) {
+                toggleEl.classList.add('active');
+            }
         }
     }
+
+    const bpSaveBtn = document.getElementById('save-bp-alarms-btn');
+    const bsSaveBtn = document.getElementById('save-bs-alarms-btn');
+
+    if (bpSaveBtn) bpSaveBtn.disabled = !masterAlarmEnabled;
+    if (bsSaveBtn) bsSaveBtn.disabled = !masterAlarmEnabled;
+
+    lockHealthControls();
 }
 
 async function loadMeds() {
@@ -174,6 +283,7 @@ function renderMeds() {
     medList.innerHTML = currentMeds.map(med => {
         const medAlarms = alarms.filter(a => a.current_med_id === med.id);
         const hasActiveAlarm = medAlarms.some(a => a.is_active);
+        const finalActive = masterAlarmEnabled && hasActiveAlarm;
 
         return `
             <div class="med-item ${selectedMedId === med.id ? 'selected' : ''}" onclick="showMedDetail(${med.id})">
@@ -182,9 +292,10 @@ function renderMeds() {
                     <div class="med-meta">알람 ${medAlarms.length}개</div>
                 </div>
                 <button type="button"
-                        class="toggle-switch ${hasActiveAlarm ? 'active' : ''}"
-                        onclick="event.stopPropagation(); toggleMedAlarms(${med.id}, ${!hasActiveAlarm})"
-                        aria-label="${med.medication_name} 알람 전체 켜기 끄기">
+                        class="toggle-switch ${finalActive ? 'active' : ''} ${getMasterBlockedClass()}"
+                        ${getToggleMedClick(med.id, !finalActive)}
+                        aria-label="${med.medication_name} 알람 전체 켜기 끄기"
+                        ${getMasterDisabledAttr()}>
                 </button>
             </div>
         `;
@@ -218,28 +329,42 @@ function showMedDetail(medId) {
             ${medAlarms.length === 0
                 ? `<div class="alarm-detail-empty" style="min-height: 160px;">등록된 알람이 없습니다.</div>`
                 : medAlarms.map(alarm => `
-                    <div class="alarm-time-item">
+                    <div class="alarm-time-item ${!masterAlarmEnabled ? 'is-disabled' : ''}">
                         <div class="alarm-time-left">
                             <span>🕔</span>
                             <span>${alarm.alarm_time}</span>
                         </div>
-                        <div class="alarm-time-right">
+                        <div class="alarm-time-right ${!masterAlarmEnabled ? 'is-master-disabled' : ''}">
                             <button type="button"
-                                    class="toggle-switch ${alarm.is_active ? 'active' : ''}"
-                                    onclick="toggleAlarm(${alarm.id}, ${!alarm.is_active})"
-                                    aria-label="알람 켜기 끄기">
+                                    class="toggle-switch ${(masterAlarmEnabled && alarm.is_active) ? 'active' : ''} ${getMasterBlockedClass()}"
+                                    ${getToggleAlarmClick(alarm.id, !(masterAlarmEnabled && alarm.is_active))}
+                                    aria-label="알람 켜기 끄기"
+                                    ${getMasterDisabledAttr()}>
                             </button>
-                            <button type="button" class="btn-delete" onclick="deleteAlarm(${alarm.id})" aria-label="알람 삭제">✖</button>
+                            <button
+                                type="button"
+                                class="btn-delete ${getMasterBlockedClass()}"
+                                ${getDeleteAlarmClick(alarm.id)}
+                                aria-label="알람 삭제"
+                                ${getMasterDisabledAttr()}>
+                                ✖
+                            </button>
                         </div>
                     </div>
                 `).join('')
             }
         </div>
 
-        <div class="alarm-add-box">
+        <div class="alarm-add-box ${!masterAlarmEnabled ? 'is-disabled is-master-disabled' : ''}">
             <div class="alarm-add-title">새 알람 추가</div>
-            <input type="time" id="newAlarmTime" value="09:00">
-            <button type="button" class="btn-add-time" onclick="addAlarmTime(${medId})">복약 알람 추가</button>
+            <input type="time" id="newAlarmTime" value="09:00" ${getMasterDisabledAttr()}>
+            <button
+                type="button"
+                class="btn-add-time ${getMasterBlockedClass()}"
+                ${getAddAlarmClick(medId)}
+                ${getMasterDisabledAttr()}>
+                복약 알람 추가
+            </button>
         </div>
     `;
 
@@ -247,6 +372,11 @@ function showMedDetail(medId) {
 }
 
 async function toggleMedAlarms(medId, isActive) {
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '복약 알람');
+        return;
+    }
+
     const medAlarms = alarms.filter(a => a.current_med_id === medId);
 
     if (medAlarms.length === 0) {
@@ -272,6 +402,11 @@ async function toggleMedAlarms(medId, isActive) {
 }
 
 async function toggleAlarm(alarmId, isActive, reload = true) {
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '복약 알람');
+        return;
+    }
+
     const response = await fetchAlarmWithAuth(`/api/v1/alarms/${alarmId}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -290,6 +425,11 @@ async function toggleAlarm(alarmId, isActive, reload = true) {
 }
 
 async function deleteAlarm(alarmId) {
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '복약 알람');
+        return;
+    }
+
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
     const response = await fetchAlarmWithAuth(`/api/v1/alarms/${alarmId}`, { method: 'DELETE' });
@@ -309,6 +449,11 @@ async function toggleHealthAlarm(type, prefix) {
     const token = localStorage.getItem('access_token');
     if (!token) {
         showAppToast('로그인이 필요합니다.', 'warn', '알람');
+        return;
+    }
+
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '알람');
         return;
     }
 
@@ -349,6 +494,11 @@ async function saveHealthAlarms(prefixMap, successMessage, titleText) {
         return;
     }
 
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', titleText);
+        return;
+    }
+
     for (const [type, prefix] of Object.entries(prefixMap)) {
         const time = document.getElementById(prefix + '-time').value;
         const isActive = document.getElementById(prefix + '-toggle').classList.contains('active');
@@ -370,16 +520,33 @@ async function saveHealthAlarms(prefixMap, successMessage, titleText) {
     showAppToast(successMessage, 'success', titleText);
 }
 
-function toggleBpAlarm(slot) { 
-    toggleHealthAlarm('BP_' + slot.toUpperCase(), 'bp-' + slot); 
+function toggleBpAlarm(slot) {
+    if (!masterAlarmEnabled) {
+        applyHealthAlarmState();
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '혈압 알람');
+        return;
+    }
+    toggleHealthAlarm('BP_' + slot.toUpperCase(), 'bp-' + slot);
 }
 
 function toggleBsAlarm(slot) {
+    if (!masterAlarmEnabled) {
+        applyHealthAlarmState();
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '혈당 알람');
+        return;
+    }
+
     const map = { fasting: 'BS_FASTING', postmeal: 'BS_POSTMEAL', bedtime: 'BS_BEDTIME' };
     toggleHealthAlarm(map[slot], 'bs-' + slot);
 }
 
 function saveBpAlarms() {
+    if (!masterAlarmEnabled) {
+        applyHealthAlarmState();
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '혈압 알람');
+        return;
+    }
+
     saveHealthAlarms(
         { BP_MORNING: 'bp-morning', BP_EVENING: 'bp-evening' },
         '혈압 알람이 저장되었어요.',
@@ -388,6 +555,12 @@ function saveBpAlarms() {
 }
 
 function saveBsAlarms() {
+    if (!masterAlarmEnabled) {
+        applyHealthAlarmState();
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '혈당 알람');
+        return;
+    }
+
     saveHealthAlarms(
         { BS_FASTING: 'bs-fasting', BS_POSTMEAL: 'bs-postmeal', BS_BEDTIME: 'bs-bedtime' },
         '혈당 알람이 저장되었어요.',
@@ -396,6 +569,11 @@ function saveBsAlarms() {
 }
 
 async function addAlarmTime(medId) {
+    if (!masterAlarmEnabled) {
+        showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '복약 알람');
+        return;
+    }
+
     const time = document.getElementById('newAlarmTime').value;
     if (!time) {
         showAppToast('시간을 선택해주세요.', 'warn', '복약 알람');

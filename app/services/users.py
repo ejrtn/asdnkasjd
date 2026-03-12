@@ -20,7 +20,7 @@ from app.dtos.users import (
 from app.models.allergy import Allergy
 from app.models.chronic_disease import ChronicDisease
 from app.models.user import User
-from app.repositories.user_repository import UserRepository
+from app.repositories.user import UserRepository
 from app.utils.common import normalize_phone_number, redis_client
 from app.utils.security import create_access_token, create_refresh_token, hash_password, verify_password
 

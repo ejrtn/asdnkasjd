@@ -1,9 +1,3 @@
-.health-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .health-page .c9-page-header {
   margin-bottom: 0;
 }
