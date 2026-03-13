@@ -351,11 +351,10 @@
         return;
       }
       const data = await response.json();
-
-      if (data.insights && data.insights.length === 3) {
-        document.getElementById('insight-1').textContent = data.insights[0];
-        document.getElementById('insight-2').textContent = data.insights[1];
-        document.getElementById('insight-3').textContent = data.insights[2];
+      if (data.result && data.result.length === 3) {
+        document.getElementById('insight-1').textContent = data.result[0];
+        document.getElementById('insight-2').textContent = data.result[1];
+        document.getElementById('insight-3').textContent = data.result[2];
       }
 
       if (data.mission_rate !== undefined) {
