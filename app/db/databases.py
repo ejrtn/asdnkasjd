@@ -48,6 +48,7 @@ TORTOISE_ORM = {
             "models": TORTOISE_APP_MODELS,
         },
     },
+    "use_tz": True,
     "timezone": "Asia/Seoul",
 }
 
@@ -60,11 +61,23 @@ def initialize_tortoise(app: FastAPI) -> None:
 
     # DB 연결 실패 시 SQLite로 폴백하는 로직 추가 (데모용)
     try:
-        register_tortoise(app, config=TORTOISE_ORM, generate_schemas=False, add_exception_handlers=True)
+        register_tortoise(
+            app,
+            config=TORTOISE_ORM,
+            generate_schemas=False,
+            add_exception_handlers=True,
+        )
     except Exception as e:
         print(f"MySQL connection failed: {e}. Falling back to in-memory SQLite for demo.")
         sqlite_orm = {
             "connections": {"default": "sqlite://:memory:"},
             "apps": {"models": {"models": TORTOISE_APP_MODELS}},
+            "use_tz": True,
+            "timezone": "Asia/Seoul",
         }
-        register_tortoise(app, config=sqlite_orm, generate_schemas=True, add_exception_handlers=True)
+        register_tortoise(
+            app,
+            config=sqlite_orm,
+            generate_schemas=True,
+            add_exception_handlers=True,
+        )

@@ -22,9 +22,8 @@ class AlarmHistory(models.Model):
     sent_at = fields.DatetimeField(auto_now_add=True)  # 알람 발송 시각 (UTC)
     delivered_at = fields.DatetimeField(null=True)  # 기기 도착 시각 (UTC)
     read_at = fields.DatetimeField(null=True)  # 사용자 확인 시각 (UTC)
-    is_confirmed = fields.BooleanField(default=False)  # 확인(복약/측정 완료) 여부
+    is_confirmed = fields.BooleanField(default=False)
 
-    # 기능 A: 알람 미루기(10분 후) 대응용
     snoozed_until = fields.DatetimeField(null=True)  # 다시 보여줄 예정 시각 (UTC)
     snooze_count = fields.IntField(default=0)  # 미루기 횟수
 
@@ -33,25 +32,28 @@ class AlarmHistory(models.Model):
         related_name="histories",
     )
 
+    def _as_kst(self, dt):
+        if not dt:
+            return None
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+        return dt.astimezone(ZoneInfo("Asia/Seoul"))
+
     @property
     def sent_at_kst(self):
-        """발송 시각을 KST로 변환"""
-        return self.sent_at.astimezone(ZoneInfo("Asia/Seoul"))
+        return self._as_kst(self.sent_at)
 
     @property
     def delivered_at_kst(self):
-        """도착 시각을 KST로 변환"""
-        return self.delivered_at.astimezone(ZoneInfo("Asia/Seoul")) if self.delivered_at else None
+        return self._as_kst(self.delivered_at)
 
     @property
     def read_at_kst(self):
-        """확인 시각을 KST로 변환"""
-        return self.read_at.astimezone(ZoneInfo("Asia/Seoul")) if self.read_at else None
+        return self._as_kst(self.read_at)
 
     @property
     def snoozed_until_kst(self):
-        """미루기 재알림 시각을 KST로 변환"""
-        return self.snoozed_until.astimezone(ZoneInfo("Asia/Seoul")) if self.snoozed_until else None
+        return self._as_kst(self.snoozed_until)
 
     class Meta:
         table = "alarm_history"

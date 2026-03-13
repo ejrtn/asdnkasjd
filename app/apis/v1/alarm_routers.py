@@ -94,7 +94,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
     [ALARM] 현재 웹 화면에서 띄워야 할 알람 조회
 
     노출 대상:
-    - 최근 2분 내 발송된 미확인 알람
+    - snoozed_until 이 없고 최근 2분 내 발송된 미확인 알람
     - 또는 snoozed_until 시각이 도래한 미확인 알람
     - 현재 로그인 사용자 기준
     """
@@ -106,7 +106,9 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
 
     histories = (
         await AlarmHistory.filter(
-            Q(is_confirmed=False) & Q(alarm__user=user) & (Q(sent_at__gte=since_utc) | Q(snoozed_until__lte=now_utc))
+            Q(is_confirmed=False)
+            & Q(alarm__user=user)
+            & ((Q(snoozed_until__isnull=True) & Q(sent_at__gte=since_utc)) | Q(snoozed_until__lte=now_utc))
         )
         .prefetch_related("alarm__current_med")
         .order_by("-sent_at")
@@ -119,12 +121,11 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
         if not alarm:
             continue
 
-        # snooze 재노출이면 snoozed_until 초기화 (1회만 재노출)
         is_snoozed_reopen = history.snoozed_until is not None and history.snoozed_until <= now_utc
 
         if is_snoozed_reopen:
             history.snoozed_until = None
-            await history.save()
+            await history.save(update_fields=["snoozed_until"])
 
         med_name = alarm.current_med.medication_name if alarm.current_med else None
 
@@ -187,7 +188,7 @@ async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request
         history.is_confirmed = True
         history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
         history.snoozed_until = None
-        await history.save()
+        await history.save(update_fields=["is_confirmed", "read_at", "snoozed_until"])
 
     return {"detail": "확인 완료"}
 
@@ -234,13 +235,20 @@ async def confirm_alarm_history(history_id: int, user: Annotated[User, Depends(g
     """
     [ALARM] alarm_history 단건 확인 처리
     """
-    default_logger.info("[Alarm] confirm_alarm_history - 로그인")
+    default_logger.info(f"[Alarm] confirm_alarm_history - 로그인 history_id={history_id} user={user}")
     service = AlarmService()
 
     try:
         await service.confirm_alarm_history(user, history_id)
     except ValueError as e:
+        default_logger.warning(f"[Alarm] confirm_alarm_history ValueError history_id={history_id}: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+    except Exception as e:
+        default_logger.exception(f"[Alarm] confirm_alarm_history Exception history_id={history_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="알람 확인 처리 중 오류가 발생했습니다.",
+        ) from e
 
     return {"detail": "알람 확인 되었습니다."}
 
@@ -261,7 +269,8 @@ async def snooze_alarm_history(history_id: int, user: Annotated[User, Depends(ge
     except Exception as e:
         default_logger.exception(f"[Alarm] snooze_alarm_history Exception history_id={history_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="알람 미루기 처리 중 오류가 발생했습니다."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="알람 미루기 처리 중 오류가 발생했습니다.",
         ) from e
 
     return {"detail": "10분 뒤 다시 알려드립니다."}

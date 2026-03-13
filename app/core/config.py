@@ -63,7 +63,7 @@ class Config(BaseSettings):
     RESET_DB_ON_STARTUP: bool = False
 
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # API 호출용 토큰 (30분)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 6  # API 호출용 토큰 (360분)
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 30 * 24 * 60  # 자동로그인 체크 시 30일 유지
     REFRESH_TOKEN_EXPIRE_MINUTES_SHORT: int = 360  # 자동로그인 체크 안 할 시 6시간 유지
     JWT_LEEWAY: int = 5

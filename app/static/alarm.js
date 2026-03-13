@@ -108,7 +108,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     await refreshAlarmPageState();
 });
 
-// 기록확인 탭 자동 갱신 이벤트 리스너
 window.addEventListener('alarm-history-updated', async () => {
     const historyPanel = document.getElementById('alarm-mode-history');
     if (historyPanel && historyPanel.classList.contains('active')) {
@@ -116,7 +115,6 @@ window.addEventListener('alarm-history-updated', async () => {
     }
 });
 
-// 기록확인 탭 주기적 갱신
 setInterval(() => {
     const historyPanel = document.getElementById('alarm-mode-history');
     if (historyPanel && historyPanel.classList.contains('active')) {
@@ -262,7 +260,7 @@ function renderMeds() {
           약물을 선택하세요
         `;
         if (detail) {
-          detail.innerHTML = '<div class="alarm-detail-empty">등록된 약물이 없습니다.</div>';
+            detail.innerHTML = '<div class="alarm-detail-empty">등록된 약물이 없습니다.</div>';
         }
         return;
     }
@@ -455,9 +453,9 @@ async function toggleHealthAlarm(type, prefix) {
             body: JSON.stringify({ is_active: isActive })
         });
 
-        if (r && r.ok) { 
-            healthAlarms[type] = await r.json(); 
-            applyHealthAlarmState(); 
+        if (r && r.ok) {
+            healthAlarms[type] = await r.json();
+            applyHealthAlarmState();
         }
     } else {
         const time = document.getElementById(prefix + '-time').value;
@@ -467,9 +465,9 @@ async function toggleHealthAlarm(type, prefix) {
             body: JSON.stringify({ alarm_type: type, alarm_time: time })
         });
 
-        if (r && r.ok) { 
-            healthAlarms[type] = await r.json(); 
-            applyHealthAlarmState(); 
+        if (r && r.ok) {
+            healthAlarms[type] = await r.json();
+            applyHealthAlarmState();
         }
     }
 }
@@ -611,7 +609,16 @@ function formatHistorySentAt(isoString) {
     if (!isoString) return '-';
 
     try {
-        const date = new Date(isoString);
+        let normalized = String(isoString).trim();
+
+        // 타임존 정보가 없는 ISO 문자열이면 UTC로 간주
+        // 예: 2026-03-13T17:05:53  ->  2026-03-13T17:05:53Z
+        const hasTimezone = /([zZ]|[+\-]\d{2}:\d{2})$/.test(normalized);
+        if (!hasTimezone) {
+            normalized += 'Z';
+        }
+
+        const date = new Date(normalized);
 
         if (Number.isNaN(date.getTime())) {
             return isoString;
@@ -645,7 +652,7 @@ function formatHistorySentAt(isoString) {
 
         return `${year}.${month}.${day} ${dayPeriod} ${hour}:${minute}`;
     } catch (error) {
-        console.error('Time parsing error:', error);
+        console.error('Time parsing error:', error, isoString);
         return isoString;
     }
 }
@@ -659,55 +666,28 @@ function renderAlarmHistories() {
         return;
     }
 
-    listEl.innerHTML = alarmHistories.map(item => `
-        <div class="history-item">
-            <div class="history-item-left">
-                <div class="history-item-title-row">
-                    <div class="history-item-title">${item.title}</div>
-                    <span class="history-status ${item.is_confirmed ? 'done' : 'pending'}">
-                        ${item.is_confirmed ? '확인 완료' : '미확인'}
-                    </span>
+    listEl.innerHTML = `
+        <div class="history-grid">
+            ${alarmHistories.map(item => `
+                <div class="history-item">
+                    <div class="history-item-left" style="width:100%;">
+                        <div class="history-item-title-row">
+                            <div class="history-item-title">${item.title}</div>
+                            <span class="history-status ${item.is_confirmed ? 'done' : 'pending'}">
+                                ${item.is_confirmed ? '확인 완료' : '미확인'}
+                            </span>
+                        </div>
+
+                        <div class="history-item-body">${item.body}</div>
+
+                        <div class="history-item-meta">
+                            <span>🕒 ${formatHistorySentAt(item.sent_at)}</span>
+                            <span>•</span>
+                            <span>${item.alarm_type}</span>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="history-item-body">${item.body}</div>
-
-                <div class="history-item-meta">
-                    <span>🕒 ${formatHistorySentAt(item.sent_at)}</span>
-                    <span>•</span>
-                    <span>${item.alarm_type}</span>
-                </div>
-            </div>
-
-            <div class="history-item-right">
-                <button
-                    type="button"
-                    class="history-confirm-btn"
-                    onclick="confirmAlarmHistory(${item.history_id})"
-                    ${item.is_confirmed ? 'disabled' : ''}>
-                    ${item.is_confirmed ? '확인됨' : '확인'}
-                </button>
-            </div>
+            `).join('')}
         </div>
-    `).join('');
-}
-
-async function confirmAlarmHistory(historyId) {
-    const response = await fetchWithAuth(`/api/v1/alarms/history/${historyId}`, {
-        method: 'PATCH'
-    });
-
-    if (!response) return;
-
-    if (response.ok) {
-        alarmHistories = alarmHistories.map(item =>
-            item.history_id === historyId
-                ? { ...item, is_confirmed: true }
-                : item
-        );
-
-        renderAlarmHistories();
-        showAppToast('알람 기록을 확인 처리했어요.', 'success', '기록 확인');
-    } else {
-        showAppToast('알람 기록을 확인 처리할 수 없습니다.', 'warn', '기록 확인');
-    }
+    `;
 }

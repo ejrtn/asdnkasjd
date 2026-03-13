@@ -67,8 +67,18 @@ async def main() -> None:
 
         # DB 연결
         await Tortoise.init(
-            db_url=DB_URL,
-            modules={"models": MODELS},
+            config={
+                "connections": {
+                    "default": DB_URL,
+                },
+                "apps": {
+                    "models": {
+                        "models": MODELS,
+                    },
+                },
+                "use_tz": True,
+                "timezone": "Asia/Seoul",
+            }
         )
         logger.info("✅ DB 연결 완료")
 

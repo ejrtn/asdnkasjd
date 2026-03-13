@@ -11,6 +11,7 @@ from datetime import datetime, time, timedelta
 from ai_worker.core.config import Config
 from ai_worker.tasks.fcm import send_push_notification
 from app.models.user import User
+from app.services.alarm import AlarmService
 from app.services.plan_check_list import PlanCheckListService
 
 config = Config()
@@ -50,7 +51,6 @@ def normalize_alarm_time(value: object) -> str:
 
     text = str(value).strip()
 
-    # 예: "0:40:00", "00:40:00", "0:40:"
     if ":" in text:
         parts = text.split(":")
         if len(parts) >= 2:
@@ -94,8 +94,11 @@ async def check_and_send_alarms() -> None:
         logging.info(f"[SCHEDULER] MATCHED alarm_id={alarm.id} type={alarm.alarm_type} time={alarm_time_str}")
 
         try:
-            # alarm_history 생성
             history = await AlarmHistory.create(alarm=alarm, is_confirmed=False)
+
+            service = AlarmService()
+            await service._trim_user_alarm_histories(alarm.user)
+
             logging.info(
                 f"[SCHEDULER] history created history_id={history.id} alarm_id={alarm.id} sent_at={history.sent_at}"
             )
@@ -103,7 +106,6 @@ async def check_and_send_alarms() -> None:
             logging.exception(f"[SCHEDULER] history create failed alarm_id={alarm.id}: {e}")
             continue
 
-        # FCM 토큰이 있으면 푸시 발송
         user = alarm.user
         if not user.fcm_token or not user.alarm_tf:
             logging.info(
@@ -138,7 +140,6 @@ async def sync_all_users_daily_plans() -> None:
     """모든 사용자의 일일 실행 플랜을 동기화 (자정 실행)"""
     logging.info("[SCHEDULER] Starting daily plan sync for all users")
     service = PlanCheckListService()
-    # Repository에서 모든 사용자 ID를 가져오는 간단한 방식 (또는 User.all())
 
     users = await User.all()
 
@@ -156,7 +157,6 @@ async def run_alarm_scheduler() -> None:
     """정각에 맞춰 알람 체크 루프"""
     logging.info("⏰ 알람 스케줄러 루프 시작")
 
-    # 첫 번째 정각까지 대기
     now = datetime.now(tz=zoneinfo.ZoneInfo("Asia/Seoul"))
     seconds_until_next_minute = 60 - now.second
     logging.info(f"⏱️ 다음 정각까지 {seconds_until_next_minute}초 대기")
@@ -167,7 +167,6 @@ async def run_alarm_scheduler() -> None:
             logging.info("⏳ 알람 체크 중...")
             await check_and_send_alarms()
 
-            # 자정(00:00) 체크하여 일일 플랜 동기화
             now = datetime.now(tz=zoneinfo.ZoneInfo("Asia/Seoul"))
             if now.hour == 0 and now.minute == 0:
                 await sync_all_users_daily_plans()

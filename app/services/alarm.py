@@ -29,7 +29,7 @@ HEALTH_ALARM_NAMES = {
 
 
 class AlarmService:
-    HISTORY_KEEP_LIMIT = 50
+    HISTORY_KEEP_LIMIT = 15
 
     def __init__(self):
         self.plan_check_list_repo = PlanCheckListRepository()
@@ -38,7 +38,7 @@ class AlarmService:
     def _format_time(self, t: object) -> str:
         if hasattr(t, "strftime"):
             return t.strftime("%H:%M")  # type: ignore[union-attr, no-any-return]
-        if hasattr(t, "seconds"):  # timedelta
+        if hasattr(t, "seconds"):
             total = int(t.seconds)  # type: ignore[union-attr]
             return f"{total // 3600:02d}:{(total % 3600) // 60:02d}"
         return str(t)
@@ -47,7 +47,7 @@ class AlarmService:
         if isinstance(value, time):
             return value
 
-        if hasattr(value, "seconds"):  # timedelta 대응
+        if hasattr(value, "seconds"):
             total = int(value.seconds)  # type: ignore[union-attr]
             hour = (total // 3600) % 24
             minute = (total % 3600) // 60
@@ -82,7 +82,8 @@ class AlarmService:
             self._to_response(
                 alarm,
                 HEALTH_ALARM_NAMES.get(
-                    alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+                    alarm.alarm_type,
+                    alarm.current_med.medication_name if alarm.current_med else "알 수 없음",
                 ),
                 alarm.current_med.id if alarm.current_med else 0,
             )
@@ -113,7 +114,6 @@ class AlarmService:
             is_active=True,
         )
 
-        # 복약 체크리스트 동기화 (plan_type='pill')
         if request.alarm_type == "MED":
             plan_service = PlanCheckListService()
             await plan_service.sync_pill_plans(user.id)
@@ -133,13 +133,13 @@ class AlarmService:
             alarm.is_active = request.is_active
         await alarm.save()
 
-        # 복약 체크리스트 동기화 (plan_type='pill')
         if alarm.alarm_type == "MED":
             plan_service = PlanCheckListService()
             await plan_service.sync_pill_plans(user.id)
 
         med_name = HEALTH_ALARM_NAMES.get(
-            alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+            alarm.alarm_type,
+            alarm.current_med.medication_name if alarm.current_med else "알 수 없음",
         )
         return self._to_response(alarm, med_name, alarm.current_med.id if alarm.current_med else 0)
 
@@ -152,13 +152,13 @@ class AlarmService:
         alarm.is_active = request.is_active
         await alarm.save()
 
-        # 복약 체크리스트 동기화 (plan_type='pill')
         if alarm.alarm_type == "MED":
             plan_service = PlanCheckListService()
             await plan_service.sync_pill_plans(user.id)
 
         med_name = HEALTH_ALARM_NAMES.get(
-            alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
+            alarm.alarm_type,
+            alarm.current_med.medication_name if alarm.current_med else "알 수 없음",
         )
         return self._to_response(alarm, med_name, alarm.current_med.id if alarm.current_med else 0)
 
@@ -168,7 +168,6 @@ class AlarmService:
             raise ValueError("알람을 찾을 수 없습니다.")
         await alarm.delete()
 
-        # 복약 체크리스트 동기화 (plan_type='pill')
         if alarm.alarm_type == "MED":
             plan_service = PlanCheckListService()
             await plan_service.sync_pill_plans(user.id)
@@ -217,7 +216,9 @@ class AlarmService:
 
         if not alarms:
             return DashboardAlarmSummaryResponse(
-                previous_alarm=None, next_alarm=None, remaining_text="예정된 다음 알림이 없습니다."
+                previous_alarm=None,
+                next_alarm=None,
+                remaining_text="예정된 다음 알림이 없습니다.",
             )
 
         today_items: list[tuple[datetime, Alarm]] = []
@@ -235,7 +236,7 @@ class AlarmService:
         remaining_text = "예정된 다음 알림이 없습니다."
 
         if previous_candidates:
-            prev_dt, prev_alarm = previous_candidates[-1]
+            _, prev_alarm = previous_candidates[-1]
 
             latest_history = (
                 await AlarmHistory.filter(
@@ -292,7 +293,14 @@ class AlarmService:
         alarm = history.alarm
         title, body = self._build_history_title_body(alarm)
 
-        sent_at_kst = history.sent_at_kst.isoformat() if history.sent_at else ""
+        sent_at_str = ""
+        if history.sent_at:
+            # DB에 저장된 alarm_history 시간은 현재 UTC wall clock 기준으로 들어오므로
+            # ORM이 어떤 tzinfo를 붙여서 주더라도 일단 tz를 제거한 뒤 UTC로 재해석한다.
+            raw_sent_at = history.sent_at.replace(tzinfo=None)
+            sent_at_utc = raw_sent_at.replace(tzinfo=ZoneInfo("UTC"))
+            sent_at_kst = sent_at_utc.astimezone(ZoneInfo("Asia/Seoul"))
+            sent_at_str = sent_at_kst.isoformat()
 
         return AlarmHistoryResponse(
             history_id=history.id,
@@ -300,22 +308,35 @@ class AlarmService:
             alarm_type=alarm.alarm_type,
             title=title,
             body=body,
-            sent_at=sent_at_kst,
+            sent_at=sent_at_str,
             is_confirmed=history.is_confirmed,
         )
 
     async def _trim_user_alarm_histories(self, user: User) -> None:
+        """
+        MySQL에서는 relation filter가 들어간 DELETE JOIN 쿼리가 깨질 수 있어서
+        alarm_id 목록을 먼저 구한 뒤, alarm_history 단일 테이블 기준으로 정리한다.
+        """
+        user_alarm_ids = await Alarm.filter(user=user).values_list("id", flat=True)
+
+        if not user_alarm_ids:
+            return
+
+        user_alarm_ids = list(user_alarm_ids)
+
         keep_ids = (
-            await AlarmHistory.filter(alarm__user=user)
+            await AlarmHistory.filter(alarm_id__in=user_alarm_ids)
             .order_by("-sent_at")
             .limit(self.HISTORY_KEEP_LIMIT)
             .values_list("id", flat=True)
         )
 
+        keep_ids = list(keep_ids)
+
         if not keep_ids:
             return
 
-        await AlarmHistory.filter(alarm__user=user).exclude(id__in=list(keep_ids)).delete()
+        await AlarmHistory.filter(alarm_id__in=user_alarm_ids).exclude(id__in=keep_ids).delete()
 
     async def get_user_alarm_histories(self, user: User, limit: int = 15) -> list[AlarmHistoryResponse]:
         histories = (
@@ -335,7 +356,7 @@ class AlarmService:
         history.is_confirmed = True
         history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
         history.snoozed_until = None
-        await history.save()
+        await history.save(update_fields=["is_confirmed", "read_at", "snoozed_until"])
 
         await self._trim_user_alarm_histories(user)
 
@@ -354,6 +375,6 @@ class AlarmService:
         now_utc = datetime.now(tz=ZoneInfo("UTC"))
         history.snoozed_until = now_utc + timedelta(minutes=minutes)
         history.snooze_count = 1
-        await history.save()
+        await history.save(update_fields=["snoozed_until", "snooze_count"])
 
         await self._trim_user_alarm_histories(user)
