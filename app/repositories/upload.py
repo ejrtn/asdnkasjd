@@ -39,3 +39,11 @@ class UploadRepository:
         사용자의 모든 업로드 기록을 최신순으로 정렬하여 반환합니다.
         """
         return await self._model.filter(user_id=user_id).order_by("-created_at")
+
+    async def delete_upload(self, upload_id: int, user_id: str) -> bool:
+        """
+        주어진 upload_id 업로드 레코드를 삭제합니다.
+        사용자가 자신의 파일만 삭제할 수 있도록 user_id 조건을 부고, 삭제 성공 시 True 반환.
+        """
+        deleted_count = await self._model.filter(id=upload_id, user_id=user_id).delete()
+        return bool(deleted_count > 0)

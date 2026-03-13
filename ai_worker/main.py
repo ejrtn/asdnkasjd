@@ -23,7 +23,21 @@ DB_URL = os.getenv("DATABASE_URL", "mysql://ozcoding:pw1234@mysql:3306/ai_health
 MODELS = [
     "app.models.alarm",
     "app.models.alarm_history",
+    "app.models.allergy",
+    "app.models.blood_pressure_record",
+    "app.models.blood_sugar_record",
+    "app.models.chat_message",
+    "app.models.chronic_disease",
     "app.models.current_med",
+    "app.models.health_profile",
+    "app.models.llm_life_guide",
+    "app.models.multimodal_asset",
+    "app.models.ocr_history",
+    "app.models.pill_recognitions",
+    "app.models.prescription",
+    "app.models.prescription_drug",
+    "app.models.system_log",
+    "app.models.upload",
     "app.models.user",
 ]
 

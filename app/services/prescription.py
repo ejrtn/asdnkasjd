@@ -26,7 +26,7 @@ class PrescriptionService:
     @staticmethod
     def _clean_drug_name(raw_name: str) -> str:
         """
-        약품명에서 불필요한 접두어(비), 급)) 및 잘린 괄호/성분명을 제거합니다.
+        약품명에서 불필요한 접두어(비), 급)) 및 잘린 괄호/성분명을 제거하고 특수기호를 제외합니다.
         """
         import re
 
@@ -37,8 +37,45 @@ class PrescriptionService:
         name = re.sub(r"^[비급]\)\s*", "", raw_name)
         # 2. 첫 번째 괄호가 시작되는 지점 이후로 모두 제거 (잘린 성성분명/용량 제거)
         name = name.split("(")[0]
-        # 3. 양끝 공백 제거
+        # 3. 불필요한 특수문자 제거
+        name = re.sub(r"[^가-힣a-zA-Z0-9\s]", "", name)
+        # 4. 양끝 공백 제거
         return name.strip()
+
+    def _preprocess_image(self, image_bytes: bytes) -> bytes:
+        """
+        [성능 향상] 이미지 대비와 선명도를 높여 OCR 인식률을 개선합니다.
+        """
+        import io
+
+        from PIL import Image, ImageEnhance, ImageOps
+
+        try:
+            # 1. 처음에 여는 이미지 변수 이름을 'source_img'로 합니다. (ImageFile 타입)
+            source_img = Image.open(io.BytesIO(image_bytes))
+
+            if source_img.mode != "RGB":
+                source_img = source_img.convert("RGB")  # type: ignore
+
+            # 2. 가공을 시작하는 시점부터는 'processed'라는 새로운 변수 이름을 씁니다. (Image 타입)
+            # 이렇게 이름을 아예 갈라치면 mypy가 더 이상 화내지 않습니다.
+            processed = ImageOps.grayscale(source_img)
+
+            # 3. 대비(Contrast) 향상
+            enhancer = ImageEnhance.Contrast(processed)
+            processed = enhancer.enhance(2.5)
+
+            # 4. 선명도(Sharpness) 조절
+            sharpness = ImageEnhance.Sharpness(processed)
+            processed = sharpness.enhance(2.0)
+
+            # 바이트로 다시 변환
+            img_byte_arr = io.BytesIO()
+            processed.save(img_byte_arr, format="JPEG", quality=95)
+            return img_byte_arr.getvalue()
+        except Exception as e:
+            logger.error(f"이미지 전처리 실패: {e}")
+            return image_bytes
 
     async def parse_prescription_with_vision(self, image_bytes: bytes) -> dict[str, Any]:
         """
@@ -48,13 +85,15 @@ class PrescriptionService:
         import base64
 
         if not config.OPENAI_API_KEY:
-            logger.warning("OPENAI_API_KEY가 설정되지 않았습니다. 파싱을 건너뜜니다.")
+            logger.warning("OPENAI_API_KEY가 설정되지 않았습니다. 파싱을 건너뜁니다.")
             return {"hospital_name": None, "prescribed_date": None, "drugs": []}
 
-        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        # 전처리 적용
+        processed_bytes = self._preprocess_image(image_bytes)
+        image_b64 = base64.b64encode(processed_bytes).decode("utf-8")
 
         system_prompt = """
-        당신은 한국의 처방전 및 약봉투 분석 전문가입니다. 이미지를 보고 정보를 JSON으로 추출하세요.
+        당신은 한국의 처방전 및 약봉투 분석 전문가입니다. 이미지를 보고 '병원/약국명', '날짜', '약물 정보'를 JSON으로 추출하세요.
 
         ### [추출 및 정제 규칙] ###
         1. **약품명 정제 (CRITICAL)**:

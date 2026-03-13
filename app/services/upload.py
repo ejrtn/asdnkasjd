@@ -324,6 +324,17 @@ class UploadService:
         # 딕셔너리의 값만 리스트로 반환 (최근순 정렬 유지)
         return list(history_map.values())
 
+    async def delete_upload_file(self, user: Any, upload_id: int) -> bool:
+        """
+        특정 업로드 레코드를 삭제합니다.
+        사용자 소유 파일만 삭제할 수 있으며, 성공 시 True를 반환합니다.
+        """
+        if not user:
+            return False
+        # await 결과를 bool()로 감싸서 명시적으로 타입을 맞춰줍니다.
+        result = await self._repo.delete_upload(upload_id, user.id)
+        return bool(result)
+
     def _get_base_name(self, path: str) -> str:
         """파일명에서 핵심 이름을 추출합니다."""
         filename = os.path.basename(path)

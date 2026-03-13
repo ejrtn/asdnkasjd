@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div>
-                        <div style="color: #666; font-size: 11px; margin-bottom: 8px;">💊 분석된 약물 리스트 (클릭하여 선택)</div>
+                        <div style="color: #666; font-size: 11px; margin-bottom: 8px;">💊 분석된 알약 리스트 (클릭하여 선택)</div>
                         <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
                             ${drugListHtml}
                         </div>
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedDrugNames = Array.from(selectedItems).map(item => item.dataset.name);
 
             if (selectedDrugNames.length === 0) {
-                alert('연동할 약물을 하나 이상 선택해 주세요.');
+                alert('연동할 알약을 하나 이상 선택해 주세요.');
                 return;
             }
 
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchUploadHistory() {
     const list1 = document.getElementById('upload-history-list-prescription');
     const list2 = document.getElementById('upload-history-list-pill');
-    
+
     // 두 컨테이너 중 하나라도 없으면 여기서 에러표시를 할 필요는 없지만,
     // 둘 다 없다면 굳이 페치할 필요 없음.
     if (!list1 && !list2) return;
@@ -732,15 +732,14 @@ function renderUploadHistory(container, historyList) {
         const icon = item.type === '처방전' ? '📄' : '💊';
         const dateStr = item.date;
         const uniqueId = `history-images-${container.id}-${index}`;
-        
+
         // 이미지 목록 서브 HTML 생성
         let imagesHtml = '';
         if (item.images && item.images.length > 0) {
             item.images.forEach(img => {
-                // 이미지 이름이 길 경우 말줄임 처리, 클릭 시 속성으로 전달한 url을 이용해 확대 기능 수행
                 imagesHtml += `
                     <div class="history-image-item" data-url="${img.url}" style="padding: 8px 10px; margin-top: 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; transition: background 0.2s;">
-                        <span>🖼️</span> 
+                        <span>🖼️</span>
                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${img.name}</span>
                     </div>
                 `;
@@ -751,14 +750,17 @@ function renderUploadHistory(container, historyList) {
 
         html += `
             <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                <!-- 타이틀 (클릭 시 아코디언 토글) -->
+                <!-- 타이틀 (클릭 시 아코디언 토글) + X 버튼 -->
                 <div class="history-title-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; cursor: pointer;">
-                    <div style="display: flex; align-items: center; font-size: 16px; font-weight: 500; color: #334155;">
+                    <div style="display: flex; align-items: center; font-size: 16px; font-weight: 500; color: #334155; flex: 1;">
                         <span style="font-size: 20px; margin-right: 12px; opacity: 0.8;">${icon}</span>
                         <span>${dateStr} ${item.type}</span>
                     </div>
-                    <div class="history-arrow" style="font-size: 16px; color: #94a3b8; transition: transform 0.3s;">
-                        ▼
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="history-arrow" style="font-size: 16px; color: #94a3b8; transition: transform 0.3s;">▼</div>
+                        <button class="history-delete-btn" data-id="${item.id}" title="삭제"
+                            style="background: none; border: none; cursor: pointer; font-size: 16px; color: #cbd5e1; padding: 4px 6px; border-radius: 4px; line-height: 1; transition: color 0.2s;"
+                            onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">✕</button>
                     </div>
                 </div>
                 <!-- 확장 영역 (이미지 목록) -->
@@ -774,7 +776,7 @@ function renderUploadHistory(container, historyList) {
     // 이벤트 리스너 바인딩 (아코디언 토글)
     const titleRows = container.querySelectorAll('.history-title-row');
     titleRows.forEach(row => {
-        row.addEventListener('click', function() {
+        row.addEventListener('click', function () {
             const arrow = this.querySelector('.history-arrow');
             const expandArea = this.nextElementSibling;
             if (expandArea.style.display === 'none') {
@@ -787,10 +789,37 @@ function renderUploadHistory(container, historyList) {
         });
     });
 
+    // 이벤트 리스너 바인딩 (X 삭제 버튼)
+    const deleteBtns = container.querySelectorAll('.history-delete-btn');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', async function (e) {
+            e.stopPropagation(); // 아코디언 토글 방지
+            const uploadId = this.getAttribute('data-id');
+            if (!uploadId) return;
+
+            if (!confirm('이 업로드 기록을 삭제하시겠습니까?')) return;
+
+            try {
+                const response = await fetchWithAuth(`/api/v1/uploads/${uploadId}`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    // 성공 시 히스토리 새로고침
+                    fetchUploadHistory();
+                } else {
+                    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                }
+            } catch (err) {
+                console.error('삭제 에러:', err);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        });
+    });
+
     // 이벤트 리스너 바인딩 (이미지 이름 클릭 시 줌 모달 띄우기)
     const imageItems = container.querySelectorAll('.history-image-item');
     imageItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.stopPropagation(); // 부모 토글 이벤트 방지
             const url = this.getAttribute('data-url');
             if (url && typeof showZoomModal === 'function') {
@@ -809,6 +838,11 @@ function renderUploadHistory(container, historyList) {
         });
     });
 }
+
+// 최초 로딩 시 데이터 패치
+document.addEventListener('DOMContentLoaded', () => {
+    fetchUploadHistory();
+});
 
 // 최초 로딩 시 데이터 패치
 document.addEventListener('DOMContentLoaded', () => {

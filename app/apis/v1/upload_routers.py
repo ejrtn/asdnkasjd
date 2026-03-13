@@ -39,3 +39,17 @@ async def get_upload_history(user: Annotated[User, Depends(get_request_user)]):
     upload_service = UploadService()
     history = await upload_service.get_upload_history(user)
     return {"status": "success", "content": history}
+
+
+@upload_router.delete("/{upload_id}")
+async def delete_upload(upload_id: int, user: Annotated[User, Depends(get_request_user)]):
+    """
+    [UPLOAD] 특정 업로드 레코드 삭제
+    """
+    upload_service = UploadService()
+    success = await upload_service.delete_upload_file(user, upload_id)
+    if success:
+        return {"status": "success", "message": "파일이 삭제되었습니다."}
+    from fastapi import HTTPException
+
+    raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다.")
