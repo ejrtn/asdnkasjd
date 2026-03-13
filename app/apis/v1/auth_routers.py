@@ -1,7 +1,8 @@
 import uuid
+from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.responses import ORJSONResponse as Response
 from fastapi.security import OAuth2PasswordRequestForm
@@ -15,81 +16,84 @@ from app.dtos.users import (
     SocialLoginResponse,
 )
 from app.services.users import UserManageService
+from app.utils.security import create_access_token, verify_refresh_token
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def login(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     user_service: Annotated[UserManageService, Depends(UserManageService)],
 ) -> JSONResponse:
     """
-    [USER] 로그인 (이메일/비밀번호) -> access_token 발급
+    [USER] 로그인 -> access_token + refresh_token 발급
     """
+    form = await request.form()
+    remember_me = str(form.get("remember_me", "")).lower() in ("true", "1", "on", "yes")
+
     login_data = LoginRequest(id=form_data.username, password=form_data.password)
-    tokens = await user_service.login(login_data)
+    tokens = await user_service.login(login_data, remember_me=remember_me)
+
+    refresh_max_age = (
+        config.REFRESH_TOKEN_EXPIRE_MINUTES * 60
+        if remember_me
+        else config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60
+    )
 
     response = JSONResponse(
-        content={"access_token": tokens["access_token"], "token_type": tokens["token_type"], "id": tokens["id"]},
+        content={
+            "access_token": tokens["access_token"],
+            "token_type": tokens["token_type"],
+            "id": tokens["id"],
+        },
         status_code=status.HTTP_200_OK,
     )
-    response.set_cookie("access_token", tokens["access_token"], httponly=False, samesite="lax")
+
+    # 프론트 localStorage 동기화용
+    response.set_cookie("access_token", tokens["access_token"], httponly=False, samesite="lax", path="/")
+    response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", path="/")
+
+    # 실제 재발급용
+    response.set_cookie(
+        "refresh_token",
+        tokens["refresh_token"],
+        httponly=True,
+        samesite="lax",
+        path="/",
+        max_age=refresh_max_age,
+    )
     return response
 
 
-@auth_router.get("/google/authorize", response_model=GoogleAuthUrlResponse)
-async def google_authorize() -> Response:
+@auth_router.get("/token/refresh")
+async def refresh_access_token(
+    refresh_token: str | None = Cookie(default=None),
+) -> JSONResponse:
     """
-    [USER] 구글 소셜 로그인 시작.
-    프론트는 반환된 auth_url로 리다이렉트하여 인가코드(code)를 획득
+    [USER] refresh_token으로 access_token 재발급
     """
-    google_client_id = config.GOOGLE_CLIENT_ID
-    redirect_uri = config.GOOGLE_REDIRECT_URI
-    scope = "openid email profile"
-    auth_url = (
-        f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
-        f"&client_id={google_client_id}&redirect_uri={redirect_uri}&scope={scope}"
+    if not refresh_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="리프레시 토큰이 없습니다.")
+
+    try:
+        payload = verify_refresh_token(refresh_token)
+        user_id = payload["user_id"]
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)) from e
+
+    access_token = create_access_token(
+        data={"user_id": user_id},
+        expires_delta=timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    return Response(content={"auth_url": auth_url}, status_code=status.HTTP_200_OK)
 
-
-@auth_router.get("/google/callback", response_model=SocialLoginResponse)
-async def google_callback(
-    code: str,
-    user_service: Annotated[UserManageService, Depends(UserManageService)],
-) -> HTMLResponse:
-    """
-    [USER] 구글 로그인 콜백. service access_token 발급.
-    """
-
-    return await user_service.google_login(code)
-
-
-@auth_router.get("/naver/authorize", response_model=NaverAuthUrlResponse)
-async def naver_authorize() -> Response:
-    """
-    [USER] 네이버 소셜 로그인 시작.
-    프론트는 반환된 auth_url로 리다이렉트하여 인가코드(code)를 획득
-    """
-    naver_client_id = config.NAVER_CLIENT_ID
-    redirect_uri = config.NAVER_REDIRECT_URI
-    # state parameter is recommended for Naver to prevent CSRF
-
-    state = str(uuid.uuid4())[:8]
-    auth_url = (
-        f"https://nid.naver.com/oauth2.0/authorize?response_type=code"
-        f"&client_id={naver_client_id}&redirect_uri={redirect_uri}&state={state}"
+    response = JSONResponse(
+        content={
+            "access_token": access_token,
+            "token_type": "bearer",
+        },
+        status_code=status.HTTP_200_OK,
     )
-    return Response(content={"auth_url": auth_url}, status_code=status.HTTP_200_OK)
-
-
-@auth_router.get("/naver/callback", response_model=SocialLoginResponse)
-async def naver_callback(
-    code: str, user_service: Annotated[UserManageService, Depends(UserManageService)], state: str | None = None
-) -> HTMLResponse:
-    """
-    [USER] 네이버 로그인 콜백. service access_token 발급.
-    """
-
-    return await user_service.naver_login(code, state)
+    response.set_cookie("access_token", access_token, httponly=False, samesite="lax", path="/")
+    return response

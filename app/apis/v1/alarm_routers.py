@@ -3,6 +3,7 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from tortoise.expressions import Q
 
 from app.core.logger import default_logger
 from app.dependencies.security import get_request_user
@@ -91,20 +92,26 @@ async def delete_alarm(alarm_id: int, user: Annotated[User, Depends(get_request_
 async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> list[dict]:
     """
     [ALARM] 현재 웹 화면에서 띄워야 할 알람 조회
-    - 최근 2분 내 발송된 알람
-    - 아직 확인하지 않은 알람
+
+    노출 대상:
+    - 최근 2분 내 발송된 미확인 알람
+    - 또는 snoozed_until 시각이 도래한 미확인 알람
     - 현재 로그인 사용자 기준
     """
     default_logger.info("[Alarm] get_due_alarms - 로그인")
 
-    now = datetime.now(ZoneInfo("Asia/Seoul"))
-    since = now - timedelta(minutes=2)
+    now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
+    now_utc = now_kst.astimezone(ZoneInfo("UTC"))
+    since_utc = now_utc - timedelta(minutes=2)
 
     histories = (
         await AlarmHistory.filter(
-            is_confirmed=False,
-            sent_at__gte=since,
-            alarm__user=user,
+            Q(is_confirmed=False)
+            & Q(alarm__user=user)
+            & (
+                Q(sent_at__gte=since_utc)
+                | Q(snoozed_until__lte=now_utc)
+            )
         )
         .prefetch_related("alarm__current_med")
         .order_by("-sent_at")
@@ -116,6 +123,16 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
         alarm = history.alarm
         if not alarm:
             continue
+
+        # snooze 재노출이면 snoozed_until 초기화 (1회만 재노출)
+        is_snoozed_reopen = (
+            history.snoozed_until is not None
+            and history.snoozed_until <= now_utc
+        )
+
+        if is_snoozed_reopen:
+            history.snoozed_until = None
+            await history.save()
 
         med_name = alarm.current_med.medication_name if alarm.current_med else None
 
@@ -149,6 +166,8 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
                 "title": title,
                 "body": body,
                 "sent_at": history.sent_at.isoformat() if history.sent_at else None,
+                "snoozed_until": history.snoozed_until.isoformat() if history.snoozed_until else None,
+                "snooze_count": history.snooze_count,
             }
         )
 
@@ -159,6 +178,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
 async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request_user)]) -> dict:
     """
     [ALARM] 알람 확인 (복약/측정 완료 체크)
+    - 과거 호환용 엔드포인트
     """
     default_logger.info("[Alarm] confirm_alarm - 로그인")
     from app.models.alarm_history import AlarmHistory
@@ -173,7 +193,10 @@ async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request
     )
     if history:
         history.is_confirmed = True
+        history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
+        history.snoozed_until = None
         await history.save()
+
     return {"detail": "확인 완료"}
 
 
@@ -195,7 +218,7 @@ async def get_dashboard_alarm_summary(
 @alarm_router.get("/history", response_model=list[AlarmHistoryResponse])
 async def get_alarm_histories(
     user: Annotated[User, Depends(get_request_user)],
-    limit: int = 30,
+    limit: int = 15,
 ) -> list[AlarmHistoryResponse]:
     """
     [ALARM] 로그인 사용자의 알람 기록 조회
@@ -228,6 +251,26 @@ async def confirm_alarm_history(history_id: int, user: Annotated[User, Depends(g
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     return {"detail": "알람 확인 되었습니다."}
+
+
+@alarm_router.patch("/history/{history_id}/snooze")
+async def snooze_alarm_history(history_id: int, user: Annotated[User, Depends(get_request_user)]) -> dict:
+    """
+    [ALARM] alarm_history 단건 10분 미루기
+    """
+    default_logger.info(f"[Alarm] snooze_alarm_history - 로그인 history_id={history_id} user={user}")
+    service = AlarmService()
+
+    try:
+        await service.snooze_alarm_history(user, history_id, minutes=10)
+    except ValueError as e:
+        default_logger.warning(f"[Alarm] snooze_alarm_history ValueError history_id={history_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+    except Exception as e:
+        default_logger.exception(f"[Alarm] snooze_alarm_history Exception history_id={history_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="알람 미루기 처리 중 오류가 발생했습니다.") from e
+
+    return {"detail": "10분 뒤 다시 알려드립니다."}
 
 
 @alarm_router.post("/history/{history_id}/confirm-link")

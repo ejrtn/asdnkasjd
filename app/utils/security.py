@@ -2,6 +2,7 @@ import base64
 from datetime import UTC, datetime, timedelta
 
 import jwt
+from jwt import InvalidTokenError
 from passlib.context import CryptContext
 
 from app.core import config
@@ -118,3 +119,35 @@ def decrypt_data(encrypted_data: str) -> str:
         return decoded.split(":", 1)[1]
     except Exception:
         return "decryption_failed"
+
+
+def decode_token(token: str) -> dict:
+    """
+    JWT 토큰 디코드
+    """
+    try:
+        payload = jwt.decode(
+            token,
+            config.SECRET_KEY,
+            algorithms=[config.JWT_ALGORITHM],
+            leeway=getattr(config, "JWT_LEEWAY", 0),
+        )
+        return dict(payload)
+    except InvalidTokenError as e:
+        raise ValueError("유효하지 않은 토큰입니다.") from e
+
+
+def verify_refresh_token(token: str) -> dict:
+    """
+    refresh token 검증
+    """
+    payload = decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise ValueError("리프레시 토큰이 아닙니다.")
+
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise ValueError("토큰에 user_id가 없습니다.")
+
+    return payload

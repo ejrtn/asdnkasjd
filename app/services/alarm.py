@@ -199,7 +199,7 @@ class AlarmService:
         minutes = total_minutes % 60
 
         if total_minutes == 0:
-            return "곷 다음 알림이 울립니다."
+            return "곧 다음 알림이 울립니다."
         if hours == 0:
             return f"다음 알림까지 {minutes}분 남음"
         if minutes == 0:
@@ -232,11 +232,9 @@ class AlarmService:
         next_alarm_res = None
         remaining_text = "예정된 다음 알림이 없습니다."
 
-        # 직전 알람 처리 (최근 history의 is_confirmed 확인)
         if previous_candidates:
             prev_dt, prev_alarm = previous_candidates[-1]
 
-            # 가장 최근 history 조회
             latest_history = (
                 await AlarmHistory.filter(
                     alarm=prev_alarm,
@@ -253,7 +251,6 @@ class AlarmService:
                 is_confirmed=is_confirmed,
             )
 
-        # 직후 알람 처리 (아직 예정이므로 기본 False)
         if next_candidates:
             next_dt, next_alarm = next_candidates[0]
         else:
@@ -262,7 +259,7 @@ class AlarmService:
         next_alarm_res = DashboardAlarmItemResponse(
             time=self._normalize_alarm_time(next_alarm.alarm_time).strftime("%H:%M"),
             label=self._get_dashboard_alarm_label(next_alarm),
-            is_confirmed=False,  # 아직 예정이므로 기본 False
+            is_confirmed=False,
         )
         remaining_text = self._format_remaining_text(next_dt, now)
 
@@ -305,7 +302,15 @@ class AlarmService:
             is_confirmed=history.is_confirmed,
         )
 
-    async def get_user_alarm_histories(self, user: User, limit: int = 30) -> list[AlarmHistoryResponse]:
+    async def _trim_user_alarm_histories(self, user: User) -> None:
+        keep_ids = await AlarmHistory.filter(alarm__user=user).order_by("-sent_at").limit(self.HISTORY_KEEP_LIMIT).values_list("id", flat=True)
+
+        if not keep_ids:
+            return
+
+        await AlarmHistory.filter(alarm__user=user).exclude(id__in=list(keep_ids)).delete()
+
+    async def get_user_alarm_histories(self, user: User, limit: int = 15) -> list[AlarmHistoryResponse]:
         histories = (
             await AlarmHistory.filter(alarm__user=user)
             .prefetch_related("alarm__current_med")
@@ -322,4 +327,26 @@ class AlarmService:
 
         history.is_confirmed = True
         history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
+        history.snoozed_until = None
         await history.save()
+
+        await self._trim_user_alarm_histories(user)
+
+    async def snooze_alarm_history(self, user: User, history_id: int, minutes: int = 10) -> None:
+        history = await AlarmHistory.filter(id=history_id, alarm__user=user).prefetch_related("alarm").first()
+
+        if not history:
+            raise ValueError("알람 이력을 찾을 수 없습니다.")
+
+        if history.is_confirmed:
+            raise ValueError("이미 확인된 알람은 미룰 수 없습니다.")
+
+        if (history.snooze_count or 0) >= 1:
+            raise ValueError("이 알람은 이미 한 번 미뤄졌습니다.")
+
+        now_utc = datetime.now(tz=ZoneInfo("UTC"))
+        history.snoozed_until = now_utc + timedelta(minutes=minutes)
+        history.snooze_count = 1
+        await history.save()
+
+        await self._trim_user_alarm_histories(user)

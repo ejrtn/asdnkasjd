@@ -40,7 +40,7 @@ async function refreshAlarmPageState() {
 
 async function loadMasterAlarmState() {
     try {
-        const response = await fetchAlarmWithAuth('/api/v1/users/me');
+        const response = await fetchWithAuth('/api/v1/users/me');
         if (response && response.ok) {
             const user = await response.json();
             masterAlarmEnabled = user.alarm_tf !== false;
@@ -51,35 +51,6 @@ async function loadMasterAlarmState() {
         console.error('Error loading master alarm state:', error);
         masterAlarmEnabled = true;
     }
-}
-
-async function fetchAlarmWithAuth(url, options = {}) {
-    let token = localStorage.getItem("access_token");
-    if (!options.headers) options.headers = {};
-    if (token) options.headers["Authorization"] = `Bearer ${token}`;
-
-    let response = await fetch(url, options);
-
-    if (response.status === 401) {
-        const refresh = await fetch('/api/v1/users/token/refresh', { 
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (refresh.ok) {
-            const result = await refresh.json();
-            token = result.access_token;
-            localStorage.setItem("access_token", token);
-            options.headers["Authorization"] = `Bearer ${token}`;
-            response = await fetch(url, options);
-        } else {
-            alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("user_id");
-            location.href = "/login";
-            return null;
-        }
-    }
-    return response;
 }
 
 function checkLoginStatus() {
@@ -137,6 +108,22 @@ window.addEventListener('DOMContentLoaded', async () => {
     await refreshAlarmPageState();
 });
 
+// 기록확인 탭 자동 갱신 이벤트 리스너
+window.addEventListener('alarm-history-updated', async () => {
+    const historyPanel = document.getElementById('alarm-mode-history');
+    if (historyPanel && historyPanel.classList.contains('active')) {
+        await loadAlarmHistories();
+    }
+});
+
+// 기록확인 탭 주기적 갱신
+setInterval(() => {
+    const historyPanel = document.getElementById('alarm-mode-history');
+    if (historyPanel && historyPanel.classList.contains('active')) {
+        loadAlarmHistories();
+    }
+}, 30000);
+
 window.addEventListener('pageshow', async () => {
     if (!checkLoginStatus()) return;
     await refreshAlarmPageState();
@@ -158,7 +145,7 @@ async function loadHealthAlarms() {
 
     const results = await Promise.all(
         types.map(type =>
-            fetchAlarmWithAuth(`/api/v1/alarms?alarm_type=${type}`)
+            fetchWithAuth(`/api/v1/alarms?alarm_type=${type}`)
                 .then(r => r && r.ok ? r.json() : [])
                 .then(data => ({ type, data }))
                 .catch(() => ({ type, data: [] }))
@@ -239,7 +226,7 @@ function applyHealthAlarmState() {
 async function loadMeds() {
     if (window.__BLOCK_ALARM_LOAD__) return;
     try {
-        const response = await fetchAlarmWithAuth('/api/v1/current-meds');
+        const response = await fetchWithAuth('/api/v1/current-meds');
         if (!response) return;
         if (response.ok) {
             currentMeds = await response.json();
@@ -254,7 +241,7 @@ async function loadMeds() {
 
 async function loadAlarms() {
     try {
-        const response = await fetchAlarmWithAuth('/api/v1/alarms');
+        const response = await fetchWithAuth('/api/v1/alarms');
         if (!response) return;
         if (response.ok) alarms = await response.json();
     } catch (error) {
@@ -386,7 +373,7 @@ async function toggleMedAlarms(medId, isActive) {
 
     for (const alarm of medAlarms) {
         try {
-            await fetchAlarmWithAuth(`/api/v1/alarms/${alarm.id}/toggle`, {
+            await fetchWithAuth(`/api/v1/alarms/${alarm.id}/toggle`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ is_active: isActive })
@@ -407,7 +394,7 @@ async function toggleAlarm(alarmId, isActive, reload = true) {
         return;
     }
 
-    const response = await fetchAlarmWithAuth(`/api/v1/alarms/${alarmId}/toggle`, {
+    const response = await fetchWithAuth(`/api/v1/alarms/${alarmId}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_active: isActive })
@@ -432,7 +419,7 @@ async function deleteAlarm(alarmId) {
 
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
-    const response = await fetchAlarmWithAuth(`/api/v1/alarms/${alarmId}`, { method: 'DELETE' });
+    const response = await fetchWithAuth(`/api/v1/alarms/${alarmId}`, { method: 'DELETE' });
     if (!response) return;
 
     if (response.ok) {
@@ -462,7 +449,7 @@ async function toggleHealthAlarm(type, prefix) {
 
     if (healthAlarms[type]) {
         const alarmId = healthAlarms[type].id;
-        const r = await fetchAlarmWithAuth(`/api/v1/alarms/${alarmId}/toggle`, {
+        const r = await fetchWithAuth(`/api/v1/alarms/${alarmId}/toggle`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_active: isActive })
@@ -474,7 +461,7 @@ async function toggleHealthAlarm(type, prefix) {
         }
     } else {
         const time = document.getElementById(prefix + '-time').value;
-        const r = await fetchAlarmWithAuth('/api/v1/alarms', {
+        const r = await fetchWithAuth('/api/v1/alarms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ alarm_type: type, alarm_time: time })
@@ -503,13 +490,13 @@ async function saveHealthAlarms(prefixMap, successMessage, titleText) {
         const time = document.getElementById(prefix + '-time').value;
         const isActive = document.getElementById(prefix + '-toggle').classList.contains('active');
         if (healthAlarms[type]) {
-            await fetchAlarmWithAuth(`/api/v1/alarms/${healthAlarms[type].id}`, {
+            await fetchWithAuth(`/api/v1/alarms/${healthAlarms[type].id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ alarm_time: time, is_active: isActive })
             });
         } else {
-            const r = await fetchAlarmWithAuth('/api/v1/alarms', {
+            const r = await fetchWithAuth('/api/v1/alarms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ alarm_type: type, alarm_time: time })
@@ -580,7 +567,7 @@ async function addAlarmTime(medId) {
         return;
     }
 
-    const response = await fetchAlarmWithAuth('/api/v1/alarms', {
+    const response = await fetchWithAuth('/api/v1/alarms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_med_id: medId, alarm_time: time })
@@ -605,7 +592,7 @@ async function loadAlarmHistories() {
     listEl.innerHTML = `<div class="history-empty">알람 기록을 불러오는 중입니다.</div>`;
 
     try {
-        const response = await fetchAlarmWithAuth('/api/v1/alarms/history?limit=30');
+        const response = await fetchWithAuth('/api/v1/alarms/history?limit=15');
         if (!response) return;
 
         if (response.ok) {
@@ -623,21 +610,44 @@ async function loadAlarmHistories() {
 function formatHistorySentAt(isoString) {
     if (!isoString) return '-';
 
-    const date = new Date(isoString);
-    if (Number.isNaN(date.getTime())) return isoString;
+    try {
+        const date = new Date(isoString);
 
-    const yy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
+        if (Number.isNaN(date.getTime())) {
+            return isoString;
+        }
 
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours < 12 ? '오전' : '오후';
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
 
-    hours = hours % 12;
-    if (hours === 0) hours = 12;
+        const parts = formatter.formatToParts(date);
 
-    return `${yy}.${mm}.${dd} ${ampm} ${String(hours).padStart(2, '0')}:${minutes}`;
+        const year = parts.find(p => p.type === 'year')?.value ?? '';
+        const month = parts.find(p => p.type === 'month')?.value ?? '';
+        const day = parts.find(p => p.type === 'day')?.value ?? '';
+        const hour = parts.find(p => p.type === 'hour')?.value ?? '';
+        const minute = parts.find(p => p.type === 'minute')?.value ?? '';
+        const dayPeriodRaw = parts.find(p => p.type === 'dayPeriod')?.value ?? '';
+
+        let dayPeriod = dayPeriodRaw;
+        if (dayPeriodRaw.includes('AM') || dayPeriodRaw.includes('am')) {
+            dayPeriod = '오전';
+        } else if (dayPeriodRaw.includes('PM') || dayPeriodRaw.includes('pm')) {
+            dayPeriod = '오후';
+        }
+
+        return `${year}.${month}.${day} ${dayPeriod} ${hour}:${minute}`;
+    } catch (error) {
+        console.error('Time parsing error:', error);
+        return isoString;
+    }
 }
 
 function renderAlarmHistories() {
@@ -682,7 +692,7 @@ function renderAlarmHistories() {
 }
 
 async function confirmAlarmHistory(historyId) {
-    const response = await fetchAlarmWithAuth(`/api/v1/alarms/history/${historyId}`, {
+    const response = await fetchWithAuth(`/api/v1/alarms/history/${historyId}`, {
         method: 'PATCH'
     });
 

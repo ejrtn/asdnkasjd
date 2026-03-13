@@ -103,7 +103,7 @@ window.BloodNotebook = (() => {
     let response = await fetch(url, options);
 
     if (response.status === 401) {
-      const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
+      const refreshResponse = await fetch('/api/v1/auth/token/refresh', { method: 'GET' });
 
       if (refreshResponse.ok) {
         const result = await refreshResponse.json();

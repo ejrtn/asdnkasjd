@@ -4,6 +4,12 @@ let __sessionExpiredMode = false;
 const PUBLIC_PATHS = ['/', '/login', '/signup', '/find-account'];
 let __authGuardRunning = false;
 
+function clearClientSession() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('auth_token');
+}
+
 function showSessionToast() {
     const toast = document.getElementById('session-toast');
     if (!toast) return;
@@ -33,8 +39,7 @@ function handleSessionExpired() {
     __sessionExpiredHandled = true;
     __sessionExpiredMode = true;
 
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_id');
+    clearClientSession();
 
     if (PUBLIC_PATHS.includes(window.location.pathname)) {
         window.location.replace('/');
@@ -60,7 +65,7 @@ async function fetchWithAuth(url, options = {}) {
     let response = await fetch(url, options);
 
     if (response.status === 401) {
-        const refreshResponse = await fetch('/api/v1/users/token/refresh', {
+        const refreshResponse = await fetch('/api/v1/auth/token/refresh', {
             method: 'GET',
             credentials: 'include'
         });
@@ -237,8 +242,7 @@ async function logout() {
         console.error(e);
     }
 
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_id');
+    clearClientSession();
     window.location.replace('/');
 }
 

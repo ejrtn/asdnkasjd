@@ -13,8 +13,7 @@ function syncTokensFromCookies() {
 
     if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('auth_token', accessToken); // auth_token도 함께 세팅 (보안 가드용)
-        // localStorage로 옮긴 후 쿠키에서는 삭제
+        localStorage.setItem('auth_token', accessToken);
         document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
     }
 
@@ -36,19 +35,19 @@ function redirectToDashboardAfterLogin() {
 }
 
 window.addEventListener('load', () => {
-    syncTokensFromCookies(); // 혹시 로딩 과정에서 쿠키가 들어왔을 때를 대비해 한 번 더 체크
+    syncTokensFromCookies();
     redirectToDashboardAfterLogin();
 });
 
 // 사용자 메뉴 드롭다운 토글
-document.getElementById('user-menu-btn').addEventListener('click', function (e) {
+document.getElementById('user-menu-btn')?.addEventListener('click', function (e) {
     e.stopPropagation();
-    document.getElementById('user-dropdown').classList.toggle('show');
+    document.getElementById('user-dropdown')?.classList.toggle('show');
 });
 
-document.addEventListener('click', function (e) {
+document.addEventListener('click', function () {
     const dropdown = document.getElementById('user-dropdown');
-    if (dropdown.classList.contains('show')) {
+    if (dropdown?.classList.contains('show')) {
         dropdown.classList.remove('show');
     }
 });
@@ -68,11 +67,9 @@ async function initFCM() {
     try {
         console.log('🚀 FCM: 초기화 시작');
 
-        // Service Worker 등록
         const swReg = await navigator.serviceWorker.register('/static/firebase-messaging-sw.js');
         console.log('✅ FCM: Service Worker 등록 완료');
 
-        // Firebase 초기화
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
         const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js');
 
@@ -88,7 +85,6 @@ async function initFCM() {
 
         const messaging = getMessaging(app);
 
-        // 알림 권한 요청 및 FCM 토큰 발급
         const permission = await Notification.requestPermission();
         console.log(`🔔 FCM: 알림 권한 상태 - ${permission}`);
         if (permission !== 'granted') {
@@ -96,25 +92,32 @@ async function initFCM() {
             return;
         }
 
-        const fcmToken = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY, serviceWorkerRegistration: swReg });
+        const fcmToken = await getToken(messaging, {
+            vapidKey: VAPID_PUBLIC_KEY,
+            serviceWorkerRegistration: swReg
+        });
         console.log('🎫 FCM: 토큰 발급 완료', fcmToken.substring(0, 20) + '...');
 
-        // 서버에 FCM 토큰 저장
-        await fetch('/api/v1/users/me/fcm-token', {
+        const saveRes = await fetchWithAuth('/api/v1/users/me/fcm-token', {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fcm_token: fcmToken }),
         });
-        console.log('💾 FCM: 서버에 토큰 저장 완료');
 
-        // 앱이 열려있을 때 인앱 팝업 처리
+        if (saveRes && saveRes.ok) {
+            console.log('💾 FCM: 서버에 토큰 저장 완료');
+        } else {
+            console.warn('⚠️ FCM: 서버에 토큰 저장 실패');
+        }
+
         onMessage(messaging, (payload) => {
             console.log('📱 FCM: 메시지 수신!', payload);
             showAlarmPopup(
-                payload.notification.title,
-                payload.notification.body,
+                payload.notification?.title || '알람',
+                payload.notification?.body || '알람 시간이 되었습니다.',
                 payload.data?.alarm_id || null,
-                payload.data?.history_id || null
+                payload.data?.history_id || null,
+                Number(payload.data?.snooze_count || 0)
             );
         });
         console.log('👂 FCM: 메시지 리스너 등록 완료');
@@ -127,11 +130,20 @@ async function initFCM() {
 // =====================
 // 인앱 알람 팝업
 // =====================
-function showAlarmPopup(title, body, alarmId, historyId = null) {
-    console.log('🎉 알람 팝업 표시:', { title, body, alarmId, historyId });
+let __alarmPopupTimer = null;
 
-    // 기존 팝업 제거
+function clearAlarmPopupTimer() {
+    if (__alarmPopupTimer) {
+        clearTimeout(__alarmPopupTimer);
+        __alarmPopupTimer = null;
+    }
+}
+
+function showAlarmPopup(title, body, alarmId, historyId = null, snoozeCount = 0) {
+    console.log('🎉 알람 팝업 표시:', { title, body, alarmId, historyId, snoozeCount });
+
     document.getElementById('alarm-popup')?.remove();
+    clearAlarmPopupTimer();
 
     const popup = document.createElement('div');
     popup.id = 'alarm-popup';
@@ -149,6 +161,8 @@ function showAlarmPopup(title, body, alarmId, historyId = null) {
         border-left: 4px solid #4f46e5;
         animation: slideIn 0.3s ease;
     `;
+
+    const snoozeDisabled = Number(snoozeCount) >= 1;
 
     popup.innerHTML = `
         <style>
@@ -185,70 +199,102 @@ function showAlarmPopup(title, body, alarmId, historyId = null) {
                 ✅ 확인
             </button>
 
-            <button onclick='snoozeAlarm(${JSON.stringify(title)}, ${JSON.stringify(body)}, ${JSON.stringify(alarmId)}, ${JSON.stringify(historyId || "")})' style="
-                flex:1;
-                padding:10px 12px;
-                background:#f3f4f6;
-                color:#374151;
-                border:none;
-                border-radius:10px;
-                cursor:pointer;
-                font-weight:700;
-            ">
+            <button
+                ${snoozeDisabled ? 'disabled' : `onclick='snoozeAlarm(${JSON.stringify(title)}, ${JSON.stringify(body)}, ${JSON.stringify(alarmId)}, ${JSON.stringify(historyId || "")})'`}
+                style="
+                    flex:1;
+                    padding:10px 12px;
+                    background:${snoozeDisabled ? '#e5e7eb' : '#f3f4f6'};
+                    color:#374151;
+                    border:none;
+                    border-radius:10px;
+                    cursor:${snoozeDisabled ? 'not-allowed' : 'pointer'};
+                    font-weight:700;
+                    opacity:${snoozeDisabled ? '0.6' : '1'};
+                "
+            >
                 나중에
             </button>
         </div>
     `;
 
     document.body.appendChild(popup);
+
+    __alarmPopupTimer = setTimeout(() => {
+        document.getElementById('alarm-popup')?.remove();
+        __alarmPopupTimer = null;
+    }, 60000);
+
     console.log('✅ 알람 팝업이 화면에 추가되었습니다');
 }
 
-function snoozeAlarm(title, body, alarmId, historyId = null) {
+async function snoozeAlarm(title, body, alarmId, historyId = null) {
     document.getElementById('alarm-popup')?.remove();
+    clearAlarmPopupTimer();
 
-    const snoozeKey = historyId || alarmId;
-    if (!snoozeKey) return;
-
-    // 이미 예약된 동일 알람 있으릴 제거 후 다시 예약
-    if (snoozedAlarmTimers.has(snoozeKey)) {
-        clearTimeout(snoozedAlarmTimers.get(snoozeKey));
+    if (!historyId) {
+        showAppToast('이 알람은 아직 미루기를 지원하지 않습니다.', 'warn', '알람 미루기');
+        return;
     }
 
-    showAppToast('10분 뒤에 한 번 더 알려드릴게요.', 'info', '알람 미루기');
+    try {
+        const response = await fetchWithAuth(`/api/v1/alarms/history/${historyId}/snooze`, {
+            method: 'PATCH'
+        });
 
-    const timerId = setTimeout(() => {
-        showAlarmPopup(title, body, alarmId, historyId);
-        snoozedAlarmTimers.delete(snoozeKey);
-    }, 10 * 60 * 1000); // 10분
+        if (!response) return;
 
-    snoozedAlarmTimers.set(snoozeKey, timerId);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('snooze failed:', response.status, errorText);
+            throw new Error(`snooze failed: ${response.status} ${errorText}`);
+        }
+
+        shownAlarmHistoryIds.delete(Number(historyId));
+        window.dispatchEvent(new CustomEvent('alarm-history-updated'));
+        showAppToast('10분 뒤에 다시 알려드릴게요.', 'info', '알람 미루기');
+    } catch (error) {
+        console.error('알람 미루기 실패:', error);
+        showAppToast('알람 미루기에 실패했습니다.', 'warn', '알람 미루기');
+    }
 }
 
 async function confirmAlarm(alarmId, historyId = null) {
     document.getElementById('alarm-popup')?.remove();
-
-    const snoozeKey = historyId || alarmId;
-    if (snoozeKey && snoozedAlarmTimers.has(snoozeKey)) {
-        clearTimeout(snoozedAlarmTimers.get(snoozeKey));
-        snoozedAlarmTimers.delete(snoozeKey);
-    }
+    clearAlarmPopupTimer();
 
     if (!alarmId) return;
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
-    const url = historyId
-        ? `/api/v1/alarms/history/${historyId}`
-        : `/api/v1/alarms/history/confirm/${alarmId}`;
 
     try {
-        await fetch(url, {
-            method: historyId ? 'PATCH' : 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
+        let response = null;
+
+        if (historyId) {
+            response = await fetchWithAuth(`/api/v1/alarms/history/${historyId}`, {
+                method: 'PATCH',
+            });
+        }
+
+        if (!response || !response.ok) {
+            response = await fetchWithAuth(`/api/v1/alarms/history/confirm/${alarmId}`, {
+                method: 'POST',
+            });
+        }
+
+        if (!response) return;
+
+        if (!response.ok) {
+            throw new Error(`confirm failed: ${response.status}`);
+        }
+
+        if (historyId) {
+            shownAlarmHistoryIds.add(Number(historyId));
+        }
+
+        window.dispatchEvent(new CustomEvent('alarm-history-updated'));
+        showAppToast('알람을 확인 처리했어요.', 'success', '알람 확인');
     } catch (error) {
         console.error('알람 확인 처리 실패:', error);
+        showAppToast('알람 확인 처리에 실패했습니다.', 'warn', '알람 확인');
     }
 }
 
@@ -304,20 +350,14 @@ document.getElementById('app-toast-close')?.addEventListener('click', () => {
 // 웹 폴링 백업 (FCM 누락 대비)
 // =====================
 const shownAlarmHistoryIds = new Set();
-const snoozedAlarmTimers = new Map();
 
 async function pollDueAlarms() {
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
     try {
-        const response = await fetch('/api/v1/alarms/due', {
+        const response = await fetchWithAuth('/api/v1/alarms/due', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
         });
 
+        if (!response) return;
         if (!response.ok) return;
 
         const items = await response.json();
@@ -325,9 +365,15 @@ async function pollDueAlarms() {
 
         items.forEach(item => {
             if (shownAlarmHistoryIds.has(item.history_id)) return;
-            shownAlarmHistoryIds.add(item.history_id);
 
-            showAlarmPopup(item.title, item.body, item.alarm_id, item.history_id);
+            shownAlarmHistoryIds.add(item.history_id);
+            showAlarmPopup(
+                item.title,
+                item.body,
+                item.alarm_id,
+                item.history_id,
+                item.snooze_count || 0
+            );
         });
     } catch (error) {
         console.error('❌ due alarm polling 실패:', error);

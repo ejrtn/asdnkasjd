@@ -108,7 +108,7 @@ async function fetchWithAuth(url, options = {}) {
 
   if (response.status === 401) {
     console.log("액세스 토큰 만료, 갱신 시도 중...");
-    const refreshResponse = await fetch('/api/v1/users/token/refresh', { method: 'GET' });
+    const refreshResponse = await fetch('/api/v1/auth/token/refresh', { method: 'GET' });
 
     if (refreshResponse.ok) {
       const result = await refreshResponse.json();
