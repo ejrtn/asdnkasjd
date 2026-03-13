@@ -1,14 +1,14 @@
 /* base.css에서 .guide-page-container, .c9-page-header 공통 처리 */
 
-.guide-page-container > .c9-page-header {
+.guide-page-container>.c9-page-header {
     align-items: center;
 }
 
-.guide-page-container > .c9-page-header .c9-page-title {
+.guide-page-container>.c9-page-header .c9-page-title {
     margin: 0;
 }
 
-.guide-page-container > .c9-page-header .c9-muted {
+.guide-page-container>.c9-page-header .c9-muted {
     margin-top: 8px;
 }
 
@@ -204,7 +204,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .guide-section-title {
@@ -223,7 +223,9 @@
 .guide-section-body {
     color: #475569;
     font-size: 14px;
-    line-height: 1.8;
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .guide-note-box {
@@ -796,7 +798,7 @@
         align-items: flex-start;
     }
 
-    .guide-page-container > .c9-page-header {
+    .guide-page-container>.c9-page-header {
         align-items: flex-start;
     }
 

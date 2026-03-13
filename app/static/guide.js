@@ -188,9 +188,8 @@ function renderHealthProfile() {
         document.getElementById('sleep-text').innerText =
             prof.sleep_hours ? `${prof.sleep_hours}시간/일 (${prof.sleep_change || '변화없음'})` : '-';
 
-        const smoke = prof.smoking_status === 'NEVER' ? '비흡연' : '흡연';
-        const drink = prof.drinking_status === 'NEVER' ? '비음주' : '음주';
-        document.getElementById('smoking-drinking-text').innerText = `${smoke} / ${drink}`;
+        document.getElementById('smoking-text').innerText = prof.smoking_status || '-';
+        document.getElementById('drinking-text').innerText = prof.drinking_status || '-';
         document.getElementById('exercise-text').innerText = prof.exercise_frequency || '-';
         document.getElementById('diet-text').innerText = prof.diet_type || '-';
     }
@@ -199,35 +198,106 @@ function renderHealthProfile() {
 function renderGuide() {
     if (!guideData) return;
 
+    // --- Section 1: 복약 안전성 ---
     const s1 = guideData.section1;
     const section1 = document.getElementById('section-1');
     const statusTag = document.getElementById('safety-status-tag');
+    const safetyContent = document.getElementById('safety-content');
+    const safetyCautions = document.getElementById('general-cautions-list');
 
     statusTag.innerText = s1.status;
-    section1.className = 'guide-section-card line-indigo';
+    section1.className = 'guide-section-card line-blue'; // Default color
 
     if (s1.status.includes('위험')) {
         statusTag.className = 'c9-badge c9-badge-danger';
+        section1.className = 'guide-section-card line-red';
     } else if (s1.status.includes('주의')) {
         statusTag.className = 'c9-badge c9-badge-warn';
+        section1.className = 'guide-section-card line-amber';
     } else {
         statusTag.className = 'c9-badge c9-badge-success';
+        section1.className = 'guide-section-card line-indigo';
     }
 
-    document.getElementById('safety-content').innerText = s1.content;
-    document.getElementById('general-cautions-list').innerHTML =
-        s1.general_cautions.map(c => `<li>${c}</li>`).join('');
+    // 약물이 없을 때의 문구 처리 (LLM이 준 content를 우선하되, 비어있으면 기본 문구)
+    safetyContent.innerHTML = (currentStatus.meds.length === 0 && (!s1.content || s1.content.length < 5))
+        ? `<div>현재 복용 중인 약물이 없어 상호작용 위험이 없습니다.</div><div class="mt-1">건강한 상태를 잘 유지하고 계시네요!</div>`
+        : s1.content.replace(/\n/g, '<br>');
 
+    const safetyNotesBox = document.getElementById('safety-notes-box');
+    if (currentStatus.meds.length === 0) {
+        statusTag.classList.add('hidden');
+        if (safetyNotesBox) safetyNotesBox.classList.add('hidden');
+    } else {
+        statusTag.classList.remove('hidden');
+        if (safetyNotesBox) safetyNotesBox.classList.remove('hidden');
+        safetyCautions.innerHTML = s1.general_cautions.length > 0
+            ? s1.general_cautions.map(c => `<li>${c}</li>`).join('')
+            : '<li>특별한 주의사항이 없습니다.</li>';
+    }
+
+    // --- Section 1: 질환 기반 생활습관 가이드 ---
     const s2 = guideData.section2;
-    document.getElementById('disease-guides-container').innerHTML =
-        s2.disease_guides.map(dg => `
+    const diseaseGuidesContent = document.getElementById('disease-guides-content');
+    const integratedPoint = document.getElementById('integrated-point');
+    const integratedBox = document.querySelector('#section-2 .guide-integrated-box');
+
+    if (currentStatus.diseases.length > 0 && s2.disease_guides && s2.disease_guides.length > 0) {
+        integratedBox.classList.remove('hidden');
+        diseaseGuidesContent.innerHTML = `
+            <div class="guide-disease-grid">
+                ${s2.disease_guides.map(dg => `
+                    <div class="guide-disease-card">
+                        <div class="guide-disease-title">
+                            <span>${dg.name}</span>
+                            <span class="c9-badge c9-badge-primary">CARE</span>
+                        </div>
+                        <div class="guide-disease-list">
+                            ${dg.tips.map(tip => `
+                                <div class="guide-disease-item">
+                                    <span class="guide-disease-dot">•</span>
+                                    <span>${tip}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        integratedPoint.innerText = s2.integrated_point || "";
+    } else {
+        integratedBox.classList.add('hidden');
+        diseaseGuidesContent.innerHTML = `
+            <div>등록된 질환이 없어 별도의 생활습관 가이드가 필요하지 않습니다.</div>
+            <div class="mt-1">아주 건강하시네요!</div>
+        `;
+    }
+
+    // --- Section 3: 건강 관리 수칙 ---
+    const s3 = guideData.section3;
+    const section3Title = document.querySelector('#section-3 .guide-plan-title');
+    const checklistContainer = document.getElementById('checklist-container');
+
+    section3Title.innerText = "3) 오늘의 건강 관리 수칙";
+
+    // Support both new 'health_guides' and old 'checklist' format
+    let healthGuides = s3.health_guides || [];
+    if (healthGuides.length === 0 && s3.checklist && s3.checklist.length > 0) {
+        healthGuides = [{
+            name: "공통 관리 수칙",
+            tips: s3.checklist
+        }];
+    }
+
+    if (healthGuides.length > 0) {
+        checklistContainer.innerHTML = healthGuides.map(hg => `
             <div class="guide-disease-card">
                 <div class="guide-disease-title">
-                    <span>${dg.name}</span>
-                    <span class="c9-badge c9-badge-primary">CARE</span>
+                    <span>${hg.name}</span>
+                    <span class="c9-badge c9-badge-primary">HEALTH</span>
                 </div>
                 <div class="guide-disease-list">
-                    ${dg.tips.map(tip => `
+                    ${(hg.tips || []).map(tip => `
                         <div class="guide-disease-item">
                             <span class="guide-disease-dot">•</span>
                             <span>${tip}</span>
@@ -236,35 +306,21 @@ function renderGuide() {
                 </div>
             </div>
         `).join('');
+    } else {
+        checklistContainer.innerHTML = `
+            <div class="guide-section-body text-gray-600" style="grid-column: span 2;">
+                수집된 건강 데이터를 바탕으로 생성된 맞춤 수칙이 없습니다.
+            </div>
+        `;
+    }
 
-    document.getElementById('integrated-point').innerText = s2.integrated_point;
-
-    const s3 = guideData.section3;
-    document.getElementById('checklist-container').innerHTML =
-        s3.checklist.map(item => `
-            <label class="guide-check-item">
-                <input
-                    type="checkbox"
-                    onchange="updateProgress()"
-                    class="plan-checkbox w-5 h-5 rounded border-[#f3c79b] text-[#f4a261] focus:ring-[#f7c59f]"
-                >
-                <div class="guide-check-copy">
-                    <span class="guide-check-title">${item}</span>
-                    <span class="guide-check-sub">Daily Action</span>
-                </div>
-            </label>
-        `).join('');
-
-    updateProgress();
+    // Disclaimer
+    const disclaimerText = document.getElementById('disclaimer-text');
+    if (disclaimerText && guideData.disclaimer) {
+        disclaimerText.innerText = guideData.disclaimer;
+    }
 }
 
-function updateProgress() {
-    const checks = document.querySelectorAll('.plan-checkbox');
-    const checked = Array.from(checks).filter(c => c.checked).length;
-    const percent = checks.length > 0 ? Math.round((checked / checks.length) * 100) : 0;
-    document.getElementById('progress-bar').style.width = percent + '%';
-    document.getElementById('progress-percent').innerText = percent + '%';
-}
 
 function toggleAccordion(id) {
     document.getElementById(id).classList.toggle('accordion-active');
@@ -313,21 +369,28 @@ function toggleTTS() {
     const s2 = guideData.section2;
     const s3 = guideData.section3;
 
-    const diseaseText = s2.disease_guides
-        .map(d => `${d.name} 관리 방법입니다. ${d.tips.join(', ')}`)
+    const diseaseText = (s2.disease_guides || [])
+        .map(d => `${d.name} 관리 방법입니다. ${(d.tips || []).join(', ')}`)
         .join('. ');
+
+    let healthGuidesText = "";
+    if (s3.health_guides && s3.health_guides.length > 0) {
+        healthGuidesText = s3.health_guides.map(h => `${h.name} 관리법입니다. ${(h.tips || []).join(', ')}`).join('. ');
+    } else if (s3.checklist && s3.checklist.length > 0) {
+        healthGuidesText = s3.checklist.join(', ');
+    }
 
     const fullText = `
         현재 등록된 질환, 복용 중인 약, 생활습관 등 건강 정보를 바탕으로 맞춤 생활 가이드를 안내드립니다.
 
         먼저 질환 기반 생활습관 가이드입니다.
-        ${diseaseText}.
+        ${diseaseText || "등록된 질환이 없습니다."}
 
         다음은 복약 안전성 안내입니다.
-        현재 상태는 ${s1.status} 입니다. ${s1.content}.
+        현재 상태는 ${s1.status || "정보 없음"} 입니다. ${s1.content || ""}.
 
-        오늘의 실행 플랜입니다.
-        ${s3.checklist.join(', ')}를 실천해보세요.
+        오늘의 건강 관리 수칙입니다.
+        ${healthGuidesText || "특별한 수칙이 없습니다."}
     `;
 
     const utterance = new SpeechSynthesisUtterance(fullText);
