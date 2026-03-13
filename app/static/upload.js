@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // State
     let selectedFiles = [];
     let currentUploadType = '';
+    let prescriptionSessionResults = []; // Store multiple analysis results for the current session
 
     // Persistent state for main view (uploaded images)
     let uploadedImages = {
@@ -27,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         medication: []
     };
 
-    let lastPrescriptionId = null;
 
     // --- Sync Elements ---
     const syncModal = document.getElementById('prescription-sync-modal');
@@ -233,26 +233,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBox(container, type) {
-        // 이미지가 없으면 빈 상태(업로드 안내) 표시
-        if (uploadedImages[type].length === 0) {
-            container.classList.add('empty-state');
-            container.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 10px;">📁</div>
-                <div style="font-weight: 700; color: #475569; font-size: 16px;">파일 업로드</div>
-                <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">지원 형식: JPG, PNG, PDF (최대 10MB, 다중 선택 가능)</div>
-            `;
-            return;
-        }
-
-        // 이미지가 있으면 리스트 렌더링
-        container.classList.remove('empty-state');
         container.innerHTML = '';
+        container.className = 'upload-zone-card has-files'; // Always use has-files to enable flex layout
 
-        // 업로드 버튼 역할을 할 빈 박스 하나 추가 (다시 업로드 가능하도록)
+        // Always show the "Add" button as a square thumbnail
         const addBtn = document.createElement('div');
-        addBtn.className = 'main-preview-item add-more-btn';
-        addBtn.style.cssText = 'border: 2px dashed #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #3b82f6; cursor: pointer; background: #f8fbff;';
-        addBtn.innerHTML = '+';
+        addBtn.className = 'main-upload-add-btn';
+        addBtn.innerHTML = `
+            <div class="main-upload-add-btn-icon">➕</div>
+            <div class="main-upload-add-btn-text">사진 추가</div>
+        `;
         addBtn.onclick = (e) => {
             e.stopPropagation();
             currentUploadType = type;
@@ -261,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         container.appendChild(addBtn);
 
+        // Render existing images
         uploadedImages[type].forEach((imageData, index) => {
             const previewItem = document.createElement('div');
             previewItem.className = 'main-preview-item';
@@ -275,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 previewItem.appendChild(img);
             } else {
-                // PDF Placeholder for main view
                 const pdfPlaceholder = document.createElement('div');
                 pdfPlaceholder.className = 'pdf-placeholder';
                 pdfPlaceholder.style.cssText = 'width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff1f0; color:#f5222d; font-weight:bold; font-size:12px;';
@@ -288,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeBtn.innerHTML = '×';
             removeBtn.title = '삭제';
             removeBtn.onclick = (e) => {
-                e.stopPropagation(); // Prevent opening upload modal
+                e.stopPropagation();
                 uploadedImages[type].splice(index, 1);
                 renderMainPreviews();
             };
@@ -400,71 +390,95 @@ document.addEventListener('DOMContentLoaded', () => {
         const resultContainer = targetBox.querySelector('.analysis-result-text');
         if (!resultContainer) return;
 
+        // 새로운 결과 렌더링 시 상단으로 스크롤 고정
+        resultContainer.scrollTop = 0;
+
         // 1. 처방전(Prescription) 구조화 데이터 처리
-        if (type === 'prescription' && typeof data === 'object') {
-            const hospitalName = data.hospital_name || '미확인 병원';
-            const prescribedDate = data.prescribed_date || '날짜 정보 없음';
+        if (type === 'prescription' && data) {
+            // Flatten current result if it's an array and add to session results
+            if (Array.isArray(data)) {
+                prescriptionSessionResults.push(...data);
+            } else if (typeof data === 'object') {
+                prescriptionSessionResults.push(data);
+            }
 
-            // 약물 리스트 생성
-            let drugListHtml = '';
-            const drugList = data.drugs || [];
+            // Group by hospital name (Ensure flat grouping)
+            const grouped = prescriptionSessionResults.reduce((acc, current) => {
+                // 병원명이 없거나 빈 공백인 경우 처리
+                const hospital = (current.hospital_name && current.hospital_name.trim()) 
+                    ? current.hospital_name.trim() 
+                    : '병원명 미확인';
+                
+                if (!acc[hospital]) acc[hospital] = [];
+                acc[hospital].push(current);
+                return acc;
+            }, {});
 
-            if (drugList.length > 0) {
-                drugListHtml = drugList.map(d => {
-                    const name = d.standard_drug_name || d.drug_name || d.name || '알 수 없는 약품';
-                    const dosage = d.dosage_amount || d.dosage || '';
-                    const frequency = d.daily_frequency || d.frequency || '';
-                    const duration = d.duration_days || d.duration || '';
+            let fullHtml = '';
+
+            for (const hospital in grouped) {
+                const results = grouped[hospital];
+                
+                let hospitalBlocksHtml = results.map(res => {
+                    const pId = res.prescription_id || res.id || 'unknown';
+                    const pDate = res.prescribed_date || '날짜 정보 없음';
+                    const drugList = res.drugs || [];
+                    
+                    let drugListHtml = '';
+                    if (drugList.length > 0) {
+                        drugListHtml = drugList.map(d => {
+                            const name = d.standard_drug_name || d.drug_name || d.name || '알 수 없는 약품';
+                            const dosage = d.dosage_amount || d.dosage || '';
+                            const frequency = d.daily_frequency || d.frequency || '';
+                            const duration = d.duration_days || d.duration || '';
+
+                            return `
+                                <div class="prescription-drug-item" 
+                                     data-name="${name}"
+                                     data-prescription-id="${pId}"
+                                     style="margin-bottom: 8px; padding: 12px 15px; background: #fff; border-radius: 10px; border: 1px solid #e1e8f0; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;">
+                                    <div style="display: flex; align-items: center; flex: 1;">
+                                        <span style="font-size: 18px; margin-right: 10px;">💊</span>
+                                        <span style="font-weight: 600; color: #2c3e50; line-height: 1.2;">${name}</span>
+                                    </div>
+                                    <div style="text-align: right; font-size: 11px; color: #7f8c8d; min-width: 80px;">
+                                        <span style="display: inline-block; background: #f8f9fa; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;">${dosage || '1정'}</span>
+                                        <br>
+                                        <span>${frequency ? frequency + '회' : '-'} / ${duration ? duration + '일분' : '-'}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        drugListHtml = '<div style="color: #95a5a6; padding: 10px; text-align: center;">분석된 약물이 없습니다.</div>';
+                    }
 
                     return `
-                        <div class="prescription-drug-item" 
-                             data-name="${name}"
-                             style="margin-bottom: 8px; padding: 12px 15px; background: #fff; border-radius: 10px; border: 1px solid #e1e8f0; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;">
-                            <div style="display: flex; align-items: center; flex: 1;">
-                                <span style="font-size: 18px; margin-right: 10px;">💊</span>
-                                <span style="font-weight: 600; color: #2c3e50; line-height: 1.2;">${name}</span>
+                        <div class="prescription-result-block" style="margin-bottom: 15px; padding-bottom: 10px; ${results.length > 1 ? 'border-bottom: 1px dashed #eef2f7;' : ''}">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #7f8c8d;">
+                                <span>📅 처방일: ${pDate}</span>
                             </div>
-                            <div style="text-align: right; font-size: 11px; color: #7f8c8d; min-width: 80px;">
-                                <span style="display: inline-block; background: #f8f9fa; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;">${dosage || '1정'}</span>
-                                <br>
-                                <span>${frequency ? frequency + '회' : '-'} / ${duration ? duration + '일분' : '-'}</span>
+                            <div class="drug-list-container">
+                                ${drugListHtml}
                             </div>
                         </div>
                     `;
                 }).join('');
-            } else if (data.drug_names && data.drug_names.length > 0) {
-                drugListHtml = data.drug_names.map(name => `
-                    <div class="prescription-drug-item" 
-                         data-name="${name}"
-                         style="margin-bottom: 8px; padding: 12px 15px; background: #fff; border-radius: 10px; border: 1px solid #e1e8f0; border-left: 5px solid #007bff; font-weight: 600; font-size: 15px; color: #2c3e50; box-shadow: 0 2px 5px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s;">
-                        <span style="font-size: 18px; margin-right: 10px;">💊</span> ${name}
+
+                fullHtml += `
+                    <div class="hospital-group" style="background: #f8fbff; padding: 15px; border-radius: 12px; border: 1px solid #e1f0ff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; width: 100%;">
+                        <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #007bff;">
+                            <div style="color: #666; font-size: 11px; margin-bottom: 2px;">🏥 병원명</div>
+                            <div style="font-weight: 700; font-size: 16px; color: #007bff;">${hospital}</div>
+                        </div>
+                        <div>
+                            ${hospitalBlocksHtml}
+                        </div>
                     </div>
-                `).join('');
-            } else {
-                drugListHtml = '<div style="color: #95a5a6; padding: 20px; text-align: center; background: #f8f9fa; border-radius: 10px;">분석된 약물 성분이 없습니다.</div>';
+                `;
             }
 
-            // 전체 레이아웃 렌더링
-            resultContainer.innerHTML = `
-                <div style="background: #f8fbff; padding: 15px; border-radius: 12px; border: 1px solid #e1f0ff; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eef2f7;">
-                        <div>
-                            <div style="color: #666; font-size: 11px; margin-bottom: 2px;">🏥 병원명</div>
-                            <div style="font-weight: 600; font-size: 14px; color: #333;">${hospitalName}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: #666; font-size: 11px; margin-bottom: 2px;">📅 처방일</div>
-                            <div style="font-weight: 500; font-size: 14px; color: #333;">${prescribedDate}</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="color: #666; font-size: 11px; margin-bottom: 8px;">💊 분석된 알약 리스트 (클릭하여 선택)</div>
-                        <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
-                            ${drugListHtml}
-                        </div>
-                    </div>
-                </div>
-            `;
+            resultContainer.innerHTML = fullHtml;
 
             // 클릭 이벤트 리스너 등록
             resultContainer.querySelectorAll('.prescription-drug-item').forEach(item => {
@@ -480,10 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
-            // 전역 변수에 ID 저장 및 연동 모달 표시
-            if (data.prescription_id || data.id) {
-                lastPrescriptionId = data.prescription_id || data.id;
-                if (syncModal) syncModal.style.display = 'block';
+            // 연동 모달 표시: 모든 렌더링이 완료된 후 하단에 나타나도록 함
+            if (syncModal) {
+                // 부드러운 노출을 위해 display 제어 (자동 스크롤 제거)
+                setTimeout(() => {
+                    syncModal.style.display = 'block';
+                }, 100);
             }
         }
         // 2. 알약(Medication/Pill) 데이터 처리
@@ -645,36 +661,71 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMainPreviews();
     }
 
+    // --- Toast Notification ---
+    function showToast(message) {
+        let toast = document.querySelector('.c9-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'c9-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<span>✅</span> ${message}`;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
     // --- Sync Action (Prescription -> CurrentMed) ---
     if (btnSync) {
         btnSync.addEventListener('click', async () => {
-            if (!lastPrescriptionId) return;
-
-            // 선택된 약물 이름들 수집
+            // 선택된 약물들 수집 (데이터-처방전-ID 필요)
             const selectedItems = document.querySelectorAll('.prescription-drug-item.selected');
-            const selectedDrugNames = Array.from(selectedItems).map(item => item.dataset.name);
-
-            if (selectedDrugNames.length === 0) {
+            if (selectedItems.length === 0) {
                 alert('연동할 알약을 하나 이상 선택해 주세요.');
                 return;
             }
 
+            // Group drug names by prescription ID
+            const syncGroups = {};
+            selectedItems.forEach(item => {
+                const pId = item.dataset.prescriptionId;
+                const name = item.dataset.name;
+                if (!syncGroups[pId]) syncGroups[pId] = [];
+                syncGroups[pId].push(name);
+            });
+
             try {
                 const token = localStorage.getItem('access_token');
-                const response = await fetch(`/api/v1/ocr/prescriptions/${lastPrescriptionId}/sync`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ drug_names: selectedDrugNames })
+                let totalSynced = 0;
+
+                // Call sync API for each prescription group
+                for (const pId in syncGroups) {
+                    if (pId === 'unknown') continue;
+
+                    const response = await fetch(`/api/v1/ocr/prescriptions/${pId}/sync`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ drug_names: syncGroups[pId] })
+                    });
+
+                    if (!response.ok) throw new Error(`처방전(ID: ${pId}) 연동 실패`);
+                    const data = await response.json();
+                    totalSynced += data.count;
+                }
+
+                // 성공 피드백: 알럿 대신 토스트 사용 및 창 유지
+                showToast(`${totalSynced}개의 약물이 복용 명단에 추가되었습니다.`);
+                
+                // 선택된 약물들의 스타일 초기화 및 선택 해제 (창은 닫지 않음)
+                selectedItems.forEach(item => {
+                    item.classList.remove('selected');
+                    item.style.background = '#fff';
+                    item.style.borderColor = '#e1e8f0';
                 });
-
-                if (!response.ok) throw new Error('연동 실패');
-
-                const data = await response.json();
-                alert(`${data.count}개의 약물이 성공적으로 연동되었습니다.`);
-                if (syncModal) syncModal.style.display = 'none';
             } catch (error) {
                 alert(`오류: ${error.message}`);
             }
@@ -683,7 +734,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnCancelSync) {
         btnCancelSync.addEventListener('click', () => {
-            if (syncModal) syncModal.style.display = 'none';
+            // "나중에" 버튼을 눌러도 창이 닫히지 않도록 수정되었습니다.
+            // 필요시 선택 해제 등의 다른 로직을 추가할 수 있습니다.
+            console.log('Sync postponed, but window remains open.');
         });
     }
 });

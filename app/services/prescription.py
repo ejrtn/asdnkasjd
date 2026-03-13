@@ -54,12 +54,10 @@ class PrescriptionService:
             # 1. 처음에 여는 이미지 변수 이름을 'source_img'로 합니다. (ImageFile 타입)
             source_img = Image.open(io.BytesIO(image_bytes))
 
-            if source_img.mode != "RGB":
-                source_img = source_img.convert("RGB")  # type: ignore
-
             # 2. 가공을 시작하는 시점부터는 'processed'라는 새로운 변수 이름을 씁니다. (Image 타입)
             # 이렇게 이름을 아예 갈라치면 mypy가 더 이상 화내지 않습니다.
-            processed = ImageOps.grayscale(source_img)
+            img_for_processing = source_img.convert("RGB") if source_img.mode != "RGB" else source_img
+            processed = ImageOps.grayscale(img_for_processing)
 
             # 3. 대비(Contrast) 향상
             enhancer = ImageEnhance.Contrast(processed)
