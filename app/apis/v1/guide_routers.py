@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.dependencies.security import get_optional_user
 from app.dtos.llm_life_guide import LlmLifeGuideResponse
@@ -11,16 +11,22 @@ guide_router = APIRouter(prefix="/guides", tags=["guide"])
 
 
 @guide_router.post("", response_model=LlmLifeGuideResponse)
-async def generate_guide(user: Annotated[User | None, Depends(get_optional_user)] = None):
+async def generate_guide(
+    background_tasks: BackgroundTasks,
+    user: Annotated[User | None, Depends(get_optional_user)] = None,
+):
     service = GuideService()
     user_id = str(user.id) if user and user.id else None
-    return await service.generate_guide(user_id)
+    return await service.generate_guide(user_id, background_tasks)
 
 
 @guide_router.get("", response_model=LlmLifeGuideResponse)
-async def get_guide(user: Annotated[User | None, Depends(get_optional_user)] = None):
+async def get_guide(
+    background_tasks: BackgroundTasks,
+    user: Annotated[User | None, Depends(get_optional_user)] = None,
+):
     service = GuideService()
-    return await service.get_saved_guide(user)
+    return await service.get_saved_guide(user, background_tasks)
 
 
 @guide_router.get("/{id}")

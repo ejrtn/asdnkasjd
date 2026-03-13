@@ -78,7 +78,9 @@ class HealthProfileService:
 
         await self.blood_pressure_record_repo.create_blood_pressure(data)
 
-    async def save_full_health_profile(self, user_id: str, request: FullHealthProfileSaveRequest):
+    async def save_full_health_profile(
+        self, user_id: str, request: FullHealthProfileSaveRequest, background_tasks=None
+    ):
         """
         전체 건강 프로필 정보를 통합하여 저장합니다.
         기존의 알러지, 기저질환, 복용 약물 정보를 삭제하고 새로 전달받은 정보로 교체합니다.
@@ -111,7 +113,6 @@ class HealthProfileService:
         # 3. 만성질환 정보 교체
         await self.chronic_disease_repo.delete_by_user_id(user_id)
         if request.chronic_diseases:
-            # DTO 필드명(name, when_to_diagnose)을 모델 필드명(disease_name, when_to_diagnose)으로 매핑
             cd_data = [
                 {"disease_name": cd.name, "when_to_diagnose": cd.when_to_diagnose} for cd in request.chronic_diseases
             ]
@@ -122,20 +123,29 @@ class HealthProfileService:
         if request.medications:
             await self.current_med_repo.create_many(user_id, [m.model_dump() for m in request.medications])
 
-        # 5. 추천 플랜 생성 및 저장 (plan_type='llm')
+        # 5. 무거운 작업(AI 추천 및 동기화)을 백그라운드로 이동
+        if background_tasks:
+            background_tasks.add_task(self._background_save_tasks, user_id)
+        else:
+            # 백그라운드 태스크가 없는 경우(직접 호출 등) 동기적으로 처리
+            await self._background_save_tasks(user_id)
+
+        return {"status": "success", "detail": "건강 정보가 성공적으로 저장되었습니다."}
+
+    async def _background_save_tasks(self, user_id: str):
+        """
+        AI 추천 플랜 생성 및 복약 알림 동기화 등 무거운 작업을 백그라운드에서 처리합니다.
+        """
+        # 1. 추천 플랜 생성 및 저장 (LLM 호출 포함 - 느림)
         recommendation_result = await self.health_profile_recommend_plan(user_id)
         if recommendation_result and "content" in recommendation_result:
-            # 기존 LLM 추천 플랜만 초기화 (새로운 건강 프로필 기반 업데이트)
             await self.plan_check_list.delete_all_by_type(user_id, plan_type="llm")
-
             checklist = recommendation_result["content"].get("checklist", [])
             for content in checklist:
                 await self.plan_check_list.create(user_id, PlanCheckListRequest(content=content, plan_type="llm"))
 
-        # 6. 복약 알림 기반 플랜 동기화 (plan_type='pill')
+        # 2. 복약 알림 기반 플랜 동기화
         await self.plan_check_list.sync_pill_plans(user_id)
-
-        return {"status": "success", "detail": "건강 정보가 성공적으로 저장되었습니다."}
 
     async def blood_sugar_delete(self, user_id: str, record_id: int):
         """혈당 기록을 삭제합니다."""

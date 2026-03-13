@@ -50,7 +50,7 @@ function handleSessionExpired() {
 
     __sessionToastTimer = setTimeout(() => {
         window.location.replace('/');
-    }, 2500);
+    }, 5000);
 }
 
 async function fetchWithAuth(url, options = {}) {

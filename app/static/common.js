@@ -298,10 +298,73 @@ async function confirmAlarm(alarmId, historyId = null) {
     }
 }
 
-// 브라우저 알림 + FCM 초기화 (로그인 상태일 때만)
-if ('serviceWorker' in navigator && 'Notification' in window) {
-    window.addEventListener('load', initFCM);
+// =====================
+// 건강정보 가이드 생성 완료 폴링 (페이지 이동 대응)
+// =====================
+let __healthProfilePollInterval = null;
+
+function health_profile() {
+    // 이미 폴링 중이면 중복 실행 방지
+    if (__healthProfilePollInterval) {
+        console.log('⚠️ [Health Profile] 이미 폴링이 진행 중입니다.');
+        return;
+    }
+
+    console.log('🔍 [Health Profile] 가이드 생성 상태 폴링 시작...');
+    localStorage.setItem('health_guide_generating', 'true');
+
+    __healthProfilePollInterval = setInterval(async () => {
+        try {
+            const res = await fetchWithAuth('/api/v1/guides', {
+                method: 'GET',
+            });
+
+            if (!res) {
+                stopHealthProfilePolling();
+                return;
+            }
+
+            if (!res.ok) return;
+
+            const data = await res.json();
+
+            // activity가 false이면 작업 종료 (생성 완료됨)
+            if (data.activity === false) {
+                console.log('✅ [Health Profile] 가이드 생성 완료!');
+                stopHealthProfilePolling();
+
+                const toast = document.getElementById('health-profile-toast');
+                if (toast) {
+                    toast.classList.add('show');
+
+                    const hideTimeout = setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 5000);
+
+                    const closeBtn = toast.querySelector('.health-profile-toast-close');
+                    if (closeBtn) {
+                        closeBtn.onclick = () => {
+                            toast.classList.remove('show');
+                            clearTimeout(hideTimeout);
+                        };
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ [Health Profile] 폴링 중 오류 발생:', error);
+            stopHealthProfilePolling();
+        }
+    }, 1000); // 사용자 요청을 반영하되 너무 빈번하지 않게 1.5초
 }
+
+function stopHealthProfilePolling() {
+    if (__healthProfilePollInterval) {
+        clearInterval(__healthProfilePollInterval);
+        __healthProfilePollInterval = null;
+    }
+    localStorage.removeItem('health_guide_generating');
+}
+
 
 // =====================
 // 공통 앱 토스트
@@ -380,10 +443,22 @@ async function pollDueAlarms() {
     }
 }
 
+// 페이지 로드 시 상태 체크 및 초기화
 window.addEventListener('load', () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
+    // 1. FCM 초기화
+    if ('serviceWorker' in navigator && 'Notification' in window) {
+        initFCM();
+    }
+
+    // 2. 가이드 생성 폴링 재개 (생성 중이었던 경우)
+    if (localStorage.getItem('health_guide_generating') === 'true') {
+        health_profile();
+    }
+
+    // 3. 알람 폴링 (FCM 백업)
     pollDueAlarms();
     setInterval(pollDueAlarms, 30000);
 });
