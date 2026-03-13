@@ -307,8 +307,13 @@ class UserManageService:
                 "access_token", tokens["access_token"], httponly=False, samesite="lax", max_age=3600 * 24 * 30
             )
             response.set_cookie(
-                "refresh_token", tokens["refresh_token"], httponly=True, samesite="lax", path="/", max_age=config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60,
-        )
+                "refresh_token",
+                tokens["refresh_token"],
+                httponly=True,
+                samesite="lax",
+                path="/",
+                max_age=config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60,
+            )
             response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", max_age=3600 * 24 * 30)
         else:
             # 보안을 위해 정보를 쿼리 스트링에 노출하기보다 임시 쿠키를 사용하여 전달합니다.

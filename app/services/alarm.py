@@ -303,7 +303,12 @@ class AlarmService:
         )
 
     async def _trim_user_alarm_histories(self, user: User) -> None:
-        keep_ids = await AlarmHistory.filter(alarm__user=user).order_by("-sent_at").limit(self.HISTORY_KEEP_LIMIT).values_list("id", flat=True)
+        keep_ids = (
+            await AlarmHistory.filter(alarm__user=user)
+            .order_by("-sent_at")
+            .limit(self.HISTORY_KEEP_LIMIT)
+            .values_list("id", flat=True)
+        )
 
         if not keep_ids:
             return

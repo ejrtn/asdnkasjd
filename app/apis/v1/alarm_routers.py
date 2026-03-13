@@ -106,12 +106,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
 
     histories = (
         await AlarmHistory.filter(
-            Q(is_confirmed=False)
-            & Q(alarm__user=user)
-            & (
-                Q(sent_at__gte=since_utc)
-                | Q(snoozed_until__lte=now_utc)
-            )
+            Q(is_confirmed=False) & Q(alarm__user=user) & (Q(sent_at__gte=since_utc) | Q(snoozed_until__lte=now_utc))
         )
         .prefetch_related("alarm__current_med")
         .order_by("-sent_at")
@@ -125,10 +120,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
             continue
 
         # snooze 재노출이면 snoozed_until 초기화 (1회만 재노출)
-        is_snoozed_reopen = (
-            history.snoozed_until is not None
-            and history.snoozed_until <= now_utc
-        )
+        is_snoozed_reopen = history.snoozed_until is not None and history.snoozed_until <= now_utc
 
         if is_snoozed_reopen:
             history.snoozed_until = None
@@ -268,7 +260,9 @@ async def snooze_alarm_history(history_id: int, user: Annotated[User, Depends(ge
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except Exception as e:
         default_logger.exception(f"[Alarm] snooze_alarm_history Exception history_id={history_id}: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="알람 미루기 처리 중 오류가 발생했습니다.") from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="알람 미루기 처리 중 오류가 발생했습니다."
+        ) from e
 
     return {"detail": "10분 뒤 다시 알려드립니다."}
 

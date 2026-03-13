@@ -1,19 +1,14 @@
-import uuid
 from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.responses import ORJSONResponse as Response
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core import config
 from app.dtos.users import (
-    GoogleAuthUrlResponse,
     LoginRequest,
     LoginResponse,
-    NaverAuthUrlResponse,
-    SocialLoginResponse,
 )
 from app.services.users import UserManageService
 from app.utils.security import create_access_token, verify_refresh_token
@@ -37,9 +32,7 @@ async def login(
     tokens = await user_service.login(login_data, remember_me=remember_me)
 
     refresh_max_age = (
-        config.REFRESH_TOKEN_EXPIRE_MINUTES * 60
-        if remember_me
-        else config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60
+        config.REFRESH_TOKEN_EXPIRE_MINUTES * 60 if remember_me else config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60
     )
 
     response = JSONResponse(
