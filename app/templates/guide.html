@@ -4,722 +4,16 @@
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
-<style>
-    .guide-page-container {
-        width: 100%;
-        padding: 0;
-    }
-
-    .guide-layout {
-        display: grid;
-        grid-template-columns: 350px minmax(0, 1fr);
-        gap: 20px;
-        align-items: start;
-        width: 100%;
-    }
-
-    .guide-left-column,
-    .guide-right-column {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .guide-summary-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        padding: 24px;
-    }
-
-    .guide-info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .guide-info-box {
-        background: rgba(255, 255, 255, 0.88);
-        border: 1px solid #edf2f7;
-        border-radius: 16px;
-        padding: 14px;
-    }
-
-    .guide-info-box.full {
-        grid-column: 1 / -1;
-    }
-
-    .guide-kicker {
-        font-size: 11px;
-        font-weight: 800;
-        color: #94a3b8;
-        margin-bottom: 6px;
-        letter-spacing: 0.02em;
-    }
-
-    .guide-value {
-        font-size: 15px;
-        font-weight: 800;
-        color: #334155;
-        line-height: 1.5;
-    }
-
-    .guide-habit-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 8px 0;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 14px;
-    }
-
-    .guide-habit-row:last-child {
-        border-bottom: none;
-    }
-
-    .guide-habit-label {
-        color: #64748b;
-    }
-
-    .guide-habit-value {
-        color: #334155;
-        font-weight: 700;
-        text-align: right;
-    }
-
-    .guide-med-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-height: 250px;
-        overflow-y: auto;
-        padding-right: 4px;
-    }
-
-    .guide-med-list::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .guide-med-list::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 10px;
-    }
-
-    .guide-med-list::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-    }
-
-    .guide-med-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 10px 14px;
-        background: #f8fbff;
-        border: 1px solid #e6edff;
-        border-radius: 14px;
-    }
-
-    .guide-med-name {
-        font-size: 14px;
-        font-weight: 700;
-        color: #312e81;
-    }
-
-    .guide-med-date {
-        font-size: 11px;
-        color: #818cf8;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .guide-section-card {
-        position: relative;
-        width: 100%;
-        padding: 28px;
-        border-radius: 24px;
-        border: 1px solid rgba(229, 231, 235, 0.95);
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(8px);
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .guide-section-card:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-    }
-
-    .guide-section-card.line-emerald {
-        border-left: 7px solid #10b981;
-    }
-
-    .guide-section-card.line-amber {
-        border-left: 7px solid #f59e0b;
-    }
-
-    .guide-section-card.line-rose {
-        border-left: 7px solid #f43f5e;
-    }
-
-    .guide-section-card.line-indigo {
-        border-left: 7px solid #6366f1;
-    }
-
-    .guide-section-card.line-slate {
-        border-left: 7px solid #cbd5e1;
-    }
-
-    .guide-section-title-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-
-    .guide-section-title {
-        font-size: 16px;
-        font-weight: 800;
-        color: #1f2937;
-        line-height: 1.4;
-        margin: 0;
-    }
-
-    .guide-section-body {
-        color: #4b5563;
-        font-size: 15px;
-        line-height: 1.8;
-    }
-
-    .guide-note-box {
-        margin-top: 20px;
-        padding: 18px 20px;
-        background: rgba(248, 250, 252, 0.92);
-        border: 1px solid #edf2f7;
-        border-radius: 18px;
-    }
-
-    .guide-note-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-        font-weight: 800;
-        color: #64748b;
-        margin-bottom: 10px;
-    }
-
-    .guide-note-list {
-        padding-left: 18px;
-        color: #475569;
-        font-size: 14px;
-        line-height: 1.8;
-    }
-
-    .guide-disease-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 18px;
-    }
-
-    .guide-disease-card {
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid #edf2f7;
-        border-radius: 18px;
-        padding: 18px;
-    }
-
-    .guide-disease-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 12px;
-        font-size: 15px;
-        font-weight: 800;
-        color: #1f2937;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #edf2f7;
-    }
-
-    .guide-disease-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        color: #4b5563;
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    .guide-disease-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .guide-disease-dot {
-        color: #10b981;
-        font-weight: 900;
-        line-height: 1.4;
-        flex-shrink: 0;
-    }
-
-    .guide-integrated-box {
-        display: flex;
-        gap: 12px;
-        padding: 18px 20px;
-        background: #f0fdf4;
-        border: 1px solid #d1fae5;
-        border-radius: 18px;
-    }
-
-    .guide-progress-box {
-        width: 100%;
-        height: 10px;
-        background: #e5e7eb;
-        border-radius: 999px;
-        overflow: hidden;
-        margin: 20px 0 24px;
-    }
-
-    .guide-progress-fill {
-        height: 100%;
-        width: 0;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
-        transition: width 0.35s ease;
-    }
-
-    .guide-checklist {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .guide-check-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 16px;
-        background: rgba(255, 255, 255, 0.94);
-        border: 1px solid #edf2f7;
-        border-radius: 18px;
-        transition: border-color 0.2s ease, background 0.2s ease;
-        cursor: pointer;
-    }
-
-    .guide-check-item:hover {
-        border-color: #c7d2fe;
-        background: #fafbff;
-    }
-
-    .guide-check-copy {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .guide-check-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: #374151;
-        line-height: 1.5;
-    }
-
-    .guide-check-sub {
-        font-size: 11px;
-        font-weight: 800;
-        color: #94a3b8;
-        text-transform: uppercase;
-    }
-
-    .guide-skeleton {
-        width: 100%;
-        padding: 28px;
-    }
-
-    .guide-skeleton-pulse {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    .guide-loading-note {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 16px;
-        border: 1px solid #e0e7ff;
-        background: #f8faff;
-        color: #4f46e5;
-        border-radius: 14px;
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 1.6;
-    }
-
-    .guide-loading-state {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        width: 100%;
-    }
-
-    .guide-loading-card-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-    }
-
-    @media (max-width: 1024px) {
-        .guide-loading-card-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .guide-head-card {
-        min-height: 84px;
-        padding: 0 24px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-
-    .guide-head-card .c9-section-head {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 0;
-    }
-
-    .guide-head-card .c9-btn {
-        height: 42px;
-        padding: 0 18px;
-        font-size: 13px;
-        font-weight: 800;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-    }
-
-    /* ===== Guide typography sync with alarm page ===== */
-    .guide-page-container .c9-page-title {
-        font-size: 22px;
-        font-weight: 800;
-        line-height: 1.3;
-        color: #1f2937;
-        letter-spacing: -0.01em;
-    }
-
-    .guide-page-container .guide-page-head-copy {
-        margin-top: 8px;
-        font-size: 15px;
-        line-height: 1.7;
-        color: #64748b;
-    }
-
-    .guide-head-card .c9-section-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 18px;
-        font-weight: 800;
-        color: #1f2937;
-        margin: 0;
-    }
-
-    .guide-section-title {
-        font-size: 17px;
-        font-weight: 800;
-        line-height: 1.4;
-        color: #1f2937;
-        letter-spacing: -0.01em;
-    }
-
-    .guide-section-body {
-        font-size: 14px;
-        line-height: 1.8;
-        color: #475569;
-    }
-
-    .guide-note-title {
-        font-size: 13px;
-        font-weight: 800;
-        color: #64748b;
-    }
-
-    .guide-note-list {
-        font-size: 14px;
-        line-height: 1.8;
-        color: #475569;
-    }
-
-    .guide-disease-title {
-        font-size: 15px;
-        font-weight: 800;
-        color: #1e293b;
-    }
-
-    .guide-disease-list {
-        font-size: 13px;
-        line-height: 1.7;
-        color: #475569;
-    }
-
-    .guide-check-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: #334155;
-        line-height: 1.5;
-    }
-
-    .guide-check-sub {
-        font-size: 11px;
-        font-weight: 800;
-        color: #94a3b8;
-        letter-spacing: 0.05em;
-    }
-
-    /* Success rate alignment */
-    .success-rate-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-    }
-
-    .guide-header-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-left: auto;
-    }
-
-    .guide-mode-tabs {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 999px;
-    }
-
-    .guide-mode-tab {
-        min-width: 96px;
-        height: 40px;
-        padding: 0 18px;
-        border: none;
-        border-radius: 999px;
-        background: transparent;
-        color: #64748b;
-        font-size: 14px;
-        font-weight: 800;
-        cursor: default;
-        transition: all 0.2s ease;
-    }
-
-    .guide-mode-tab:hover {
-        background: transparent;
-        color: #64748b;
-    }
-
-    .guide-mode-tab.is-active {
-        background: #eef2ff;
-        color: #4338ca;
-        box-shadow: inset 0 0 0 1px #c7d2fe;
-    }
-
-    .guide-mode-panel {
-        display: none;
-    }
-
-    .guide-mode-panel.active {
-        display: block;
-    }
-
-    .guide-accordion-btn {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        background: transparent;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        text-align: left;
-    }
-
-    .guide-accordion-icon {
-        color: #94a3b8;
-        font-size: 18px;
-        font-weight: 700;
-        transition: transform 0.25s ease, color 0.2s ease;
-        flex-shrink: 0;
-    }
-
-    .guide-accordion-btn:hover .guide-accordion-icon {
-        color: #6366f1;
-    }
-
-    .guide-title-emoji {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        line-height: 1;
-        flex-shrink: 0;
-    }
-
-    .guide-info-icon {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: default;
-        font-size: 14px;
-        color: #94a3b8;
-        margin-left: 6px;
-        width: 20px;
-        height: 20px;
-        border: 1.5px solid #cbd5e1;
-        border-radius: 50%;
-        font-weight: 800;
-        z-index: 200;
-        transition: all 0.2s ease;
-    }
-
-    .guide-info-icon:hover {
-        color: #6366f1;
-        border-color: #6366f1;
-        background: #f5f3ff;
-    }
-
-    .guide-tooltip {
-        position: absolute;
-        top: 36px;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-
-        width: 400px;
-        padding: 18px;
-
-        background: #ffffff;
-        color: #475569;
-
-        font-size: 12px;
-        line-height: 1.7;
-
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-
-        opacity: 0;
-        visibility: hidden;
-
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        z-index: 9999;
-    }
-
-    .guide-info-icon:hover .guide-tooltip {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(-50%) translateY(0);
-    }
-
-    .guide-tooltip::after {
-        content: "";
-        position: absolute;
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%) rotate(45deg);
-
-        width: 10px;
-        height: 10px;
-
-        background: white;
-        border-left: 1px solid #e2e8f0;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .guide-head-card {
-        position: relative;
-        z-index: 100;
-    }
-
-    .accordion-content {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.35s ease;
-    }
-
-    .accordion-active .accordion-content {
-        max-height: 520px;
-    }
-
-    .accordion-active .guide-accordion-icon {
-        transform: rotate(180deg);
-    }
-
-    .guide-reason-box {
-        margin-top: 0;
-        padding: 14px 18px;
-        background: #f8fafc;
-        border: 1px solid #edf2f7;
-        border-radius: 18px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .guide-reason-text {
-        color: #64748b;
-        font-size: 13px;
-        line-height: 1.8;
-        font-style: italic;
-        text-align: center;
-        text-wrap: balance;
-    }
-
-    @media (max-width: 1024px) {
-        .guide-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .guide-disease-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .guide-section-card {
-            padding: 22px;
-        }
-
-        .guide-summary-panel {
-            padding: 20px;
-        }
-    }
-</style>
+<link rel="stylesheet" href="/static/guide.css?v=3">
 {% endblock %}
 
 {% block content %}
 <div class="page-wrap">
     <div class="guide-page-container">
-        <div class="c9-page-header">
+        <section class="c9-page-header">
             <div>
                 <h1 class="c9-page-title">생활 안내 가이드</h1>
-                <p class="guide-page-head-copy">
+                <p class="c9-muted">
                     진료 기록을 바탕으로, 오늘 실천할 수 있는 건강 가이드를 바로 확인해요.
                 </p>
             </div>
@@ -729,7 +23,7 @@
                     <button type="button" class="guide-mode-tab is-active">맞춤 가이드</button>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div id="guide-mode-custom" class="guide-mode-panel active">
             <div class="guide-layout">
@@ -737,17 +31,16 @@
                     <div class="c9-soft-card guide-head-card">
                         <div class="c9-section-head">
                             <div class="c9-section-title">
-                                <span class="c9-section-title-icon">📈</span>
+                                <span class="c9-section-title-icon guide-head-icon">📈</span>
                                 <span>나의 건강 요약</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="c9-soft-card guide-summary-panel">
-                        <!-- 통합: 기저 질환 및 알레르기 -->
                         <div class="c9-subcard">
                             <div class="c9-subcard-title">
-                                <span class="c9-subcard-bar" style="background:#60a5fa;"></span>
+                                <span class="c9-subcard-bar guide-bar-blue"></span>
                                 <span>기저 질환 및 알레르기</span>
                             </div>
                             <div id="medical-background-container" class="min-h-[60px] flex flex-col gap-3">
@@ -762,10 +55,9 @@
                             </div>
                         </div>
 
-                        <!-- 통합: 건강 지표 -->
                         <div class="c9-subcard">
                             <div class="c9-subcard-title">
-                                <span class="c9-subcard-bar" style="background:#f87171;"></span>
+                                <span class="c9-subcard-bar guide-bar-red"></span>
                                 <span>건강 지표</span>
                             </div>
                             <div class="guide-info-grid" id="health-metrics-container">
@@ -794,7 +86,7 @@
 
                         <div class="c9-subcard">
                             <div class="c9-subcard-title">
-                                <span class="c9-subcard-bar" style="background:#8b5cf6;"></span>
+                                <span class="c9-subcard-bar guide-bar-teal"></span>
                                 <span>생활 습관</span>
                             </div>
                             <div class="c9-stack-16" id="habits-container">
@@ -815,7 +107,7 @@
 
                         <div class="c9-subcard">
                             <div class="c9-subcard-title">
-                                <span class="c9-subcard-bar" style="background:#6366f1;"></span>
+                                <span class="c9-subcard-bar guide-bar-amber"></span>
                                 <span>현재 복용 약</span>
                             </div>
                             <div id="medication-container" class="min-h-[60px]">
@@ -829,19 +121,19 @@
                     <div class="c9-soft-card guide-head-card">
                         <div class="c9-section-head">
                             <div class="c9-section-title">
-                                <span class="c9-section-title-icon">✨</span>
+                                <span class="c9-section-title-icon guide-head-icon">✨</span>
                                 <span>AI 맞춤 생활 안내 가이드</span>
 
                                 <span class="guide-info-icon">ⓘ
                                     <span class="guide-tooltip">
                                         <strong>💡 가이드 생성 기준</strong><br>
-                                        이 가이드는 사용자의 건강 프로필, 보유 질환,복용 중인 약물,
+                                        이 가이드는 사용자의 건강 프로필, 보유 질환, 복용 중인 약물,
                                         알레르기 정보 및 생활습관 데이터를 기반으로 생성된 맞춤 건강 가이드입니다.
                                     </span>
                                 </span>
                             </div>
 
-                            <div class="flex items-center gap-2">
+                            <div class="guide-head-actions">
                                 <button id="tts-btn" class="c9-btn c9-btn-soft">
                                     <span id="tts-icon">📢</span>
                                     <span id="tts-text">가이드 읽어주기</span>
@@ -889,32 +181,19 @@
                         </div>
 
                         <div id="guide-sections" class="hidden c9-stack-20 w-full">
-                            <div id="section-2" class="guide-section-card line-emerald">
-                                <h3 class="guide-section-title" style="margin-bottom:18px;">1) 질환 기반 생활습관 가이드</h3>
+                            <div id="section-2" class="guide-section-card line-teal">
+                                <h3 class="guide-section-title guide-section-spacing">1) 질환 기반 생활습관 가이드</h3>
                                 <div id="disease-guides-container" class="guide-disease-grid"></div>
                                 <div class="guide-integrated-box">
-                                    <span class="text-emerald-500 text-xl font-bold">🔄</span>
+                                    <span class="guide-integrated-icon">🔄</span>
                                     <div>
-                                        <h4 class="text-sm font-bold text-emerald-800 mb-1">통합 관리 포인트</h4>
-                                        <p id="integrated-point" class="text-sm text-emerald-700 leading-relaxed"></p>
+                                        <h4 class="guide-integrated-title">통합 관리 포인트</h4>
+                                        <p id="integrated-point" class="guide-integrated-text"></p>
                                     </div>
-                                </div>
-
-                                <!-- RAG Citations Footnote -->
-                                <div class="mt-5 pt-4 border-t border-emerald-100/50 text-center">
-                                    <div class="flex items-center justify-center gap-1 text-xs text-gray-500">
-                                        <span class="text-emerald-400">ⓘ</span>
-                                        <span class="font-semibold">
-                                            참고 출처: 국가건강정보포털, 질병관리청 건강정보
-                                        </span>
-                                    </div>
-
-                                    <p class="text-xs text-gray-400 mt-1">
-                                        본 가이드는 공공기관 건강정보를 참고하여 생성되었습니다.
-                                    </p>
                                 </div>
                             </div>
-                            <div id="section-1" class="guide-section-card line-emerald">
+
+                            <div id="section-1" class="guide-section-card line-blue">
                                 <div class="guide-section-title-row">
                                     <h3 class="guide-section-title">2) 복약 안전성 및 주의사항</h3>
                                     <span id="safety-status-tag" class="c9-badge c9-badge-success"></span>
@@ -922,29 +201,28 @@
                                 <p id="safety-content" class="guide-section-body"></p>
                                 <div class="guide-note-box">
                                     <h4 class="guide-note-title">
-                                        <span class="text-blue-500">⏰</span> 일반 주의사항
+                                        <span>⏰</span> 일반 주의사항
                                     </h4>
                                     <ul id="general-cautions-list" class="guide-note-list"></ul>
                                 </div>
                             </div>
 
-                            <div id="section-3" class="guide-section-card line-indigo">
-                                <div class="flex justify-between items-end mb-6">
+                            <div id="section-3" class="guide-section-card line-apricot">
+                                <div class="guide-plan-head">
                                     <div>
-                                        <h3 class="guide-section-title mb-1">3) 오늘의 실행 플랜</h3>
-                                        <p class="text-sm text-gray-500">체크한 항목은 나의 관리 기록으로 저장됩니다.</p>
+                                        <h3 class="guide-section-title guide-plan-title">3) 오늘의 실행 플랜</h3>
+                                        <p class="guide-plan-desc">체크한 항목은 나의 관리 기록으로 저장됩니다.</p>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="text-2xl font-black text-indigo-600"
-                                            id="progress-percent">0%</span>
-                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-                                            SUCCESS RATE
-                                        </p>
+                                    <div class="success-rate-container">
+                                        <span class="guide-progress-percent" id="progress-percent">0%</span>
+                                        <p class="guide-progress-caption">SUCCESS RATE</p>
                                     </div>
                                 </div>
+
                                 <div class="guide-progress-box">
                                     <div id="progress-bar" class="guide-progress-fill"></div>
                                 </div>
+
                                 <div id="checklist-container" class="guide-checklist"></div>
                             </div>
                         </div>
@@ -954,18 +232,16 @@
         </div>
 
         <div id="guide-mode-history" class="guide-mode-panel">
-            <section class="c9-soft-card" style="padding: 28px;">
+            <section class="c9-soft-card guide-history-card">
                 <div class="c9-section-head">
                     <h3 class="c9-section-title">
-                        <span class="c9-section-title-icon"
-                            style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);">🗂️</span>
+                        <span class="c9-section-title-icon guide-history-icon">🗂️</span>
                         생활 안내 기록 확인
                     </h3>
                     <span class="c9-badge c9-badge-slate">준비 중</span>
                 </div>
 
-                <div
-                    style="min-height: 240px; display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-size:15px;">
+                <div class="guide-history-empty">
                     생활 안내 기록 확인 화면은 다음 단계에서 연결할 수 있어요.
                 </div>
             </section>
@@ -975,361 +251,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        initGuide();
-    });
-
-    let currentStatus = { diseases: [], allergies: [], meds: [], profile: null, bp_records: [], bs_records: [] };
-    let guideData = null;
-    let isSpeaking2 = false;
-    const synthesis2 = window.speechSynthesis;
-
-    async function initGuide() {
-        await fetchHealthProfile();
-        await generateNewGuide();
-        setupGuideEventListeners();
-    }
-
-    async function fetchHealthProfile() {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            showLoginRequired();
-            return;
-        }
-
-        try {
-            const healthRes = await fetchWithAuth(`/api/v1/health`, { method: 'GET' });
-
-            if (!healthRes || !healthRes.ok) throw new Error("Fetch failed");
-            const health = await healthRes.json();
-
-            currentStatus.diseases = health.chronic_diseases || [];
-            currentStatus.allergies = health.allergies || [];
-            currentStatus.meds = health.current_meds || [];
-            currentStatus.profile = health.health_profile || null;
-            currentStatus.bp_records = health.blood_pressure_records || [];
-            currentStatus.bs_records = health.blood_sugar_records || [];
-
-            renderHealthProfile();
-        } catch (err) {
-            console.error("Profile Load Error:", err);
-            currentStatus.diseases = [];
-            currentStatus.allergies = [];
-            currentStatus.meds = [];
-            currentStatus.profile = null;
-            renderHealthProfile();
-        }
-    }
-
-    function showLoginRequired() {
-        const container = document.getElementById('guide-container');
-        container.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px 20px;">
-                <div style="font-size:64px; margin-bottom:24px;">🔐</div>
-                <h3 style="font-size:20px; color:#333; margin-bottom:12px; font-weight:bold;">로그인이 필요합니다</h3>
-                <p style="color:#999; font-size:14px; margin-bottom:32px; text-align:center;">상단 우측의 사람 아이콘을 클릭하여 로그인하세요.</p>
-                <a href="/" style="display:inline-block; padding:12px 32px; background:#4f46e5; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px;">로그인 하기</a>
-            </div>
-        `;
-    }
-
-    async function generateNewGuide() {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            showLoginRequired();
-            return;
-        }
-
-        const loadingState = document.getElementById('guide-loading-state');
-        const content = document.getElementById('guide-sections');
-        const loadingNote = document.getElementById('guide-loading-note');
-
-        if (loadingState) {
-            loadingState.classList.remove('hidden');
-        }
-
-        if (content) {
-            content.classList.add('hidden');
-            content.style.display = 'none';
-        }
-
-        if (loadingNote) {
-            loadingNote.innerHTML = `
-                <span>⏳</span>
-                <span>AI 맞춤 가이드를 새로 생성 중입니다. 잠시만 기다려주세요.</span>
-            `;
-        }
-
-        try {
-            const res = await fetchWithAuth('/api/v1/guides', {
-                method: 'GET',
-            });
-
-            if (!res || !res.ok) {
-                throw new Error("Guide request failed");
-            }
-
-            const data = await res.json();
-            console.log("Guide API Data:", data);
-
-            // activity가 true면 아직 생성 중인 상태 -> 5초 후 다시 확인
-            if (data.activity === true) {
-                console.log("Currently generating... checking again in 5s.");
-                setTimeout(initGuide, 5000);
-                return;
-            }
-
-            if (data.generated_content) {
-                guideData = data.generated_content;
-                renderGuide();
-
-                if (loadingState) {
-                    loadingState.classList.add('hidden');
-                }
-
-                if (content) {
-                    content.classList.remove('hidden');
-                    content.style.display = 'flex';
-                }
-            }
-        } catch (err) {
-            console.error("Guide Gen Error:", err);
-            // 에러 발생 시에도 일정 시간 후 재시도할 수 있도록 처리 (옵션)
-            if (loadingNote) {
-                loadingNote.innerHTML = `
-                    <span>⚠️</span>
-                    <span>가이드를 불러오는 중 문제가 발생했습니다. 잠시 후 자동으로 다시 시도합니다.</span>
-                `;
-            }
-            setTimeout(initGuide, 5000);
-        }
-    }
-
-    function renderHealthProfile() {
-        const diseaseList = document.getElementById('chronic-disease-list');
-        diseaseList.innerHTML =
-            currentStatus.diseases.length > 0
-                ? currentStatus.diseases.map(d => `<li class="c9-chip c9-chip-blue">${d.disease_name}</li>`).join('')
-                : '<li class="c9-muted">등록된 질환이 없습니다.</li>';
-
-        const allergyList = document.getElementById('allergy-list');
-        allergyList.innerHTML =
-            currentStatus.allergies.length > 0
-                ? currentStatus.allergies.map(a => `<li class="c9-chip c9-chip-amber">${a.allergy_name}</li>`).join('')
-                : '<li class="c9-muted">등록된 알레르기가 없습니다.</li>';
-
-        // 최근 기록 렌더링
-        const bpText = document.getElementById('recent-bp-text');
-        const bsText = document.getElementById('recent-bs-text');
-
-        if (currentStatus.bp_records.length > 0) {
-            const latestBP = currentStatus.bp_records[0]; // Assuming API returns sorted by latest
-            bpText.innerText = `${latestBP.systolic}/${latestBP.diastolic}`;
-        } else {
-            bpText.innerText = '기록 없음';
-        }
-
-        if (currentStatus.bs_records.length > 0) {
-            const latestBS = currentStatus.bs_records[0];
-            bsText.innerText = `${latestBS.glucose_mg_dl}mg/dL`;
-        } else {
-            bsText.innerText = '기록 없음';
-        }
-
-        const medList = document.getElementById('medication-list');
-        medList.innerHTML =
-            currentStatus.meds.length > 0
-                ? currentStatus.meds.map(m => `
-                    <div class="guide-med-item">
-                        <span class="guide-med-name">${m.medication_name}</span>
-                        <span class="guide-med-date">${m.start_date || '기록없음'}</span>
-                    </div>
-                `).join('')
-                : '<p class="c9-muted text-center py-2">등록된 약물이 없습니다.</p>';
-
-        const prof = currentStatus.profile;
-        if (prof) {
-            document.getElementById('height-weight-text').innerText =
-                (prof.height_cm && prof.weight_kg) ? `${prof.height_cm}cm / ${prof.weight_kg}kg` : '-';
-
-            const bmiText = document.getElementById('bmi-text');
-            if (prof.height_cm && prof.weight_kg) {
-                const bmi = (prof.weight_kg / ((prof.height_cm / 100) ** 2)).toFixed(1);
-                let status = '';
-                if (bmi < 18.5) status = '(저체중)';
-                else if (bmi < 23) status = '(정상)';
-                else if (bmi < 25) status = '(과체중)';
-                else status = '(비만)';
-                bmiText.innerHTML = `${bmi} <span class="text-[10px] font-normal">${status}</span>`;
-            } else {
-                bmiText.innerText = '-';
-            }
-
-            document.getElementById('sleep-text').innerText =
-                prof.sleep_hours ? `${prof.sleep_hours}시간/일 (${prof.sleep_change || '변화없음'})` : '-';
-
-            const smoke = prof.smoking_status === 'NEVER' ? '비흡연' : '흡연';
-            const drink = prof.drinking_status === 'NEVER' ? '비음주' : '음주';
-            document.getElementById('smoking-drinking-text').innerText = `${smoke} / ${drink}`;
-            document.getElementById('exercise-text').innerText = prof.exercise_frequency || '-';
-            document.getElementById('diet-text').innerText = prof.diet_type || '-';
-        }
-    }
-
-    function renderGuide() {
-        if (!guideData) return;
-
-        const s1 = guideData.section1;
-        const section1 = document.getElementById('section-1');
-        const statusTag = document.getElementById('safety-status-tag');
-
-        statusTag.innerText = s1.status;
-        section1.className = 'guide-section-card';
-
-        if (s1.status.includes('위험')) {
-            statusTag.className = 'c9-badge c9-badge-danger';
-            section1.classList.add('line-rose');
-        } else if (s1.status.includes('주의')) {
-            statusTag.className = 'c9-badge c9-badge-warn';
-            section1.classList.add('line-amber');
-        } else {
-            statusTag.className = 'c9-badge c9-badge-success';
-            section1.classList.add('line-emerald');
-        }
-
-        document.getElementById('safety-content').innerText = s1.content;
-        document.getElementById('general-cautions-list').innerHTML =
-            s1.general_cautions.map(c => `<li>${c}</li>`).join('');
-
-        const s2 = guideData.section2;
-        document.getElementById('disease-guides-container').innerHTML =
-            s2.disease_guides.map(dg => `
-                <div class="guide-disease-card">
-                    <div class="guide-disease-title">
-                        <span>${dg.name}</span>
-                        <span class="c9-badge c9-badge-primary">CARE</span>
-                    </div>
-                    <div class="guide-disease-list">
-                        ${dg.tips.map(tip => `
-                            <div class="guide-disease-item">
-                                <span class="guide-disease-dot">•</span>
-                                <span>${tip}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-        document.getElementById('integrated-point').innerText = s2.integrated_point;
-
-        const s3 = guideData.section3;
-        document.getElementById('checklist-container').innerHTML =
-            s3.checklist.map(item => `
-                <label class="guide-check-item">
-                    <input
-                        type="checkbox"
-                        onchange="updateProgress()"
-                        class="plan-checkbox w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    >
-                    <div class="guide-check-copy">
-                        <span class="guide-check-title">${item}</span>
-                        <span class="guide-check-sub">Daily Action</span>
-                    </div>
-                </label>
-            `).join('');
-
-        updateProgress();
-    }
-
-    function updateProgress() {
-        const checks = document.querySelectorAll('.plan-checkbox');
-        const checked = Array.from(checks).filter(c => c.checked).length;
-        const percent = checks.length > 0 ? Math.round((checked / checks.length) * 100) : 0;
-        document.getElementById('progress-bar').style.width = percent + '%';
-        document.getElementById('progress-percent').innerText = percent + '%';
-    }
-
-    function toggleAccordion(id) {
-        document.getElementById(id).classList.toggle('accordion-active');
-    }
-
-    function switchGuideMode(mode, buttonEl) {
-        const tabs = document.querySelectorAll('.guide-mode-tab');
-        const panels = document.querySelectorAll('.guide-mode-panel');
-
-        tabs.forEach(tab => tab.classList.remove('is-active'));
-        panels.forEach(panel => panel.classList.remove('active'));
-
-        if (buttonEl) {
-            buttonEl.classList.add('is-active');
-        }
-
-        const target = document.getElementById(`guide-mode-${mode}`);
-        if (target) {
-            target.classList.add('active');
-        }
-    }
-
-    function setupGuideEventListeners() {
-        const ttsBtn = document.getElementById('tts-btn');
-
-        if (ttsBtn) {
-            ttsBtn.addEventListener('click', toggleTTS);
-        }
-    }
-
-    function toggleTTS() {
-        if (!guideData) return;
-
-        const btnText = document.getElementById('tts-text');
-        const btnIcon = document.getElementById('tts-icon');
-
-        if (isSpeaking2) {
-            synthesis2.cancel();
-            isSpeaking2 = false;
-            btnText.innerText = '가이드 읽어주기';
-            btnIcon.innerText = '📢';
-            return;
-        }
-
-        const s1 = guideData.section1;
-        const s2 = guideData.section2;
-        const s3 = guideData.section3;
-
-        const diseaseText = s2.disease_guides
-            .map(d => `${d.name} 관리 방법입니다. ${d.tips.join(', ')}`)
-            .join('. ');
-
-        const fullText = `
-            현재 등록된 질환, 복용 중인 약, 생활습관 등 건강 정보를 바탕으로 맞춤 생활 가이드를 안내드립니다.
-
-            먼저 질환 기반 생활습관 가이드입니다.
-            ${diseaseText}.
-
-            다음은 복약 안전성 안내입니다.
-            현재 상태는 ${s1.status} 입니다. ${s1.content}.
-
-            오늘의 실행 플랜입니다.
-            ${s3.checklist.join(', ')}를 실천해보세요.
-        `;
-
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.lang = 'ko-KR';
-
-        utterance.onstart = () => {
-            isSpeaking2 = true;
-            btnText.innerText = '읽기 중지';
-            btnIcon.innerText = '⏹';
-        };
-
-        utterance.onend = () => {
-            isSpeaking2 = false;
-            btnText.innerText = '가이드 읽어주기';
-            btnIcon.innerText = '📢';
-        };
-
-        synthesis2.speak(utterance);
-    }
-</script>
+<script src="/static/guide.js?v=3"></script>
 {% endblock %}

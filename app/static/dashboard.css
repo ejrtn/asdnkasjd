@@ -1,13 +1,15 @@
 /* Hero Slider */
 .hero-slider {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
+  background: linear-gradient(155deg, #7a6df0 0%, #7c5fe8 36%, #8b5cf6 68%, #9f6cf4 100%);
+  border: 1px solid rgba(233, 228, 245, 0.32);
+  border-radius: 24px;
   padding: 40px;
   margin-bottom: 32px;
   min-height: 400px;
   position: relative;
   color: white;
   overflow: hidden;
+  box-shadow: 0 18px 34px rgba(76, 29, 149, 0.10);
 }
 
 .slide {
@@ -33,11 +35,13 @@
 
 .slide-brand {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .slide-date {
   text-align: right;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .slide-date div {
@@ -51,15 +55,17 @@
 
 .slide-content h2 {
   font-size: 36px;
-  font-weight: bold;
-  line-height: 1.4;
+  font-weight: 800;
+  line-height: 1.38;
   margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
 
 .slide-content p {
   font-size: 18px;
-  line-height: 1.6;
-  opacity: 0.95;
+  line-height: 1.7;
+  opacity: 0.96;
+  color: rgba(255, 255, 255, 0.94);
 }
 
 .slide-footer {
@@ -68,7 +74,8 @@
 
 .slide-footer small {
   font-size: 14px;
-  opacity: 0.9;
+  opacity: 0.92;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .slide-indicators {
@@ -81,16 +88,16 @@
 .indicator {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .indicator.active {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   width: 24px;
-  border-radius: 4px;
+  border-radius: 999px;
 }
 
 /* Dashboard Cards */
@@ -102,22 +109,24 @@
 }
 
 .dashboard-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(233, 228, 245, 0.98);
+  border-radius: 24px;
   padding: 18px 20px;
   min-height: auto;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 22px rgba(76, 29, 149, 0.06);
+  backdrop-filter: blur(10px);
   transition: all 0.2s ease;
 }
 
 .dashboard-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 28px rgba(76, 29, 149, 0.10);
+  border-color: #ddd0ff;
 }
 
 .dashboard-card.health-metrics {
-  border: 1px solid #e6ebf3;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(233, 228, 245, 0.98);
+  box-shadow: 0 8px 22px rgba(76, 29, 149, 0.06);
   align-self: start;
 }
 
@@ -128,7 +137,7 @@
 .dashboard-card.health-metrics .card-header h4 {
   font-size: 17px;
   font-weight: 800;
-  color: #334155;
+  color: #2b2340;
 }
 
 .dashboard-card.health-metrics .card-content {
@@ -147,7 +156,7 @@
 .card-header h4 {
   font-size: 17px;
   font-weight: 800;
-  color: #334155;
+  color: #2b2340;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -155,12 +164,12 @@
 .metric-select {
   min-height: 38px;
   padding: 0 38px 0 14px;
-  border: 1px solid #c7d2fe;
-  border-radius: 12px;
+  border: 1px solid #ddd0ff;
+  border-radius: 14px;
   font-size: 13px;
   font-weight: 700;
-  color: #334155;
-  background-color: #fff;
+  color: #3f3a53;
+  background-color: rgba(255, 255, 255, 0.92);
   cursor: pointer;
   outline: none;
   transition: all 0.2s ease;
@@ -168,8 +177,8 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image:
-    linear-gradient(45deg, transparent 50%, #4f46e5 50%),
-    linear-gradient(135deg, #4f46e5 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #7c5cff 50%),
+    linear-gradient(135deg, #7c5cff 50%, transparent 50%);
   background-position:
     calc(100% - 18px) calc(50% - 2px),
     calc(100% - 12px) calc(50% - 2px);
@@ -178,13 +187,13 @@
 }
 
 .metric-select:hover {
-  background-color: #f8faff;
-  border-color: #a5b4fc;
+  background-color: #f8f3ff;
+  border-color: #c8b5ff;
 }
 
 .metric-select:focus {
-  border-color: #818cf8;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.18);
 }
 
 .card-content {
@@ -227,7 +236,7 @@
 .metric-label,
 .trend-label {
   font-size: 13px;
-  color: #64748b;
+  color: #7a728f;
   margin-bottom: 8px;
 }
 
@@ -278,7 +287,7 @@
 
 .metric-stream-item {
   padding: 10px 0;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid #f1ebfb;
 }
 
 .metric-stream-item:first-child {
@@ -309,9 +318,9 @@
   font-weight: 800;
   line-height: 1;
   border: 1px solid transparent;
-  background: #eef2ff;
-  color: #4338ca;
-  border-color: #c7d2fe;
+  background: #f3edff;
+  color: #6d4ff3;
+  border-color: #ddd0ff;
   flex-shrink: 0;
 }
 
@@ -360,7 +369,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid #f1ebfb;
 }
 
 #dashboard-alarm-summary .medication-item:last-of-type {
@@ -386,11 +395,11 @@
   min-width: 56px;
   font-size: 15px;
   font-weight: 800;
-  color: #1f2937;
+  color: #2b2340;
 }
 
 .med-name {
-  color: #475569;
+  color: #5b556f;
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -450,7 +459,7 @@
 }
 
 .next-alarm small {
-  color: #64748b;
+  color: #7a728f;
   font-size: 13px;
 }
 
@@ -468,31 +477,43 @@
 .analysis-title {
   font-size: 15px;
   font-weight: 800;
-  color: #334155;
+  color: #2b2340;
   margin-bottom: 8px;
 }
 
 .analysis-result {
   font-size: 13px;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 10px;
-  display: inline-block;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  margin-bottom: 7px;
 }
 .analysis-result.safe{
-  background: green;
-  margin-bottom: 7px;
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
 }
 .analysis-result.caution{
-  background: orange;
-  margin-bottom: 7px;
+  background: #fff7ed;
+  color: #d97706;
+  border-color: #fdba74;
 }
 .analysis-result.danger{
-  background: red;
-  margin-bottom: 7px;
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #fecdd3;
 }
 .analysis-summary{
   margin-bottom: 7px;
+  color: #5b556f;
+  line-height: 1.6;
+}
+.analysis_pill {
+  color: #7a728f;
+  line-height: 1.6;
 }
 
 /* Insights */
@@ -505,11 +526,11 @@
 .insight-item {
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
-  padding: 8px;
-  background: #f9f9f9;
-  border-left: 3px solid #667eea;
-  border-radius: 4px;
+  color: #2b2340;
+  padding: 10px 12px;
+  background: #f8f3ff;
+  border-left: 3px solid #8b5cf6;
+  border-radius: 12px;
 }
 
 /* Health Score */
@@ -520,34 +541,37 @@
 }
 
 .score-badge {
-  background: #667eea;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
+  background: #f3edff;
+  color: #6d4ff3;
+  padding: 5px 12px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 800;
+  border: 1px solid #ddd0ff;
 }
 
 .score-status {
   font-size: 12px;
-  color: #666;
+  color: #7a728f;
 }
 
 /* Slide 2 insight items should match hero background */
 .hero-slider .insight-item {
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #fff;
-  border-left: 3px solid rgba(255,255,255,0.7);
+  border-left: 3px solid rgba(255, 255, 255, 0.72);
+  border-radius: 12px;
 }
 
 .hero-slider .score-status {
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .hero-slider .score-badge {
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: #fff;
 }
 
 /* Responsive */

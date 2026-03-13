@@ -1,0 +1,80 @@
+/* =========================
+   Blood Pressure Specific Styles
+   혈압 전용 스타일
+========================= */
+
+.pressure-icon-primary {
+  background: linear-gradient(135deg, #7264f8 0%, #5b4ff0 58%, #4f46e5 100%);
+}
+
+.pressure-icon-chart {
+  background: linear-gradient(135deg, #5b4ff0 0%, #4f46e5 100%);
+}
+
+.pressure-icon-record {
+  background: linear-gradient(135deg, #7264f8 0%, #5b4ff0 58%, #4f46e5 100%);
+}
+
+.pressure-page .c9-page-header {
+  margin-bottom: 0;
+}
+
+.pressure-page .notebook-guide-card {
+  border: 1px solid #e9e4f5;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
+}
+
+.pressure-page .guide-row {
+  background: #f8faff;
+  border: 1px solid #edf2ff;
+  padding: 12px 14px;
+}
+
+.pressure-page .guide-badge.pending {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+
+.pressure-page .guide-badge.pending::before {
+  content: "";
+}
+
+.pressure-page .guide-badge.done {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.pressure-page .guide-badge.done::before {
+  content: "";
+}
+
+.pressure-page .notebook-summary-card {
+  border: 1px solid #e9e4f5;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
+}
+
+.pressure-page .notebook-record-item {
+  border: 1px solid #e9e4f5;
+}
+
+.pressure-page .notebook-record-item:hover {
+  border-color: #c7d2fe;
+  background: #fafbff;
+  box-shadow: 0 10px 20px rgba(76, 29, 149, 0.06);
+}
+
+.pressure-page .notebook-record-badge {
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.pressure-page .notebook-empty {
+  color: #64748b;
+}
+
+.pressure-page .notebook-chart-wrap {
+  margin-top: 16px;
+}

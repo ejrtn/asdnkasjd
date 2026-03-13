@@ -181,7 +181,7 @@ async def read_health_profile(request: Request):
     """
     건강 정보 통합 관리 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    return templates.TemplateResponse("health_profile_save.html", {"request": request})
+    return templates.TemplateResponse("health_profile.html", {"request": request})
 
 
 @app.get("/blood-pressure", response_class=HTMLResponse)
@@ -189,7 +189,7 @@ async def read_blood_pressure(request: Request):
     """
     혈압 기록 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    return templates.TemplateResponse("blood_pressure_save.html", {"request": request})
+    return templates.TemplateResponse("blood_pressure.html", {"request": request})
 
 
 @app.get("/blood-sugar", response_class=HTMLResponse)
@@ -197,7 +197,7 @@ async def read_blood_sugar(request: Request):
     """
     혈당 기록 페이지. 프론트엔드 authGuard가 세션 관리를 처리.
     """
-    return templates.TemplateResponse("blood_sugar_save.html", {"request": request})
+    return templates.TemplateResponse("blood_sugar.html", {"request": request})
 
 
 @app.get("/pill-identifier", response_class=HTMLResponse)

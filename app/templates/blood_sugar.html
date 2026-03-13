@@ -3,8 +3,8 @@
 {% block title %}Cloud9 Care - 혈당 수첩{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/blood_notebook.css">
-<link rel="stylesheet" href="/static/blood_sugar_save.css">
+<link rel="stylesheet" href="/static/blood_common.css">
+<link rel="stylesheet" href="/static/blood_sugar.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
@@ -13,7 +13,7 @@
   <section class="c9-page-header">
     <div>
       <h1 class="c9-page-title">혈당 수첩</h1>
-      <p class="c9-muted sugar-page-desc">
+      <p class="c9-muted">
         혈당 기록을 저장하고 공복 · 식후 · 취침 전 패턴을 확인해 더 정확한 건강 관리를 이어가세요.
       </p>
     </div>
@@ -188,6 +188,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/blood_notebook.js"></script>
-<script src="/static/blood_sugar_save.js?v=1"></script>
+<script src="/static/blood_common.js"></script>
+<script src="/static/blood_sugar.js"></script>
 {% endblock %}

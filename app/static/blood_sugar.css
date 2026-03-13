@@ -1,0 +1,80 @@
+/* =========================
+   Blood Sugar Specific Styles
+   혈당 전용 스타일
+========================= */
+
+.sugar-icon-primary {
+  background: linear-gradient(135deg, #7264f8 0%, #5b4ff0 58%, #4f46e5 100%);
+}
+
+.sugar-icon-chart {
+  background: linear-gradient(135deg, #6f63f7 0%, #5b4ff0 58%, #4f46e5 100%);
+}
+
+.sugar-icon-record {
+  background: linear-gradient(135deg, #7a6df8 0%, #6357f6 52%, #4f46e5 100%);
+}
+
+.sugar-page .c9-page-header {
+  margin-bottom: 0;
+}
+
+.sugar-page .notebook-guide-card {
+  border: 1px solid #e9e4f5;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
+}
+
+.sugar-page .guide-row {
+  background: #f8faff;
+  border: 1px solid #edf2ff;
+  padding: 12px 14px;
+}
+
+.sugar-page .guide-badge.pending {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+
+.sugar-page .guide-badge.pending::before {
+  content: "";
+}
+
+.sugar-page .guide-badge.done {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.sugar-page .guide-badge.done::before {
+  content: "";
+}
+
+.sugar-page .notebook-summary-card {
+  border: 1px solid #e9e4f5;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
+}
+
+.sugar-page .notebook-record-item {
+  border: 1px solid #e9e4f5;
+}
+
+.sugar-page .notebook-record-item:hover {
+  border-color: #c7d2fe;
+  background: #fafbff;
+  box-shadow: 0 10px 20px rgba(76, 29, 149, 0.06);
+}
+
+.sugar-page .notebook-record-badge {
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.sugar-page .notebook-empty {
+  color: #64748b;
+}
+
+.sugar-page .notebook-chart-wrap {
+  margin-top: 16px;
+}

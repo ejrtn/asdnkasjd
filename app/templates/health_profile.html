@@ -3,7 +3,7 @@
 {% block title %}Cloud9 Care - 건강정보{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/health_profile_save.css">
+<link rel="stylesheet" href="/static/health_profile.css?v=2">
 {% endblock %}
 
 {% block content %}
@@ -11,10 +11,11 @@
   <section class="c9-page-header">
     <div>
       <h1 class="c9-page-title">건강정보</h1>
-      <p class="c9-muted" style="margin-top: 6px;">
+      <p class="c9-muted">
         건강 프로필, 알레르기, 질환, 복용 약물을 등록해 맞춤 가이드 정확도를 높여보세요.
       </p>
     </div>
+
     <div class="health-header-meta">
       <div class="health-mode-tabs" aria-label="건강정보 화면 상태">
         <button type="button" class="health-mode-tab is-active">건강 관리</button>
@@ -22,7 +23,7 @@
     </div>
   </section>
 
-  <div class="guide-card">
+  <div class="health-guide-card">
     <h5>🩺 정확한 건강 가이드를 위한 정보 입력</h5>
     <p>입력된 정보는 개인 맞춤 건강 관리와 질환 예방 가이드 생성에 사용됩니다. 꼼꼼히 입력할수록 더 정확한 생활 건강 가이드를 제공받을 수 있습니다.</p>
   </div>
@@ -47,7 +48,6 @@
     </button>
   </section>
 
-  <!-- 건강 프로필 탭 -->
   <div id="health-tab-profile" class="health-panel active">
     <section class="c9-soft-card health-card">
       <div class="c9-section-head">
@@ -180,7 +180,6 @@
     </section>
   </div>
 
-  <!-- 알레르기 & 질환 탭 -->
   <div id="health-tab-allergy" class="health-panel">
     <section class="c9-soft-card health-card">
       <div class="c9-section-head">
@@ -188,7 +187,7 @@
           <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">⚠️</span>
           알레르기
         </h3>
-        <span class="c9-badge c9-badge-warning">주의사항</span>
+        <span class="c9-badge health-badge-warning">주의사항</span>
       </div>
 
       <table class="allergy-table" id="allergy-table">
@@ -200,9 +199,7 @@
             <th style="width: 40px;"></th>
           </tr>
         </thead>
-        <tbody id="allergy-tbody">
-          <!-- 동적 추가 -->
-        </tbody>
+        <tbody id="allergy-tbody"></tbody>
       </table>
 
       <button type="button" class="add-btn" onclick="addAllergy()">+ 알레르기 추가</button>
@@ -218,7 +215,6 @@
       </div>
 
       <div class="disease-category">
-        <!-- 심뇌혈관 및 대사 질환 -->
         <div class="category">
           <div class="category-title">심뇌혈관 및 대사 질환</div>
           <div class="subcategory">
@@ -231,7 +227,6 @@
           </div>
         </div>
 
-        <!-- 호흡기 및 간 질환 -->
         <div class="category">
           <div class="category-title">호흡기 및 간 질환</div>
           <div class="subcategory">
@@ -242,7 +237,6 @@
           </div>
         </div>
 
-        <!-- 근골격계 및 신경계 -->
         <div class="category">
           <div class="category-title">근골격계 및 신경계 질환</div>
           <div class="subcategory">
@@ -254,7 +248,6 @@
           </div>
         </div>
 
-        <!-- 기타 -->
         <div class="category">
           <div class="category-title">기타</div>
           <div class="subcategory">
@@ -274,11 +267,11 @@
         <label>입력 질환 목록 <span style="color: #6b7280; font-weight: normal;">(진단시기 선택 필수)</span></label>
         <div id="selected-diseases" class="selected-tag-container"></div>
       </div>
+
       <input type="hidden" name="chronic_diseases_json" id="chronic-hidden">
     </section>
   </div>
 
-  <!-- 현재 복용 약물 탭 -->
   <div id="health-tab-medication" class="health-panel">
     <div class="med-guide-box">
       <div class="med-guide-text">
@@ -296,7 +289,7 @@
           <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">💊</span>
           현재 복용 약물
         </h3>
-        <span class="c9-badge c9-badge-purple">복약 관리</span>
+        <span class="c9-badge health-badge-purple">복약 관리</span>
       </div>
 
       <table class="med-table" id="med-container">
@@ -313,6 +306,7 @@
         </thead>
         <tbody></tbody>
       </table>
+
       <button type="button" class="add-btn" onclick="addMed()">+ 약 추가</button>
     </section>
   </div>
@@ -337,5 +331,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/health_profile_save.js"></script>
+<script src="/static/health_profile.js"></script>
 {% endblock %}

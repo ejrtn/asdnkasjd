@@ -339,20 +339,24 @@ function renderPressureRecordList() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadBloodPressureRecords();
-});
 
-document.querySelector("#pressure-record-list").addEventListener("click", async (e) => {
-  if (e.target.className == 'data-del') {
-    if (confirm("정말 삭제하시겠습니까?")) {
-      const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-pressure/' + e.target.title, {
-        method: 'DELETE',
-      });
-      const result = await response.json();
-      if (result.status == 'success') {
-        e.target.parentNode.parentNode.remove()
-        loadBloodPressureRecords()
+  const recordList = document.querySelector("#pressure-record-list");
+  if (!recordList) return;
+
+  recordList.addEventListener("click", async (e) => {
+    if (e.target.classList.contains('data-del')) {
+      if (confirm("정말 삭제하시겠습니까?")) {
+        const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-pressure/' + e.target.title, {
+          method: 'DELETE',
+        });
+
+        if (!response) return;
+
+        const result = await response.json();
+        if (result.status === 'success') {
+          await loadBloodPressureRecords();
+        }
       }
     }
-
-  }
-})
+  });
+});

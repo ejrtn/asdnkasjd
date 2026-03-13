@@ -1,5 +1,67 @@
+.health-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .health-page .c9-page-header {
   margin-bottom: 0;
+}
+
+.health-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.health-mode-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: #f8f3ff;
+  border: 1px solid #e9e4f5;
+  border-radius: 999px;
+}
+
+.health-mode-tab {
+  min-width: 96px;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: #ece6ff;
+  color: #5b3df5;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: default;
+  box-shadow: inset 0 0 0 1px #d8c7ff;
+}
+
+.health-guide-card {
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 0;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
+}
+
+.health-guide-card h5 {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #3730a3;
+  line-height: 1.35;
+}
+
+.health-guide-card p {
+  font-size: 14px;
+  color: #5b6480;
+  line-height: 1.7;
+  margin: 0;
 }
 
 .health-tabs {
@@ -10,11 +72,11 @@
 
 .health-tab {
   position: relative;
-  border: 1px solid var(--c9-border);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e9e4f5;
+  background: rgba(255, 255, 255, 0.94);
   border-radius: 22px;
-  padding: 18px 18px;
-  min-height: 96px;
+  padding: 20px 18px;
+  min-height: 112px;
   cursor: pointer;
   transition: all 0.22s ease;
   display: flex;
@@ -23,8 +85,8 @@
   justify-content: center;
   gap: 10px;
   text-align: center;
-  color: #475569;
-  box-shadow: var(--c9-shadow-sm);
+  color: #5b556f;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
 }
 
 .health-tab:hover {
@@ -58,19 +120,19 @@
 }
 
 .health-tab-icon {
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
 }
 
 .health-tab-title {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .health-tab-desc {
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: inherit;
   opacity: 0.86;
 }
@@ -84,37 +146,24 @@
   display: block;
 }
 
+#health-tab-allergy.active,
+#health-tab-medication.active {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .health-card {
-  padding: 26px;
-}
-
-.guide-card {
-  border-radius: 18px;
-  padding: 14px 18px;
-  margin-bottom: 0;
-  background: #eef6ff;
-  border: 1px solid #dbeafe;
-}
-
-.guide-card h5 {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #1e3a8a;
-}
-
-.guide-card p {
-  font-size: 13px;
-  color: #475569;
-  line-height: 1.55;
-  margin: 0;
+  padding: 24px;
+  border-radius: 24px;
+  box-shadow: 0 6px 18px rgba(76, 29, 149, 0.05);
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .form-group {
@@ -128,9 +177,10 @@
 }
 
 .form-group label {
-  font-weight: 600;
+  font-weight: 700;
   color: #374151;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .form-group label span,
@@ -143,12 +193,13 @@
 .form-group textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #dbe3ee;
   border-radius: 12px;
   font-size: 14px;
   background: #fff;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
+  color: #0f172a;
 }
 
 .form-group input:focus,
@@ -156,12 +207,12 @@
 .form-group textarea:focus {
   outline: none;
   border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 96px;
 }
 
 .allergy-table,
@@ -169,26 +220,27 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.allergy-table th,
+.med-table th {
+  background: #f8faff;
+  font-weight: 700;
+  color: #475569;
+  font-size: 14px;
 }
 
 .allergy-table th,
 .allergy-table td,
 .med-table th,
 .med-table td {
-  padding: 12px 8px;
+  padding: 12px 10px;
   text-align: center;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.allergy-table th,
-.med-table th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #475569;
-  font-size: 14px;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .allergy-table select,
@@ -233,7 +285,7 @@
 .category-title {
   padding: 14px 16px;
   background: #f8fafc;
-  font-weight: 600;
+  font-weight: 700;
   color: #374151;
   cursor: pointer;
   border-bottom: 1px solid #e5e7eb;
@@ -249,7 +301,7 @@
 .disease-option {
   display: inline-block;
   padding: 8px 16px;
-  background: #eef3ff;
+  background: #eef2ff;
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
@@ -259,8 +311,8 @@
 }
 
 .disease-option:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
+  background: #e0e7ff;
+  border-color: #a5b4fc;
 }
 
 .selected-tag-container {
@@ -278,11 +330,11 @@
   gap: 8px;
   padding: 8px 12px;
   background: #f0f4ff;
-  border: 1px solid #4f46e5;
+  border: 1px solid #c7d2fe;
   color: #4338ca;
   border-radius: 20px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .selected-tag select {
@@ -310,10 +362,10 @@
 }
 
 .med-guide-box {
-  background: #f1f5ff;
-  border: 1px solid #dbeafe;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
   padding: 18px 20px;
-  border-radius: 12px;
+  border-radius: 18px;
   margin-bottom: 0;
   display: none;
   align-items: center;
@@ -327,117 +379,68 @@
 
 .med-guide-text {
   font-size: 14px;
-  color: #334155;
-  line-height: 1.5;
+  color: #475569;
+  line-height: 1.7;
 }
 
 .med-guide-btn {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #7264f8 0%, #5b4ff0 58%, #4f46e5 100%);
   color: white;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 600;
-  transition: background-color 0.2s ease;
+  font-weight: 700;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .med-guide-btn:hover {
-  background: #3730a3;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(91, 79, 240, 0.18);
 }
 
 .add-btn {
-  background: #f8fafc;
-  border: 2px dashed #cbd5e1;
-  color: #6b7280;
+  background: #f8faff;
+  border: 2px dashed #c7d2fe;
+  color: #4f46e5;
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.2s ease;
   width: 100%;
 }
 
 .add-btn:hover {
-  background: #f1f5f9;
-  border-color: #9ca3af;
-  color: #374151;
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  color: #3730a3;
 }
 
 .save-row {
-  margin-top: 30px;
+  margin-top: 0;
   display: flex;
   justify-content: center;
 }
 
 .save-btn {
-  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #7264f8 0%, #5b4ff0 58%, #4f46e5 100%);
   color: white;
   border: none;
-  padding: 16px 40px;
+  padding: 15px 40px;
   border-radius: 14px;
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .save-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 24px rgba(79, 70, 229, 0.18);
-}
-
-.health-header-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-left: auto;
-}
-
-.health-mode-tabs {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-}
-
-.health-mode-tab {
-  min-width: 96px;
-  height: 40px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: #64748b;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: default;
-  transition: all 0.2s ease;
-}
-
-.health-mode-tab.is-active {
-  background: #eef2ff;
-  color: #4338ca;
-  box-shadow: inset 0 0 0 1px #c7d2fe;
-}
-
-#health-tab-allergy.active {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-#health-tab-medication.active {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  box-shadow: 0 14px 24px rgba(91, 79, 240, 0.22);
 }
 
 .form-group input:disabled,
@@ -447,41 +450,16 @@
   cursor: not-allowed;
 }
 
-.health-card .c9-section-head .c9-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 0 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.c9-badge-primary {
-  background: #eef2ff;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
-}
-
-.c9-badge-warning {
+.health-badge-warning {
   background: #fff7ed;
-  color: #ea580c;
+  color: #c2410c;
   border: 1px solid #fdba74;
 }
 
-.c9-badge-danger {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fca5a5;
-}
-
-.c9-badge-purple {
-  background: #f3f4f6;
-  color: #7c3aed;
-  border: 1px solid #c4b5fd;
+.health-badge-purple {
+  background: #f3f0ff;
+  color: #6d4ff3;
+  border: 1px solid #d8c7ff;
 }
 
 .health-toast {
@@ -605,7 +583,7 @@
     grid-template-columns: 1fr;
   }
 
-  .med-guide-box {
+  .med-guide-box.open {
     flex-direction: column;
     text-align: center;
   }

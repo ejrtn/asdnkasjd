@@ -50,7 +50,7 @@ async def create_blood_sugar(
     user: Annotated[User, Depends(get_request_user)],
 ):
     service = HealthProfileService()
-    return await service.blood_sugar_save(request, user.id)
+    return await service.blood_sugar(request, user.id)
 
 
 @health_router.get("/blood-sugar")
@@ -67,7 +67,7 @@ async def create_blood_pressure(
     user: Annotated[User, Depends(get_request_user)],
 ):
     service = HealthProfileService()
-    return await service.blood_pressure_save(request, user.id)
+    return await service.blood_pressure(request, user.id)
 
 
 @health_router.get("/blood-pressure")

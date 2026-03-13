@@ -52,14 +52,14 @@ class HealthProfileService:
             "blood_sugar_records": blood_sugar_records,
         }
 
-    async def blood_sugar_save(self, blood_sugar: BloodSugarRequest, user_id: str):
+    async def blood_sugar(self, blood_sugar: BloodSugarRequest, user_id: str):
         # Pydantic → dict 변환
         data = blood_sugar.model_dump()
         data["user_id"] = user_id
 
         await self.blood_sugar_record_repo.create_blood_sugar(data)
 
-    async def blood_pressure_save(self, blood_pressure: BloodPressureRequest, user_id: str):
+    async def blood_pressure(self, blood_pressure: BloodPressureRequest, user_id: str):
         # Pydantic → dict 변환
         data = blood_pressure.model_dump()
         data["user_id"] = user_id

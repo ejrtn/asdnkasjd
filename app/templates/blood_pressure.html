@@ -3,8 +3,8 @@
 {% block title %}Cloud9 Care - 혈압 수첩{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/blood_notebook.css">
-<link rel="stylesheet" href="/static/blood_pressure_save.css">
+<link rel="stylesheet" href="/static/blood_common.css">
+<link rel="stylesheet" href="/static/blood_pressure.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
@@ -13,7 +13,7 @@
   <section class="c9-page-header">
     <div>
       <h1 class="c9-page-title">혈압 수첩</h1>
-      <p class="c9-muted pressure-page-desc">
+      <p class="c9-muted">
         아침 · 저녁 혈압 기록을 저장하고 최근 변화를 확인해 혈압 관리 루틴을 꾸준히 이어가세요.
       </p>
     </div>
@@ -191,6 +191,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/blood_notebook.js"></script>
-<script src="/static/blood_pressure_save.js?v=2"></script>
+<script src="/static/blood_common.js"></script>
+<script src="/static/blood_pressure.js?v=2"></script>
 {% endblock %}

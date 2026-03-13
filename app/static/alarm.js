@@ -271,7 +271,7 @@ function renderMeds() {
         const detail = document.getElementById('alarm-detail');
         const title = document.getElementById('detail-title');
         if (title) title.innerHTML = `
-          <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);">⏰</span>
+          <span class="c9-section-title-icon med-tone-icon">🕰️</span>
           약물을 선택하세요
         `;
         if (detail) {
@@ -319,7 +319,7 @@ function showMedDetail(medId) {
     const detailTitle = document.getElementById('detail-title');
     if (detailTitle) {
         detailTitle.innerHTML = `
-          <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);">⏰</span>
+          <span class="c9-section-title-icon med-tone-icon">🕰️</span>
           ${med.medication_name} 알람 설정
         `;
     }
