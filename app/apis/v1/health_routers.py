@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.dependencies.security import get_request_user
 from app.dtos.health import (
@@ -30,9 +30,10 @@ async def get_health_profile(
 async def create_health_profile(
     request: FullHealthProfileSaveRequest,
     user: Annotated[User, Depends(get_request_user)],
+    background_tasks: BackgroundTasks,
 ):
     service = HealthProfileService()
-    return await service.save_full_health_profile(user.id, request)
+    return await service.save_full_health_profile(user.id, request, background_tasks)
 
 
 @health_router.put("", response_model=HealthProfileResponse)

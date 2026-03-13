@@ -18,30 +18,61 @@ class GuideService:
     # ==========================================
     # 필수 1: LLM 기반 안내 가이드 생성
     # ==========================================
-    async def generate_guide(self, user_id: str | None) -> dict:
+    async def generate_guide(self, user_id: str | None, background_tasks=None) -> dict:
         """
-        [GUIDE] 맞춤 가이드 생성(RAG 핵심).
-        실제 사용자의 기저질환, 알러지, 복용약을 바탕으로 OpenAI를 통해 구조화된 가이드를 생성합니다.
-        (DB 연결 실패 시 기본값으로 대체)
+        [GUIDE] 맞춤 가이드 생성 트리거.
+        즉시 '생성 중' 상태를 반환하고, 실제 RAG 및 LLM 작업은 백그라운드에서 수행합니다.
         """
         # API 키가 없으면 더미 데이터 반환
         if not self.llm_service.client:
             return self._get_dummy_guide()
 
-        # 1. 즉시 로딩 상태 저장 (프론트엔드 피드백용)
+        # 1. 즉시 로딩 상태 저장 및 현재 데이터 반환 (프론트엔드 피드백용)
+        # 이미 생성 중인 경우 중복 생성을 방지하거나 현재 상태를 그대로 반환
+        saved = await self.llm_service.get_by_user_id(user_id)
+        if saved and saved.activity is True:
+            return {
+                "user_current_status": saved.user_current_status,
+                "generated_content": saved.generated_content,
+                "activity": True,
+                "created_at": saved.created_at,
+            }
+
+        # 상태 업데이트: 생성 중(activity=True)
         await self._update_loading_state(user_id)
 
-        # 2. 실제 사용자 데이터 조회
-        health_data = await self._fetch_user_health_data(user_id)
-        lifestyle = self._extract_lifestyle(health_data["profile"])
+        # 최신 상태 다시 로드
+        current = await self.llm_service.get_by_user_id(user_id)
 
-        # 3. RAG context 생성
-        rag_context = await self._generate_rag_context_str(health_data["disease_list"], lifestyle)
+        # 2. 백그라운드에서 무거운 작업(RAG + LLM) 수행
+        if background_tasks:
+            background_tasks.add_task(self._run_guide_generation_task, user_id)
+        else:
+            # 백그라운드 태스크가 없는 경우 동기적으로 실행 (테스트 등)
+            await self._run_guide_generation_task(user_id)
 
-        # 4. Prompt 구성 및 LLM 생성
-        prompt = self._build_guide_prompt(health_data, lifestyle, rag_context)
+        return {
+            "user_current_status": current.user_current_status if current else "가이드 생성 시작...",
+            "generated_content": current.generated_content if current else {},
+            "activity": True,
+            "created_at": current.created_at if current else datetime.now(),
+        }
 
+    async def _run_guide_generation_task(self, user_id: str | None) -> None:
+        """
+        백그라운드에서 실행될 실제 가인드 생성 로직 (RAG + LLM)
+        """
         try:
+            # 1. 실제 사용자 데이터 조회
+            health_data = await self._fetch_user_health_data(user_id)
+            lifestyle = self._extract_lifestyle(health_data["profile"])
+
+            # 2. RAG context 생성 (느림)
+            rag_context = await self._generate_rag_context_str(health_data["disease_list"], lifestyle)
+
+            # 3. Prompt 구성 및 LLM 생성 (느림)
+            prompt = self._build_guide_prompt(health_data, lifestyle, rag_context)
+
             content_json = await self.llm_service.generate_json(
                 messages=[
                     {
@@ -54,21 +85,18 @@ class GuideService:
                 temperature=0.4,
             )
 
-            # 5. 질환 누락 보정 및 저장
+            # 4. 질환 누락 보정 및 저장
             fixed_content = self._fix_missing_diseases(content_json, health_data["disease_list"])
 
-            data = {"user_current_status": prompt, "generated_content": fixed_content, "activity": False}
-            await self.llm_service.update_or_create(user_id=user_id, data=data)
-
-            return {
+            data = {
                 "user_current_status": prompt,
                 "generated_content": fixed_content,
-                "activity": False,
-                "created_at": datetime.now(),
+                "activity": False,  # 생성 완료
             }
+            await self.llm_service.update_or_create(user_id=user_id, data=data)
 
         except Exception as e:
-            return await self._handle_generation_error(user_id, e)
+            await self._handle_generation_error(user_id, e)
 
     def _get_dummy_guide(self) -> dict:
         return {
@@ -86,7 +114,7 @@ class GuideService:
                     "integrated_point": "균형 잡힌 생활 패턴 유지를 권장합니다.",
                 },
             },
-            "activity": True,
+            "activity": False,  # 더미는 완료 상태로 표시
             "created_at": datetime.now(),
         }
 
@@ -97,7 +125,7 @@ class GuideService:
                 user_id=user_id,
                 data={
                     "activity": True,
-                    "user_current_status": "가이드 생성 중...",
+                    "user_current_status": "AI가 맞춤 가이드를 생성 중입니다...",
                     "generated_content": saved.generated_content if saved else {},
                 },
             )
@@ -281,11 +309,11 @@ class GuideService:
             "created_at": datetime.now(),
         }
 
-    async def get_saved_guide(self, user: User | None = None) -> dict:
+    async def get_saved_guide(self, user: User | None = None, background_tasks=None) -> dict:
         """
         저장된 생활가이드를 조회합니다.
         - 저장된 가이드가 있으면 그대로 반환
-        - 없으면 새로 생성해서 저장 후 반환
+        - 없으면 백그라운드 생성 트리거 후 '생성 중' 상태 반환
         """
         if not user or not user.id:
             return {
@@ -302,12 +330,15 @@ class GuideService:
             }
 
         saved = await self.llm_service.get_by_user_id(str(user.id))
-        if saved:
+
+        # 1. 저장된 가이드가 있고 '완료' 상태인 경우 즉시 반환
+        if saved and saved.activity is False:
             return {
                 "user_current_status": saved.user_current_status,
                 "generated_content": saved.generated_content,
-                "activity": saved.activity,
+                "activity": False,
                 "created_at": saved.created_at,
             }
 
-        return await self.generate_guide(str(user.id))
+        # 2. 저장된 가이드가 없거나 '생성 중'인 경우
+        return await self.generate_guide(str(user.id), background_tasks)

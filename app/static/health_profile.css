@@ -465,7 +465,7 @@
 .health-toast {
   position: fixed;
   right: 24px;
-  bottom: 24px;
+  top: 55px;
   z-index: 1200;
   min-width: 240px;
   max-width: 360px;

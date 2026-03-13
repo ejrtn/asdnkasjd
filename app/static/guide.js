@@ -8,8 +8,11 @@ let isSpeaking2 = false;
 const synthesis2 = window.speechSynthesis;
 
 async function initGuide() {
-    await fetchHealthProfile();
-    await generateNewGuide();
+    // 1. 프로필 정보와 가이드 정보를 병렬로 가져옴
+    Promise.all([
+        fetchHealthProfile(),
+        generateNewGuide()
+    ]);
     setupGuideEventListeners();
 }
 
@@ -56,48 +59,40 @@ function showLoginRequired() {
     `;
 }
 
-async function generateNewGuide() {
+async function generateNewGuide(isPolling = false) {
     const token = localStorage.getItem("access_token");
-    if (!token) {
-        showLoginRequired();
-        return;
-    }
+    if (!token) return;
 
     const loadingState = document.getElementById('guide-loading-state');
     const content = document.getElementById('guide-sections');
     const loadingNote = document.getElementById('guide-loading-note');
 
-    if (loadingState) {
-        loadingState.classList.remove('hidden');
-    }
-
-    if (content) {
-        content.classList.add('hidden');
-        content.style.display = 'none';
-    }
-
-    if (loadingNote) {
-        loadingNote.innerHTML = `
-            <span>⏳</span>
-            <span>AI 맞춤 가이드를 새로 생성 중입니다. 잠시만 기다려주세요.</span>
-        `;
+    // 처음 로드할 때만 로딩 상태 표시
+    if (!isPolling) {
+        if (loadingState) loadingState.classList.remove('hidden');
+        if (content) {
+            content.classList.add('hidden');
+            content.style.display = 'none';
+        }
     }
 
     try {
-        const res = await fetchWithAuth('/api/v1/guides', {
-            method: 'GET',
-        });
-
-        if (!res || !res.ok) {
-            throw new Error("Guide request failed");
-        }
+        const res = await fetchWithAuth('/api/v1/guides', { method: 'GET' });
+        if (!res || !res.ok) throw new Error("Guide request failed");
 
         const data = await res.json();
-        console.log("Guide API Data:", data);
 
+        // activity가 true이면 생성 중인 상태
         if (data.activity === true) {
-            console.log("Currently generating... checking again in 5s.");
-            setTimeout(initGuide, 5000);
+            console.log("Currently generating... checking again in 3s.");
+            if (loadingNote) {
+                loadingNote.innerHTML = `
+                    <span>⏳</span>
+                    <span>AI가 건강 정보를 분석하여 맞춤 가이드를 생성 중입니다...</span>
+                `;
+            }
+            // 가이드 생성 중이면 3초 뒤에 다시 체크 (isPolling = true)
+            setTimeout(() => generateNewGuide(true), 3000);
             return;
         }
 
@@ -105,10 +100,7 @@ async function generateNewGuide() {
             guideData = data.generated_content;
             renderGuide();
 
-            if (loadingState) {
-                loadingState.classList.add('hidden');
-            }
-
+            if (loadingState) loadingState.classList.add('hidden');
             if (content) {
                 content.classList.remove('hidden');
                 content.style.display = 'flex';
@@ -116,13 +108,10 @@ async function generateNewGuide() {
         }
     } catch (err) {
         console.error("Guide Gen Error:", err);
-        if (loadingNote) {
-            loadingNote.innerHTML = `
-                <span>⚠️</span>
-                <span>가이드를 불러오는 중 문제가 발생했습니다. 잠시 후 자동으로 다시 시도합니다.</span>
-            `;
+        // 에러 발생 시 처음 로드 상태면 재시도
+        if (!isPolling) {
+            setTimeout(() => generateNewGuide(false), 5000);
         }
-        setTimeout(initGuide, 5000);
     }
 }
 

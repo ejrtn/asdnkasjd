@@ -8,7 +8,7 @@
 
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="/static/base.css">
+    <link rel="stylesheet" href="/static/base.css?v=1">
     <link rel="stylesheet" href="/static/chatbot.css">
 
     {% block head %}{% endblock %}
@@ -1165,6 +1165,81 @@
             }
         }
 
+        /* ===== Health Profile Toast ===== */
+        .health-profile-toast {
+            position: fixed;
+            top: 68px;
+            right: -180px;
+            transform: translateX(-50%) translateY(20px);
+            z-index: 99999;
+            width: min(400px, calc(100vw - 40px));
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(124, 92, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(124, 92, 255, 0.15);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .health-profile-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .health-profile-toast-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+        }
+
+        .health-profile-toast-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #7c5cff 0%, #6d4ff3 100%);
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 8px 16px rgba(124, 92, 255, 0.2);
+        }
+
+        .health-profile-toast-content {
+            flex: 1;
+        }
+
+        .health-profile-toast-title {
+            font-weight: 800;
+            font-size: 15px;
+            color: #1f1733;
+            margin-bottom: 2px;
+        }
+
+        .health-profile-toast-msg {
+            font-size: 13px;
+            color: #7a728f;
+            line-height: 1.4;
+        }
+
+        .health-profile-toast-close {
+            background: none;
+            border: none;
+            color: #b1a9c3;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .health-profile-toast-close:hover {
+            color: #7c5cff;
+        }
+
         /* ===== App Toast ===== */
         .app-toast {
             position: fixed;
@@ -1502,7 +1577,19 @@
         </div>
     </div>
 
-    <script src="/static/common.js"></script>
+    <!-- Health Profile Completion Toast -->
+    <div id="health-profile-toast" class="health-profile-toast" aria-live="polite" aria-atomic="true">
+        <div class="health-profile-toast-inner">
+            <div class="health-profile-toast-icon">✨</div>
+            <div class="health-profile-toast-content">
+                <div class="health-profile-toast-title">가이드 생성 완료</div>
+                <div class="health-profile-toast-msg">AI 맞춤 생활 안내 가이드가 생성되었습니다.</div>
+            </div>
+            <button class="health-profile-toast-close" type="button" aria-label="닫기">×</button>
+        </div>
+    </div>
+
+    <script src="/static/common.js?v=1"></script>
     <script src="/static/chatbot.js"></script>
     <script src="/static/base.js"></script>
 
