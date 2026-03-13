@@ -60,3 +60,6 @@ class PrescriptionRepository:
         ID로 처방전 레코드를 조회합니다.
         """
         return await Prescription.filter(id=prescription_id).first()  # type: ignore[no-any-return]
+
+    async def last_prescription(self, user: User):
+        return await Prescription.filter(user=user).order_by("-created_at").first()

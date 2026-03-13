@@ -5,423 +5,408 @@
 {% block head %}
 <link rel="stylesheet" href="/static/dashboard.css?v=2">
 <style>
-/* 확대 기능 */
-body.zoom-large .hero-slider {
-  min-height: 480px;
-  padding: 48px;
-}
+  /* 확대 기능 */
+  body.zoom-large .hero-slider {
+    min-height: 480px;
+    padding: 48px;
+  }
 
-body.zoom-large .slide-content h2 {
-  font-size: 56px;
-}
+  body.zoom-large .slide-content h2 {
+    font-size: 56px;
+  }
 
-body.zoom-large .slide-content p {
-  font-size: 32px;
-}
+  body.zoom-large .slide-content p {
+    font-size: 32px;
+  }
 
-body.zoom-large .slide-brand {
-  font-size: 36px;
-}
+  body.zoom-large .slide-brand {
+    font-size: 36px;
+  }
 
-body.zoom-large .slide-date {
-  font-size: 22px;
-}
+  body.zoom-large .slide-date {
+    font-size: 22px;
+  }
 
-body.zoom-large .slide-footer small {
-  font-size: 22px;
-}
+  body.zoom-large .slide-footer small {
+    font-size: 22px;
+  }
 
-body.zoom-large .card h4 {
-  font-size: 22px;
-}
+  body.zoom-large .card h4 {
+    font-size: 22px;
+  }
 
-body.zoom-large .metric-value {
-  font-size: 28px;
-}
+  body.zoom-large .metric-value {
+    font-size: 28px;
+  }
 
-body.zoom-large .trend-value {
-  font-size: 26px;
-}
+  body.zoom-large .trend-value {
+    font-size: 26px;
+  }
 
-body.zoom-large .insight-item {
-  font-size: 20px;
-}
+  body.zoom-large .insight-item {
+    font-size: 20px;
+  }
 
-body.zoom-large .med-time,
-body.zoom-large .med-name {
-  font-size: 18px;
-}
+  body.zoom-large .med-time,
+  body.zoom-large .med-name {
+    font-size: 18px;
+  }
 
-body.zoom-large .analysis-title {
-  font-size: 18px;
-}
+  body.zoom-large .analysis-title {
+    font-size: 18px;
+  }
 
-body.zoom-large .analysis-result {
-  font-size: 16px;
-}
+  body.zoom-large .analysis-result {
+    font-size: 16px;
+  }
 
-body.zoom-large .metric-label,
-body.zoom-large .trend-label {
-  font-size: 16px;
-}
+  body.zoom-large .metric-label,
+  body.zoom-large .trend-label {
+    font-size: 16px;
+  }
 
-body.zoom-large .metric-status {
-  font-size: 14px;
-}
+  body.zoom-large .metric-status {
+    font-size: 14px;
+  }
 
-body.zoom-large .dashboard-card h4 {
-  font-size: 22px;
-}
+  body.zoom-large .dashboard-card h4 {
+    font-size: 22px;
+  }
 
-body.zoom-large .metric-select {
-  font-size: 16px;
-}
+  body.zoom-large .metric-select {
+    font-size: 16px;
+  }
 
-body.zoom-large #blood-pressure-data .metric-value,
-body.zoom-large #blood-sugar-data .metric-value {
-  font-size: 28px;
-}
+  body.zoom-large #blood-pressure-data .metric-value,
+  body.zoom-large #blood-sugar-data .metric-value {
+    font-size: 28px;
+  }
 
-body.zoom-large #blood-pressure-data .metric-label,
-body.zoom-large #blood-sugar-data .metric-label {
-  font-size: 16px;
-}
+  body.zoom-large #blood-pressure-data .metric-label,
+  body.zoom-large #blood-sugar-data .metric-label {
+    font-size: 16px;
+  }
 
-body.zoom-large #blood-pressure-data .metric-status,
-body.zoom-large #blood-sugar-data .metric-status {
-  font-size: 16px;
-}
+  body.zoom-large #blood-pressure-data .metric-status,
+  body.zoom-large #blood-sugar-data .metric-status {
+    font-size: 16px;
+  }
 
-body.zoom-large .metric-chart {
-  font-size: 32px;
-}
+  body.zoom-large .metric-chart {
+    font-size: 32px;
+  }
 
-body.zoom-large .next-alarm small {
-  font-size: 16px;
-}
+  body.zoom-large .next-alarm small {
+    font-size: 16px;
+  }
 
-body.zoom-large .score-badge {
-  font-size: 16px;
-}
+  body.zoom-large .score-badge {
+    font-size: 16px;
+  }
 
-body.zoom-large .score-status {
-  font-size: 14px;
-}
+  body.zoom-large .score-status {
+    font-size: 14px;
+  }
 
-body.zoom-large .trend-change {
-  font-size: 16px;
-}
+  body.zoom-large .trend-change {
+    font-size: 16px;
+  }
 
-body.zoom-large .dashboard-cards {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
+  body.zoom-large .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
 
-body.zoom-large .dashboard-card {
-  min-height: 220px;
-  padding: 24px;
-}
+  body.zoom-large .dashboard-card {
+    min-height: 220px;
+    padding: 24px;
+  }
 
-body.zoom-large .metric-card-title {
-  font-size: 16px;
-}
+  body.zoom-large .metric-card-title {
+    font-size: 16px;
+  }
 
-body.zoom-large .metric-stream-badge {
-  font-size: 14px;
-  padding: 8px 14px;
-  min-height: 32px;
-}
+  body.zoom-large .metric-stream-badge {
+    font-size: 14px;
+    padding: 8px 14px;
+    min-height: 32px;
+  }
 
-body.zoom-large .metric-stream-value {
-  font-size: 16px;
-}
+  body.zoom-large .metric-stream-value {
+    font-size: 16px;
+  }
 
-body.zoom-large .metric-select {
-  font-size: 15px;
-  min-height: 42px;
-  padding: 0 42px 0 16px;
-}
+  body.zoom-large .metric-select {
+    font-size: 15px;
+    min-height: 42px;
+    padding: 0 42px 0 16px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-wrap">
-<!-- 큰 슬라이드 박스 -->
-<div class="hero-slider" id="hero-slider">
-  <!-- 슬라이드 1: 브랜드 & 오늘의 분위기 -->
-  <div class="slide active" data-slide="1">
-    <div class="slide-header">
-      <div class="slide-brand">Cloud9 Care</div>
-      <div class="slide-date">
-        <div id="current-date">📅 2026년 3월 4일 수</div>
-        <div id="weather-info">🌤️ 18°C · 맑음</div>
+  <!-- 큰 슬라이드 박스 -->
+  <div class="hero-slider" id="hero-slider">
+    <!-- 슬라이드 1: 브랜드 & 오늘의 분위기 -->
+    <div class="slide active" data-slide="1">
+      <div class="slide-header">
+        <div class="slide-brand">Cloud9 Care</div>
+        <div class="slide-date">
+          <div id="current-date">📅 2026년 3월 4일 수</div>
+          <div id="weather-info">🌤️ 18°C · 맑음</div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <h2>☁️구름 위에 오른 듯한 건강한 일상,<br>Cloud9 Care가 함께합니다.</h2>
+        <p>의료 기록을 이해하기 쉬운<br>맞춤형 건강 가이드로 연결합니다.</p>
+      </div>
+      <div class="slide-footer">
+        <small id="weather-tip">오늘은 가벼운 산책을 하기 좋은 날입니다.</small>
       </div>
     </div>
-    <div class="slide-content">
-      <h2>☁️구름 위에 오른 듯한 건강한 일상,<br>Cloud9 Care가 함께합니다.</h2>
-      <p>의료 기록을 이해하기 쉬운<br>맞춤형 건강 가이드로 연결합니다.</p>
-    </div>
-    <div class="slide-footer">
-      <small id="weather-tip">오늘은 가벼운 산책을 하기 좋은 날입니다.</small>
-    </div>
-  </div>
-  
-  <!-- 슬라이드 2: 오늘의 건강 인사이트 -->
-  <div class="slide" data-slide="2">
-    <div class="slide-header">
-      <h3>오늘의 건강 인사이트</h3>
-      <div class="health-score">
-        <span class="score-badge" id="dash-mission-title">하루 건강 미션</span>
-        <span class="score-status" id="dash-mission-rate">0% 달성</span>
-      </div>
-    </div>
-    <div class="slide-content insight-content">
-      <div class="insight-item" id="insight-1">최근 7일 평균 혈압은 안정 범위입니다.</div>
-      <div class="insight-item" id="insight-2">수면 시간이 평균보다 40분 감소했습니다.</div>
-      <div class="insight-item" id="insight-3">체중은 큰 변화 없이 유지되고 있습니다.</div>
-    </div>
-  </div>
-  
-  <!-- 슬라이드 인디케이터 -->
-  <div class="slide-indicators">
-    <span class="indicator active" data-slide="1"></span>
-    <span class="indicator" data-slide="2"></span>
-  </div>
-</div>
 
-<!-- 작은 카드 4개 -->
-<div class="dashboard-cards" id="dashboard-cards">
-  <!-- 1. 건강 지표 -->
-  <div class="dashboard-card health-metrics">
-    <div class="card-header">
-      <h4 onclick="health_page_move()">📈 건강 지표</h4>
-      <select id="health-metric-select" class="metric-select">
-        <option value="blood-pressure">혈압</option>
-        <option value="blood-sugar">혈당</option>
-      </select>
+    <!-- 슬라이드 2: 오늘의 건강 인사이트 -->
+    <div class="slide" data-slide="2">
+      <div class="slide-header">
+        <h3>오늘의 건강 인사이트</h3>
+        <div class="health-score">
+          <span class="score-badge" id="dash-mission-title">하루 건강 미션</span>
+          <span class="score-status" id="dash-mission-rate">0% 달성</span>
+        </div>
+      </div>
+      <div class="slide-content insight-content">
+        <div class="insight-item" id="insight-1">최근 7일 평균 혈압은 안정 범위입니다.</div>
+        <div class="insight-item" id="insight-2">수면 시간이 평균보다 40분 감소했습니다.</div>
+        <div class="insight-item" id="insight-3">체중은 큰 변화 없이 유지되고 있습니다.</div>
+      </div>
     </div>
-    <div class="card-content">
-      <div id="blood-pressure-data" class="metric-data active">
-        <div class="metric-block">
-          <div class="metric-card-title">오늘 혈압 기록</div>
-          <div class="metric-stream" id="dashboard-bp-list">
-            <div class="metric-stream-item">
-              <div class="metric-stream-main">
-                <div class="metric-stream-badge">아침</div>
-                <div class="metric-stream-value pending">미기록</div>
+
+    <!-- 슬라이드 인디케이터 -->
+    <div class="slide-indicators">
+      <span class="indicator active" data-slide="1"></span>
+      <span class="indicator" data-slide="2"></span>
+    </div>
+  </div>
+
+  <!-- 작은 카드 4개 -->
+  <div class="dashboard-cards" id="dashboard-cards">
+    <!-- 1. 건강 지표 -->
+    <div class="dashboard-card health-metrics">
+      <div class="card-header">
+        <h4 onclick="health_page_move()">📈 건강 지표</h4>
+        <select id="health-metric-select" class="metric-select">
+          <option value="blood-pressure">혈압</option>
+          <option value="blood-sugar">혈당</option>
+        </select>
+      </div>
+      <div class="card-content">
+        <div id="blood-pressure-data" class="metric-data active">
+          <div class="metric-block">
+            <div class="metric-card-title">오늘 혈압 기록</div>
+            <div class="metric-stream" id="dashboard-bp-list">
+              <div class="metric-stream-item">
+                <div class="metric-stream-main">
+                  <div class="metric-stream-badge">아침</div>
+                  <div class="metric-stream-value pending">미기록</div>
+                </div>
+              </div>
+              <div class="metric-stream-item">
+                <div class="metric-stream-main">
+                  <div class="metric-stream-badge">저녁</div>
+                  <div class="metric-stream-value pending">미기록</div>
+                </div>
               </div>
             </div>
-            <div class="metric-stream-item">
-              <div class="metric-stream-main">
-                <div class="metric-stream-badge">저녁</div>
-                <div class="metric-stream-value pending">미기록</div>
+          </div>
+        </div>
+
+        <div id="blood-sugar-data" class="metric-data">
+          <div class="metric-block">
+            <div class="metric-card-title">오늘 혈당 기록</div>
+            <div class="metric-stream" id="dashboard-bs-list">
+              <div class="metric-stream-item">
+                <div class="metric-stream-main">
+                  <div class="metric-stream-badge">공복</div>
+                  <div class="metric-stream-value pending">미기록</div>
+                </div>
+              </div>
+              <div class="metric-stream-item">
+                <div class="metric-stream-main">
+                  <div class="metric-stream-badge">식후 2시간</div>
+                  <div class="metric-stream-value pending">미기록</div>
+                </div>
+              </div>
+              <div class="metric-stream-item">
+                <div class="metric-stream-main">
+                  <div class="metric-stream-badge">취침 전</div>
+                  <div class="metric-stream-value pending">미기록</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div id="blood-sugar-data" class="metric-data">
-        <div class="metric-block">
-          <div class="metric-card-title">오늘 혈당 기록</div>
-          <div class="metric-stream" id="dashboard-bs-list">
-            <div class="metric-stream-item">
-              <div class="metric-stream-main">
-                <div class="metric-stream-badge">공복</div>
-                <div class="metric-stream-value pending">미기록</div>
-              </div>
-            </div>
-            <div class="metric-stream-item">
-              <div class="metric-stream-main">
-                <div class="metric-stream-badge">식후 2시간</div>
-                <div class="metric-stream-value pending">미기록</div>
-              </div>
-            </div>
-            <div class="metric-stream-item">
-              <div class="metric-stream-main">
-                <div class="metric-stream-badge">취침 전</div>
-                <div class="metric-stream-value pending">미기록</div>
-              </div>
-            </div>
-          </div>
+    <!-- 2. 오늘의 복약 & 알림 -->
+    <div class="dashboard-card medication">
+      <div class="card-header">
+        <h4 onclick="location.href='/alarm'">💊 오늘의 복약 & 알림</h4>
+      </div>
+      <div class="card-content" id="dashboard-alarm-summary">
+        <div class="medication-item">
+          <div class="med-time">08:00</div>
+          <div class="med-name">아침약</div>
+          <div class="med-status completed">🟢</div>
+        </div>
+        <div class="medication-item">
+          <div class="med-time">20:00</div>
+          <div class="med-name">저녁약</div>
+          <div class="med-status pending">🔴</div>
+        </div>
+        <div class="next-alarm">
+          <small>다음 알림까지 3시간 12분 남음</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 최근 분석 결과 -->
+    <div class="dashboard-card analysis">
+      <div class="card-header">
+        <h4 onclick="location.href='/prescription-upload'">🏥 최근 방문 병원</h4>
+      </div>
+      <div class="card-content">
+        <div class="analysis-status">
+          <div class="hospital-name"></div>
+          <div class="prescribed-date"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 생활 변화 트렌드 -->
+    <div class="dashboard-card trends">
+      <div class="card-header">
+        <h4 onclick="location.href='/health-profile'">🌙 생활 변화 트렌드</h4>
+        <select id="trend-select" class="metric-select">
+          <option value="sleep">수면</option>
+          <option value="weight">체중</option>
+        </select>
+      </div>
+      <div class="card-content">
+        <div id="sleep-data" class="trend-data active">
+          <div class="trend-value">6시간 12분</div>
+          <div class="trend-label">평균 수면 시간</div>
+          <div class="trend-change decrease">⬇ 감소 (−40분)</div>
+        </div>
+        <div id="weight-data" class="trend-data">
+          <div class="trend-value">68.2kg</div>
+          <div class="trend-label">현재 체중</div>
+          <div class="trend-change stable">➖ 변화 없음</div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- 2. 오늘의 복약 & 알림 -->
-  <div class="dashboard-card medication">
-    <div class="card-header">
-      <h4 onclick="location.href='/alarm'">💊 오늘의 복약 & 알림</h4>
-    </div>
-    <div class="card-content" id="dashboard-alarm-summary">
-      <div class="medication-item">
-        <div class="med-time">08:00</div>
-        <div class="med-name">아침약</div>
-        <div class="med-status completed">🟢</div>
-      </div>
-      <div class="medication-item">
-        <div class="med-time">20:00</div>
-        <div class="med-name">저녁약</div>
-        <div class="med-status pending">🔴</div>
-      </div>
-      <div class="next-alarm">
-        <small>다음 알림까지 3시간 12분 남음</small>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. 최근 분석 결과 -->
-  <div class="dashboard-card analysis">
-    <div class="card-header">
-      <h4 onclick="location.href='/prescription-upload'">🧾 최근 분석 결과</h4>
-    </div>
-    <div class="card-content">
-      <div class="analysis-status">
-        <div class="analysis-title">처방전 분석 완료</div>
-        <div class="analysis-result"></div>
-        <div class="analysis-summary"></div>
-        <div class="analysis_pill"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. 생활 변화 트렌드 -->
-  <div class="dashboard-card trends">
-    <div class="card-header">
-      <h4 onclick="location.href='/health-profile'">🌙 생활 변화 트렌드</h4>
-      <select id="trend-select" class="metric-select">
-        <option value="sleep">수면</option>
-        <option value="weight">체중</option>
-      </select>
-    </div>
-    <div class="card-content">
-      <div id="sleep-data" class="trend-data active">
-        <div class="trend-value">6시간 12분</div>
-        <div class="trend-label">평균 수면 시간</div>
-        <div class="trend-change decrease">⬇ 감소 (−40분)</div>
-      </div>
-      <div id="weight-data" class="trend-data">
-        <div class="trend-value">68.2kg</div>
-        <div class="trend-label">현재 체중</div>
-        <div class="trend-change stable">➖ 변화 없음</div>
-      </div>
-    </div>
-  </div>
-</div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="/static/dashboard.js"></script>
 <script>
-    async function get_latest_day_uploads() {
-        const res = await fetchWithAuth('/api/v1/uploads', { method: 'GET' });
-        if (res.ok) {
-            data = await res.json()
-            if(data.length>0){
-              document.querySelector(".analysis-summary").innerHTML = '처방전 및 약물 업로드 페이지에서 분석할 수 있습니다.'
-              document.querySelector(".analysis_pill").innerHTML = `<p onclick="location.href=\'/prescription-upload\'">페이지 이동 버튼</p>`
-            }else{
-              document.querySelector(".analysis-result").innerHTML = data.content.severity_display
-              if(data.content.severity_display == '안전'){
-                  document.querySelector(".analysis-result").classList.add("safe")
-              }if(data.content.severity_display == '주의'){
-                  document.querySelector(".analysis-result").classList.add("caution")
-              }if(data.content.severity_display == '위험'){
-                  document.querySelector(".analysis-result").classList.add("danger")
-              }
-              document.querySelector(".analysis-summary").innerHTML = data.content.summary
-              document.querySelector(".analysis_pill").innerHTML = `<p>${data.content.pill_names}</p>`
-            }
-            
-            return;
-        }
-    }
-    
-    
-async function fetchWeather(url) {
-  console.log('[Weather] Fetching:', url);
-  const response = await fetch(url);
-  const data = await response.json();
-  
-  document.getElementById('current-date').textContent = data.date_text;
-  document.getElementById('weather-info').textContent = data.weather_text;
-  document.getElementById('weather-tip').textContent = data.tip;
-  console.log('[Weather] Rendered:', data);
-}
-
-async function loadHealthInsights() {
-  try {
-    const response = await fetchWithAuth('/api/v1/dashboard/insights', {
-        method: 'GET',
-    });
-
-    if (!response.ok) {
-      console.error(`[Insights] error: ${response.status} ${response.statusText}`);
+  async function get_latest_day_uploads() {
+    const res = await fetchWithAuth('/api/v1/ocr/last-prescription', { method: 'GET' });
+    if (res.ok) {
+      data = await res.json()
+      if(data.length == 0){
+        document.querySelector(".hospital-name").innerHTML = '데이터가 존재하지 않습니다.'
+        return;
+      }
+      console.log(data)
+      document.querySelector(".hospital-name").innerHTML = data.hospital_name
+      document.querySelector('.prescribed-date').innerHTML = data.prescribed_date
       return;
     }
+  }
+
+
+  async function fetchWeather(url) {
+    console.log('[Weather] Fetching:', url);
+    const response = await fetch(url);
     const data = await response.json();
-    console.log(data)
-    if (data.insights && data.insights.length === 3) {
-      document.getElementById('insight-1').textContent = data.insights[0];
-      document.getElementById('insight-2').textContent = data.insights[1];
-      document.getElementById('insight-3').textContent = data.insights[2];
-    }
-    
-    if (data.mission_rate !== undefined) {
+
+    document.getElementById('current-date').textContent = data.date_text;
+    document.getElementById('weather-info').textContent = data.weather_text;
+    document.getElementById('weather-tip').textContent = data.tip;
+    console.log('[Weather] Rendered:', data);
+  }
+
+  async function loadHealthInsights() {
+    try {
+      const response = await fetchWithAuth('/api/v1/dashboard/insights', {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        console.error(`[Insights] error: ${response.status} ${response.statusText}`);
+        return;
+      }
+      const data = await response.json();
+
+      if (data.insights && data.insights.length === 3) {
+        document.getElementById('insight-1').textContent = data.insights[0];
+        document.getElementById('insight-2').textContent = data.insights[1];
+        document.getElementById('insight-3').textContent = data.insights[2];
+      }
+
+      if (data.mission_rate !== undefined) {
         document.getElementById('dash-mission-rate').textContent = `${data.mission_rate}% 달성`;
+      }
+    } catch (e) {
+      console.error('[Insights] Failed to load:', e.message);
     }
-  } catch (e) {
-    console.error('[Insights] Failed to load:', e.message);
   }
-}
 
-async function loadWeatherInfo() {
-  console.log('[Weather] Initializing...');
-  if (navigator.geolocation) {
-    console.log('[Weather] Geolocation available, requesting permission...');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        console.log('[Weather] GPS Success:', { latitude: lat, longitude: lon });
-        try {
-          await fetchWeather(`/api/v1/weather/current?lat=${lat}&lon=${lon}`);
-          console.log('[Weather] GPS-based weather loaded successfully');
-        } catch (e) {
-          console.error('[Weather] GPS API failed, falling back to Seoul:', e);
+  async function loadWeatherInfo() {
+    console.log('[Weather] Initializing...');
+    if (navigator.geolocation) {
+      console.log('[Weather] Geolocation available, requesting permission...');
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          console.log('[Weather] GPS Success:', { latitude: lat, longitude: lon });
+          try {
+            await fetchWeather(`/api/v1/weather/current?lat=${lat}&lon=${lon}`);
+            console.log('[Weather] GPS-based weather loaded successfully');
+          } catch (e) {
+            console.error('[Weather] GPS API failed, falling back to Seoul:', e);
+            await fetchWeather('/api/v1/weather/current?city=Seoul');
+            console.log('[Weather] Fallback to Seoul successful');
+          }
+        },
+        async (error) => {
+          console.warn('[Weather] GPS Permission denied or error:', error.message);
+          console.log('[Weather] Using default city: Seoul');
           await fetchWeather('/api/v1/weather/current?city=Seoul');
-          console.log('[Weather] Fallback to Seoul successful');
-        }
-      },
-      async (error) => {
-        console.warn('[Weather] GPS Permission denied or error:', error.message);
-        console.log('[Weather] Using default city: Seoul');
-        await fetchWeather('/api/v1/weather/current?city=Seoul');
-        console.log('[Weather] Seoul weather loaded successfully');
-      },
-      { timeout: 5000, maximumAge: 600000 }
-    );
-  } else {
-    console.log('[Weather] Geolocation not available, using Seoul');
-    await fetchWeather('/api/v1/weather/current?city=Seoul');
-    console.log('[Weather] Seoul weather loaded successfully');
+          console.log('[Weather] Seoul weather loaded successfully');
+        },
+        { timeout: 5000, maximumAge: 600000 }
+      );
+    } else {
+      console.log('[Weather] Geolocation not available, using Seoul');
+      await fetchWeather('/api/v1/weather/current?city=Seoul');
+      console.log('[Weather] Seoul weather loaded successfully');
+    }
   }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadWeatherInfo();
-  loadHealthInsights();
-  get_latest_day_uploads();
-});
+  document.addEventListener('DOMContentLoaded', () => {
+    loadWeatherInfo();
+    loadHealthInsights();
+    get_latest_day_uploads();
+  });
 
-function health_page_move(){
-  if(document.querySelector("#health-metric-select").value == '혈압'){
-    location.href = '/blood-pressure'
-  }else{
-    location.href = '/blood-sugar'
+  function health_page_move() {
+    location.href = '/' + document.querySelector("#health-metric-select").value
   }
-}
 </script>
 {% endblock %}

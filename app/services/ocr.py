@@ -4,6 +4,7 @@ import time
 import uuid
 from typing import TYPE_CHECKING, Any
 
+from app.models.user import User
 from app.utils.ocr_processing import preprocess_image_for_ocr
 
 if TYPE_CHECKING:
@@ -20,9 +21,13 @@ from app.core import config
 from app.core.http_client import http_client
 from app.core.logger import default_logger
 from app.dtos.ocr import DrugInfo, OCRExtractResponse, PillAnalyzeResponse, PillCandidate
+from app.repositories.prescription import PrescriptionRepository
 
 
 class OCRService:
+    def __init__(self):
+        self.prescription_repo = PrescriptionRepository()
+
     async def extract_raw_text(self, image_bytes: bytes, file_name: str, file_ext: str) -> str:
         """
         PDF인 경우 우선 텍스트 추출을 시도하고, 실패하거나 이미지 기반 PDF인 경우 Naver Clova OCR을 사용합니다.
@@ -240,3 +245,7 @@ class OCRService:
                 "display_text": f"오류 발생: {str(e)}",
                 "caution": "분석 중 오류가 발생했습니다.",
             }
+
+    async def last_prescription(self, user: User):
+        result = await self.prescription_repo.last_prescription(user)
+        return result or []

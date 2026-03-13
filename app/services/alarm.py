@@ -29,6 +29,8 @@ HEALTH_ALARM_NAMES = {
 
 
 class AlarmService:
+    HISTORY_KEEP_LIMIT = 50
+
     def __init__(self):
         self.plan_check_list_repo = PlanCheckListRepository()
         self.current_med = CurrentMedRepository()

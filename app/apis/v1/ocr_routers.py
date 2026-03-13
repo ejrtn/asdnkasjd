@@ -62,6 +62,13 @@ async def save_file(file: UploadFile, user: User, category: str) -> Upload:
     )
 
 
+@ocr_router.get("/last-prescription", status_code=status.HTTP_201_CREATED)
+async def last_prescription(
+    user: Annotated[User, Depends(get_request_user)],
+):
+    return await ocr_service.last_prescription(user)
+
+
 @ocr_router.post("/prescription", status_code=status.HTTP_201_CREATED)
 async def extract_prescription_ocr(
     file: Annotated[UploadFile, File()],
