@@ -159,6 +159,7 @@
   color: #2b2340;
   margin: 0;
   letter-spacing: -0.01em;
+  cursor: pointer;
 }
 
 .metric-select {

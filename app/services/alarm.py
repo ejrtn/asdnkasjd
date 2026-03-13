@@ -15,6 +15,9 @@ from app.models.alarm import Alarm
 from app.models.alarm_history import AlarmHistory
 from app.models.current_med import CurrentMed
 from app.models.user import User
+from app.repositories.current_med import CurrentMedRepository
+from app.repositories.plan_check_list import PlanCheckListRepository
+from app.services.plan_check_list import PlanCheckListService
 
 HEALTH_ALARM_NAMES = {
     "BP_MORNING": "혈압 아침 측정",
@@ -26,6 +29,10 @@ HEALTH_ALARM_NAMES = {
 
 
 class AlarmService:
+    def __init__(self):
+        self.plan_check_list_repo = PlanCheckListRepository()
+        self.current_med = CurrentMedRepository()
+
     def _format_time(self, t: object) -> str:
         if hasattr(t, "strftime"):
             return t.strftime("%H:%M")  # type: ignore[union-attr, no-any-return]
@@ -95,6 +102,7 @@ class AlarmService:
             med_id = current_med.id
 
         hour, minute = map(int, request.alarm_time.split(":"))
+
         alarm = await Alarm.create(
             user=user,
             alarm_type=request.alarm_type,
@@ -102,6 +110,12 @@ class AlarmService:
             alarm_time=time(hour, minute),
             is_active=True,
         )
+
+        # 복약 체크리스트 동기화 (plan_type='pill')
+        if request.alarm_type == "MED":
+            plan_service = PlanCheckListService()
+            await plan_service.sync_pill_plans(user.id)
+
         return self._to_response(alarm, med_name, med_id)
 
     async def update_alarm(self, user: User, alarm_id: int, request: AlarmUpdateRequest) -> AlarmResponse:
@@ -117,6 +131,11 @@ class AlarmService:
             alarm.is_active = request.is_active
         await alarm.save()
 
+        # 복약 체크리스트 동기화 (plan_type='pill')
+        if alarm.alarm_type == "MED":
+            plan_service = PlanCheckListService()
+            await plan_service.sync_pill_plans(user.id)
+
         med_name = HEALTH_ALARM_NAMES.get(
             alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
         )
@@ -131,6 +150,11 @@ class AlarmService:
         alarm.is_active = request.is_active
         await alarm.save()
 
+        # 복약 체크리스트 동기화 (plan_type='pill')
+        if alarm.alarm_type == "MED":
+            plan_service = PlanCheckListService()
+            await plan_service.sync_pill_plans(user.id)
+
         med_name = HEALTH_ALARM_NAMES.get(
             alarm.alarm_type, alarm.current_med.medication_name if alarm.current_med else "알 수 없음"
         )
@@ -141,6 +165,11 @@ class AlarmService:
         if not alarm:
             raise ValueError("알람을 찾을 수 없습니다.")
         await alarm.delete()
+
+        # 복약 체크리스트 동기화 (plan_type='pill')
+        if alarm.alarm_type == "MED":
+            plan_service = PlanCheckListService()
+            await plan_service.sync_pill_plans(user.id)
 
     def _get_dashboard_alarm_label(self, alarm: Alarm) -> str:
         if alarm.alarm_type == "MED":

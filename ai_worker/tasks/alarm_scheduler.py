@@ -10,6 +10,8 @@ from datetime import datetime, time, timedelta
 
 from ai_worker.core.config import Config
 from ai_worker.tasks.fcm import send_push_notification
+from app.models.user import User
+from app.services.plan_check_list import PlanCheckListService
 
 config = Config()
 
@@ -132,6 +134,24 @@ async def check_and_send_alarms() -> None:
             logging.exception(f"[SCHEDULER] push failed alarm_id={alarm.id}: {e}")
 
 
+async def sync_all_users_daily_plans() -> None:
+    """모든 사용자의 일일 실행 플랜을 동기화 (자정 실행)"""
+    logging.info("[SCHEDULER] Starting daily plan sync for all users")
+    service = PlanCheckListService()
+    # Repository에서 모든 사용자 ID를 가져오는 간단한 방식 (또는 User.all())
+
+    users = await User.all()
+
+    for user in users:
+        try:
+            await service.sync_automated_plans(user.id)
+            logging.info(f"[SCHEDULER] Synced plans for user_id={user.id}")
+        except Exception as e:
+            logging.error(f"[SCHEDULER] Failed to sync plans for user_id={user.id}: {e}")
+
+    logging.info("[SCHEDULER] Completed daily plan sync")
+
+
 async def run_alarm_scheduler() -> None:
     """정각에 맞춰 알람 체크 루프"""
     logging.info("⏰ 알람 스케줄러 루프 시작")
@@ -146,6 +166,12 @@ async def run_alarm_scheduler() -> None:
         try:
             logging.info("⏳ 알람 체크 중...")
             await check_and_send_alarms()
+
+            # 자정(00:00) 체크하여 일일 플랜 동기화
+            now = datetime.now(tz=zoneinfo.ZoneInfo("Asia/Seoul"))
+            if now.hour == 0 and now.minute == 0:
+                await sync_all_users_daily_plans()
+
             logging.info("✅ 알람 체크 완료, 60초 대기")
         except Exception as e:
             logging.exception(f"❌ 알람 스케줄러 오류: {e}")

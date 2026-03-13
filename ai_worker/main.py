@@ -39,6 +39,8 @@ MODELS = [
     "app.models.system_log",
     "app.models.upload",
     "app.models.user",
+    "app.models.plan_check_list",
+    "app.models.llm_life_guide",
 ]
 
 # 전역 변수로 스케줄러 태스크 관리

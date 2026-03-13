@@ -208,4 +208,12 @@ async def pill_identifier(request: Request):
     return templates.TemplateResponse("pill_identifier.html", {"request": request})
 
 
+@app.get("/plan-check-list", response_class=HTMLResponse)
+async def plan_check_list(request: Request):
+    """
+    체크리스트 페이지
+    """
+    return templates.TemplateResponse("plan_check_list.html", {"request": request})
+
+
 app.include_router(api_v1_router)

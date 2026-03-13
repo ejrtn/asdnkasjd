@@ -12,8 +12,6 @@
     <link rel="stylesheet" href="/static/chatbot.css">
 
     {% block head %}{% endblock %}
-<<<<<<< Updated upstream
-=======
     <style>
         * {
             box-sizing: border-box;
@@ -1250,7 +1248,6 @@
             color: #0f172a;
         }
     </style>
->>>>>>> Stashed changes
 </head>
 
 <body>
@@ -1416,6 +1413,27 @@
                         </div>
                     </div>
                     <div class="mega-hint">클릭하면 혈압 수첩으로 이동해요 →</div>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <a href="/plan-check-list">
+                    <button class="plan-check-list {% if request.url.path == '/plan-check-list' %}nav-active{% endif %}">하루 건강 미션</button>
+                </a>
+                <div class="mega-panel" aria-hidden="true">
+                    <div class="mega-title">하루 건강 미션</div>
+                    <div class="mega-desc">오늘 하루 건강 미션을 확인 합니다</div>
+                    <div class="mega-grid">
+                        <div class="mega-card">
+                            <div class="mega-card-title">미션 저장</div>
+                            <div class="mega-card-desc">LLM을 통해 미션 자동 생성 및 개인 저장</div>
+                        </div>
+                        <div class="mega-card">
+                            <div class="mega-card-title">미션 체크</div>
+                            <div class="mega-card-desc">미션 동작을 체크 합니다.</div>
+                        </div>
+                    </div>
+                    <div class="mega-hint">클릭하면 하루 건강 미션으로 이동해요 →</div>
                 </div>
             </div>
 

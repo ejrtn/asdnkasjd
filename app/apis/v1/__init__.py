@@ -13,6 +13,7 @@ from app.apis.v1.insights_routers import router as insights_router
 from app.apis.v1.medication_routers import medication_router
 from app.apis.v1.multimodal_routers import multimodal_router
 from app.apis.v1.ocr_routers import ocr_router
+from app.apis.v1.plan_check_list import plan_check_list
 from app.apis.v1.result_routers import result_router
 from app.apis.v1.system_routers import system_router
 from app.apis.v1.upload_routers import upload_router
@@ -39,3 +40,4 @@ api_v1_router.include_router(common_router)
 api_v1_router.include_router(weather_router)
 api_v1_router.include_router(insights_router)
 api_v1_router.include_router(dashboard_router)
+api_v1_router.include_router(plan_check_list)

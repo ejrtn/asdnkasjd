@@ -3,7 +3,7 @@
 {% block title %}대시보드 - Cloud9 Care{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/dashboard.css?v=1">
+<link rel="stylesheet" href="/static/dashboard.css?v=2">
 <style>
 /* 확대 기능 */
 body.zoom-large .hero-slider {
@@ -171,8 +171,8 @@ body.zoom-large .metric-select {
     <div class="slide-header">
       <h3>오늘의 건강 인사이트</h3>
       <div class="health-score">
-        <span class="score-badge">건강 점수 82점</span>
-        <span class="score-status">(안정 상태)</span>
+        <span class="score-badge" id="dash-mission-title">하루 건강 미션</span>
+        <span class="score-status" id="dash-mission-rate">0% 달성</span>
       </div>
     </div>
     <div class="slide-content insight-content">
@@ -194,7 +194,7 @@ body.zoom-large .metric-select {
   <!-- 1. 건강 지표 -->
   <div class="dashboard-card health-metrics">
     <div class="card-header">
-      <h4>📈 건강 지표</h4>
+      <h4 onclick="health_page_move()">📈 건강 지표</h4>
       <select id="health-metric-select" class="metric-select">
         <option value="blood-pressure">혈압</option>
         <option value="blood-sugar">혈당</option>
@@ -252,7 +252,7 @@ body.zoom-large .metric-select {
   <!-- 2. 오늘의 복약 & 알림 -->
   <div class="dashboard-card medication">
     <div class="card-header">
-      <h4>💊 오늘의 복약 & 알림</h4>
+      <h4 onclick="location.href='/alarm'">💊 오늘의 복약 & 알림</h4>
     </div>
     <div class="card-content" id="dashboard-alarm-summary">
       <div class="medication-item">
@@ -274,7 +274,7 @@ body.zoom-large .metric-select {
   <!-- 3. 최근 분석 결과 -->
   <div class="dashboard-card analysis">
     <div class="card-header">
-      <h4>🧾 최근 분석 결과</h4>
+      <h4 onclick="location.href='/prescription-upload'">🧾 최근 분석 결과</h4>
     </div>
     <div class="card-content">
       <div class="analysis-status">
@@ -289,7 +289,7 @@ body.zoom-large .metric-select {
   <!-- 4. 생활 변화 트렌드 -->
   <div class="dashboard-card trends">
     <div class="card-header">
-      <h4>🌙 생활 변화 트렌드</h4>
+      <h4 onclick="location.href='/health-profile'">🌙 생활 변화 트렌드</h4>
       <select id="trend-select" class="metric-select">
         <option value="sleep">수면</option>
         <option value="weight">체중</option>
@@ -319,17 +319,22 @@ body.zoom-large .metric-select {
         const res = await fetchWithAuth('/api/v1/uploads', { method: 'GET' });
         if (res.ok) {
             data = await res.json()
-            console.log(data)
-            document.querySelector(".analysis-result").innerHTML = data.content.severity_display
-            if(data.content.severity_display == '안전'){
-                document.querySelector(".analysis-result").classList.add("safe")
-            }if(data.content.severity_display == '주의'){
-                document.querySelector(".analysis-result").classList.add("caution")
-            }if(data.content.severity_display == '위험'){
-                document.querySelector(".analysis-result").classList.add("danger")
+            if(data.length>0){
+              document.querySelector(".analysis-summary").innerHTML = '처방전 및 약물 업로드 페이지에서 분석할 수 있습니다.'
+              document.querySelector(".analysis_pill").innerHTML = `<p onclick="location.href=\'/prescription-upload\'">페이지 이동 버튼</p>`
+            }else{
+              document.querySelector(".analysis-result").innerHTML = data.content.severity_display
+              if(data.content.severity_display == '안전'){
+                  document.querySelector(".analysis-result").classList.add("safe")
+              }if(data.content.severity_display == '주의'){
+                  document.querySelector(".analysis-result").classList.add("caution")
+              }if(data.content.severity_display == '위험'){
+                  document.querySelector(".analysis-result").classList.add("danger")
+              }
+              document.querySelector(".analysis-summary").innerHTML = data.content.summary
+              document.querySelector(".analysis_pill").innerHTML = `<p>${data.content.pill_names}</p>`
             }
-            document.querySelector(".analysis-summary").innerHTML = data.content.summary
-            document.querySelector(".analysis_pill").innerHTML = `<p>${data.content.pill_names}</p>`
+            
             return;
         }
     }
@@ -347,22 +352,25 @@ async function fetchWeather(url) {
 }
 
 async function loadHealthInsights() {
-  console.log('[Insights] Loading health insights...');
   try {
-    const response = await fetch('/api/v1/dashboard/insights');
+    const response = await fetchWithAuth('/api/v1/dashboard/insights', {
+        method: 'GET',
+    });
+
     if (!response.ok) {
-      console.error(`[Insights] API error: ${response.status} ${response.statusText}`);
+      console.error(`[Insights] error: ${response.status} ${response.statusText}`);
       return;
     }
     const data = await response.json();
-    
+    console.log(data)
     if (data.insights && data.insights.length === 3) {
       document.getElementById('insight-1').textContent = data.insights[0];
       document.getElementById('insight-2').textContent = data.insights[1];
       document.getElementById('insight-3').textContent = data.insights[2];
-      console.log('[Insights] Successfully loaded:', data.insights);
-    } else {
-      console.warn('[Insights] Invalid response format:', data);
+    }
+    
+    if (data.mission_rate !== undefined) {
+        document.getElementById('dash-mission-rate').textContent = `${data.mission_rate}% 달성`;
     }
   } catch (e) {
     console.error('[Insights] Failed to load:', e.message);
@@ -407,5 +415,13 @@ document.addEventListener('DOMContentLoaded', () => {
   loadHealthInsights();
   get_latest_day_uploads();
 });
+
+function health_page_move(){
+  if(document.querySelector("#health-metric-select").value == '혈압'){
+    location.href = '/blood-pressure'
+  }else{
+    location.href = '/blood-sugar'
+  }
+}
 </script>
 {% endblock %}

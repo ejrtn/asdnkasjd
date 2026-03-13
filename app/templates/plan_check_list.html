@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Cloud9 Care - 생활 안내 가이드{% endblock %}
+
+{% block head %}
+<style>
+    /* 컨테이너 */
+    .plan-container {
+        background: #fff;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #f0f0f0;
+    }
+
+    /* 헤더 영역 */
+    .plan-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .plan-title-area h2 {
+        font-size: 24px;
+        color: #333;
+        margin: 0 0 8px 0;
+    }
+
+    .plan-subtitle {
+        font-size: 14px;
+        color: #888;
+    }
+
+    .success-rate-area {
+        text-align: right;
+    }
+
+    #success-rate {
+        font-size: 32px;
+        font-weight: bold;
+        color: #d4a373;
+        /* 이미지의 황금색 계열 */
+    }
+
+    .success-rate-area p {
+        font-size: 12px;
+        color: #aaa;
+        margin: 0;
+        letter-spacing: 1px;
+    }
+
+    /* 프로그레스 바 */
+    .plan-progress-bar {
+        width: 100%;
+        height: 12px;
+        background: #f0ede9;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    #progress-fill {
+        height: 100%;
+        background: #d4a373;
+        transition: width 0.3s ease;
+    }
+
+    /* 리스트 아이템 */
+    .plan-item {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 1.5px solid #f0f0f0;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .plan-item:hover {
+        border-color: #d4a373;
+        transform: translateY(-2px);
+    }
+
+    /* 커스텀 체크박스 */
+    .checkbox-wrapper {
+        margin-right: 20px;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkbox-wrapper label {
+        display: block;
+        width: 24px;
+        height: 24px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked+label {
+        background: #d4a373;
+        border-color: #d4a373;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked+label::after {
+        content: '✓';
+        color: white;
+        position: absolute;
+        left: 4px;
+        top: -2px;
+        font-weight: bold;
+    }
+
+    /* 텍스트 정보 */
+    .plan-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .plan-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .plan-tag {
+        font-size: 12px;
+        color: #99abbd;
+        font-weight: bold;
+        margin-top: 4px;
+    }
+
+    /* 삭제 버튼 */
+    .delete-btn {
+        background: none;
+        border: none;
+        color: #ccc;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .delete-btn:hover {
+        color: #ff6b6b;
+    }
+
+    /* 입력창 */
+    .plan-input-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    #new-plan-input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .add-btn {
+        padding: 10px 20px;
+        background: #d4a373;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="plan-container">
+    <div class="plan-header">
+        <div class="plan-title-area">
+            <h2>오늘의 실행 플랜</h2>
+            <p class="plan-subtitle">체크한 항목은 나의 관리 기록으로 저장됩니다.</p>
+        </div>
+        <div class="success-rate-area">
+            <span id="success-rate">0%</span>
+            <p>SUCCESS RATE</p>
+        </div>
+    </div>
+
+    <div class="plan-progress-bar">
+        <div id="progress-fill" style="width: 0%;"></div>
+    </div>
+
+    <!-- 플랜 리스트 -->
+    <div id="plan-list" class="plan-list">
+        <!-- 기본 아이템 예시 -->
+    </div>
+
+    <!-- 추가 입력창 -->
+    <div class="plan-input-group">
+        <input type="text" id="new-plan-input" placeholder="새로운 플랜을 입력하세요...">
+        <button onclick="addItem()" class="add-btn">추가</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+
+    // 달성률 업데이트 함수
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('.plan-item input[type="checkbox"]');
+        const total = checkboxes.length;
+        if (total === 0) {
+            document.getElementById('success-rate').innerText = '0%';
+            document.getElementById('progress-fill').style.width = '0%';
+            return;
+        }
+
+        const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+        const percentage = Math.round((checked / total) * 100);
+
+        document.getElementById('success-rate').innerText = percentage + '%';
+        document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    // 아이템 목록 로드 함수
+    async function loadItems() {
+        const response = await fetchWithAuth('/api/v1/plan_check_list');
+        if (!response || !response.ok) {
+            console.error('Failed to load items');
+            return;
+        }
+        const items = await response.json();
+        const list = document.getElementById('plan-list');
+        list.innerHTML = '';
+
+        items.forEach(item => {
+            const itemHtml = `
+            <div class="plan-item" data-id="${item.id}">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="check-${item.id}" ${item.is_completed ? 'checked' : ''} onchange="toggleItem(${item.id})">
+                    <label for="check-${item.id}"></label>
+                </div>
+                <div class="plan-info">
+                    <span class="plan-text" style="${item.is_completed ? 'text-decoration: line-through; color: #aaa;' : ''}">${item.content}</span>
+                    <span class="plan-tag">DAILY ACTION</span>
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            </div>
+        `;
+            list.insertAdjacentHTML('beforeend', itemHtml);
+        });
+        updateProgress();
+    }
+
+    // 아이템 추가 함수
+    async function addItem() {
+        const input = document.getElementById('new-plan-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const response = await fetchWithAuth('/api/v1/plan_check_list', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "content": text })
+        });
+
+        if (!response || !response.ok) {
+            console.error('Failed to add item');
+            return;
+        }
+
+        input.value = '';
+        loadItems(); // 목록 새로고침
+    }
+
+    // 아이템 삭제 함수
+    async function deleteItem(btn) {
+        if (confirm('이 계획을 삭제할까요?')) {
+            const itemId = btn.closest('.plan-item').dataset.id;
+            const response = await fetchWithAuth('/api/v1/plan_check_list/' + itemId, {
+                method: 'DELETE',
+            });
+            if (!response || !response.ok) {
+                console.error('Failed to delete item');
+                return;
+            }
+            btn.closest('.plan-item').remove();
+            updateProgress();
+        }
+    }
+
+    // 아이템 토글 함수
+    async function toggleItem(id) {
+        const response = await fetchWithAuth(`/api/v1/plan_check_list/${id}/toggle`, {
+            method: 'PATCH'
+        });
+        if (!response || !response.ok) {
+            console.error('Failed to toggle item');
+            loadItems(); // 상태 복구를 위해 리로드
+            return;
+        }
+        const item = await response.json();
+        const itemElement = document.querySelector(`.plan-item[data-id="${id}"]`);
+        const textElement = itemElement.querySelector('.plan-text');
+        if (item.is_completed) {
+            textElement.style.textDecoration = 'line-through';
+            textElement.style.color = '#aaa';
+        } else {
+            textElement.style.textDecoration = 'none';
+            textElement.style.color = '#444';
+        }
+        updateProgress();
+    }
+
+    // 엔터키 입력 시 추가
+    document.getElementById('new-plan-input')?.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') addItem();
+    });
+
+    // 초기 실행
+    window.onload = loadItems;
+</script>
+{% endblock %}
