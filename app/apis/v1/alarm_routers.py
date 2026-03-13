@@ -108,10 +108,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
         await AlarmHistory.filter(
             Q(is_confirmed=False)
             & Q(alarm__user=user)
-            & (
-                (Q(snoozed_until__isnull=True) & Q(sent_at__gte=since_utc))
-                | Q(snoozed_until__lte=now_utc)
-            )
+            & ((Q(snoozed_until__isnull=True) & Q(sent_at__gte=since_utc)) | Q(snoozed_until__lte=now_utc))
         )
         .prefetch_related("alarm__current_med")
         .order_by("-sent_at")

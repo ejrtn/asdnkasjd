@@ -324,9 +324,12 @@ class AlarmService:
 
         user_alarm_ids = list(user_alarm_ids)
 
-        keep_ids = await AlarmHistory.filter(alarm_id__in=user_alarm_ids).order_by("-sent_at").limit(
-            self.HISTORY_KEEP_LIMIT
-        ).values_list("id", flat=True)
+        keep_ids = (
+            await AlarmHistory.filter(alarm_id__in=user_alarm_ids)
+            .order_by("-sent_at")
+            .limit(self.HISTORY_KEEP_LIMIT)
+            .values_list("id", flat=True)
+        )
 
         keep_ids = list(keep_ids)
 

@@ -17,13 +17,14 @@ class AlarmHistory(models.Model):
     - snoozed_until: 사용자가 "10분 후 다시 알림"을 눌렀을 때 재노출 예정 시각
     - snooze_count: 사용자가 해당 알람을 몇 번 미뤘는지 카운트
     """
+
     id = fields.IntField(pk=True)
     sent_at = fields.DatetimeField(auto_now_add=True)  # 알람 발송 시각 (UTC)
     delivered_at = fields.DatetimeField(null=True)  # 기기 도착 시각 (UTC)
     read_at = fields.DatetimeField(null=True)  # 사용자 확인 시각 (UTC)
     is_confirmed = fields.BooleanField(default=False)
 
-    snoozed_until = fields.DatetimeField(null=True) # 다시 보여줄 예정 시각 (UTC)
+    snoozed_until = fields.DatetimeField(null=True)  # 다시 보여줄 예정 시각 (UTC)
     snooze_count = fields.IntField(default=0)  # 미루기 횟수
 
     alarm: fields.ForeignKeyRelation["Alarm"] = fields.ForeignKeyField(
