@@ -73,7 +73,7 @@
           <div class="notebook-field pressure-field full-row">
             <label>측정 시각</label>
             <div class="notebook-chip-group pressure-chip-group" id="save-pressure-chip-group">
-              <button type="button" class="notebook-chip pressure-chip" data-value="아침" onclick="selectSavePressureType('아침', this)">아침</button>
+              <button type="button" class="notebook-chip pressure-chip is-active" data-value="아침" onclick="selectSavePressureType('아침', this)">아침</button>
               <button type="button" class="notebook-chip pressure-chip" data-value="저녁" onclick="selectSavePressureType('저녁', this)">저녁</button>
             </div>
           </div>
@@ -153,7 +153,7 @@
         </div>
 
         <div class="notebook-filter-row" id="view-pressure-filter-chip-group">
-          <button type="button" class="notebook-chip pressure-chip" data-filter="아침" onclick="applyPressureFilter('아침', this)">아침</button>
+          <button type="button" class="notebook-chip pressure-chip is-active" data-filter="아침" onclick="applyPressureFilter('아침', this)">아침</button>
           <button type="button" class="notebook-chip pressure-chip" data-filter="저녁" onclick="applyPressureFilter('저녁', this)">저녁</button>
         </div>
 
@@ -177,8 +177,8 @@
         </div>
 
         <div class="notebook-record-filter-row" id="pressure-record-filter-chip-group">
-          <button type="button" class="notebook-chip pressure-chip is-active" onclick="applyPressureRecordFilter('아침', this)">아침</button>
-          <button type="button" class="notebook-chip pressure-chip" onclick="applyPressureRecordFilter('저녁', this)">저녁</button>
+          <button type="button" class="notebook-chip pressure-chip is-active" data-filter="아침" onclick="applyPressureRecordFilter('아침', this)">아침</button>
+          <button type="button" class="notebook-chip pressure-chip" data-filter="저녁" onclick="applyPressureRecordFilter('저녁', this)">저녁</button>
         </div>
 
         <div id="pressure-record-list" class="notebook-record-list">
