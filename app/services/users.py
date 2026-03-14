@@ -1,9 +1,7 @@
 from datetime import timedelta
-from urllib.parse import quote  # 파일 상단에 추가
 
 import httpx
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse
 from passlib.context import CryptContext
 from pydantic import EmailStr
 from starlette import status
@@ -14,6 +12,7 @@ from app.dtos.users import (
     ChangePasswordRequest,
     LoginRequest,
     SignUpRequest,
+    SocialLoginApiResponse,
     SocialLoginRequest,
     UserUpdateRequest,
 )
@@ -22,7 +21,14 @@ from app.models.chronic_disease import ChronicDisease
 from app.models.user import User
 from app.repositories.user import UserRepository
 from app.utils.common import normalize_phone_number, redis_client
-from app.utils.security import create_access_token, create_refresh_token, hash_password, verify_password
+from app.utils.security import (
+    create_access_token,
+    create_refresh_token,
+    create_social_signup_token,
+    decode_social_signup_token,
+    hash_password,
+    verify_password,
+)
 
 
 class UserManageService:
@@ -55,12 +61,19 @@ class UserManageService:
         normalized_phone = normalize_phone_number(data.phone_number)
         await self.check_phone_number_exists(normalized_phone)
 
-        # Pydantic → dict 변환
-        user_data = data.model_dump()
+        user_data = data.model_dump(exclude={"social_signup_token"})
 
         # 데이터 가공
         user_data["phone_number"] = normalized_phone
         user_data["password"] = hash_password(data.password)
+
+        if data.social_signup_token:
+            # 소셜 가입 토큰 검증 로직 추가 (선택적)
+            try:
+                decode_social_signup_token(data.social_signup_token)
+                # 추출된 정보와 입력된 정보를 대조하는 추가 검증이 가능합니다.
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e)) from e
 
         async with in_transaction():
             user: User = await self.user_repo.create_user(user_data)  # type: ignore[assignment]
@@ -237,9 +250,9 @@ class UserManageService:
 
         return {"access_token": access_token, "refresh_token": refresh_token, "id": user.id, "token_type": "bearer"}
 
-    async def google_login(self, code) -> HTMLResponse:
+    async def google_login(self, code: str) -> tuple[SocialLoginApiResponse, str | None]:
         """
-        구글 로그인 처리
+        구글 로그인 처리 (API 기반)
         """
         async with httpx.AsyncClient() as client:
             # --- 1단계: 인가 코드를 access_token으로 교환 ---
@@ -281,69 +294,28 @@ class UserManageService:
             gender="",
         )
 
-        # --- 4단계: 기존 로직 수행 (유저 체크 및 리다이렉트) ---
+        # --- 4단계: 기존 로직 수행 (유저 체크) ---
         existing_user = await self.check_id_exists(social_data.id)
 
         if existing_user:
-            # 이미 가입된 유저
+            # 이미 가입된 유저 -> 기존 서비스 토큰 발급 반환 (딕셔너리)
             tokens = await self.social_login(existing_user)
-
-            # 팝업창에서 부모창으로 넘기고 닫는 HTML
-            html_content = """
-            <!DOCTYPE html>
-            <html><body><script>
-                if (window.opener) {
-                    window.opener.postMessage({status: 'login_success'}, '*');
-                    window.close();
-                } else {
-                    window.location.href = '/dashboard';
-                }
-            </script></body></html>
-            """
-            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
-
-            # 쿠키 설정
-            response.set_cookie(
-                "access_token", tokens["access_token"], httponly=False, samesite="lax", max_age=3600 * 24 * 30
-            )
-            response.set_cookie(
-                "refresh_token",
-                tokens["refresh_token"],
-                httponly=True,
-                samesite="lax",
-                path="/",
-                max_age=config.REFRESH_TOKEN_EXPIRE_MINUTES_SHORT * 60,
-            )
-            response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", max_age=3600 * 24 * 30)
+            return SocialLoginApiResponse(
+                status="login_success", access_token=tokens["access_token"], social_signup_token=None, profile=None
+            ), tokens["refresh_token"]  # refresh_token은 router에서 쿠키로 설정하기 위해 튜플로 반환
         else:
-            # 보안을 위해 정보를 쿼리 스트링에 노출하기보다 임시 쿠키를 사용하여 전달합니다.
-            html_content = """
-            <!DOCTYPE html>
-            <html><body><script>
-                if (window.opener) {
-                    window.opener.postMessage({status: 'signup_required'}, '*');
-                    window.close();
-                } else {
-                    window.location.href = '/signup';
-                }
-            </script></body></html>
-            """
-            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
-            response.set_cookie(
-                "social_id", social_data.id, httponly=False, samesite="lax", max_age=3600
-            )  # 프론트에서 읽을 수 있게 httponly=False
-            response.set_cookie("social_name", quote(social_data.name), httponly=False, samesite="lax", max_age=3600)
-            response.set_cookie(
-                "social_nickname", quote(social_data.nickname), httponly=False, samesite="lax", max_age=3600
-            )
-            response.set_cookie(
-                "social_provider", quote(social_data.provider), httponly=False, samesite="lax", max_age=3600
-            )
-            return response
+            # 미가입 유저 -> 소셜 회원가입 임시 토큰 발급
+            social_signup_token = create_social_signup_token(social_data.model_dump())
+            return SocialLoginApiResponse(
+                status="signup_required",
+                access_token=None,
+                social_signup_token=social_signup_token,
+                profile=social_data,
+            ), None
 
-    async def naver_login(self, code: str, state: str | None = None) -> HTMLResponse:
+    async def naver_login(self, code: str, state: str | None = None) -> tuple[SocialLoginApiResponse, str | None]:
         """
-        네이버 로그인 처리
+        네이버 로그인 처리 (API 기반)
         """
         async with httpx.AsyncClient() as client:
             # --- 1단계: 인가 코드를 access_token으로 교환 ---
@@ -385,66 +357,27 @@ class UserManageService:
             social_id=user_info.get("id"),  # 네이버 고유 식별자
             provider="naver",
             phone_number=user_info.get("mobile"),  # 전화번호 (옵션)
-            birthday=user_info.get("birthyear") + "-" + user_info.get("birthday"),
+            birthday=user_info.get("birthyear", "1990") + "-" + user_info.get("birthday", "01-01")
+            if user_info.get("birthyear") and user_info.get("birthday")
+            else "",
             gender="남자" if user_info.get("gender") == "M" else "여자",
         )
 
-        # --- 4단계: 기존 로직 수행 (유저 체크 및 팝업창 닫기 응답) ---
+        # --- 4단계: 기존 로직 수행 (유저 체크) ---
         existing_user = await self.check_id_exists(social_data.id)
 
         if existing_user:
-            # 이미 가입된 유저
+            # 이미 가입된 유저 -> 기존 서비스 토큰 발급
             tokens = await self.social_login(existing_user)
-
-            # 팝업창에서 부모창으로 넘기고 닫는 HTML
-            html_content = """
-            <!DOCTYPE html>
-            <html><body><script>
-                if (window.opener) {
-                    window.opener.postMessage({status: 'login_success'}, '*');
-                    window.close();
-                } else {
-                    window.location.href = '/dashboard';
-                }
-            </script></body></html>
-            """
-            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
-
-            # 쿠키 설정
-            response.set_cookie(
-                "access_token", tokens["access_token"], httponly=False, samesite="lax", max_age=3600 * 24 * 30
-            )
-            response.set_cookie("user_id", str(tokens["id"]), httponly=False, samesite="lax", max_age=3600 * 24 * 30)
-            return response
+            return SocialLoginApiResponse(
+                status="login_success", access_token=tokens["access_token"], social_signup_token=None, profile=None
+            ), tokens["refresh_token"]
         else:
-            # 회원가입 필요
-            html_content = """
-            <!DOCTYPE html>
-            <html><body><script>
-                if (window.opener) {
-                    window.opener.postMessage({status: 'signup_required'}, '*');
-                    window.close();
-                } else {
-                    window.location.href = '/signup';
-                }
-            </script></body></html>
-            """
-            response = HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
-            response.set_cookie("social_id", social_data.id, httponly=False, samesite="lax", max_age=3600)
-            response.set_cookie("social_name", quote(social_data.name), httponly=False, samesite="lax", max_age=3600)
-            response.set_cookie(
-                "social_nickname", quote(social_data.nickname), httponly=False, samesite="lax", max_age=3600
-            )
-            response.set_cookie(
-                "social_phone_number", quote(social_data.phone_number), httponly=False, samesite="lax", max_age=3600
-            )
-            response.set_cookie(
-                "social_birthday", quote(social_data.birthday), httponly=False, samesite="lax", max_age=3600
-            )
-            response.set_cookie(
-                "social_gender", quote(social_data.gender), httponly=False, samesite="lax", max_age=3600
-            )
-            response.set_cookie(
-                "social_provider", quote(social_data.provider), httponly=False, samesite="lax", max_age=3600
-            )
-            return response
+            # 회원가입 필요 -> 소셜 회원가입 임시 토큰 발급
+            social_signup_token = create_social_signup_token(social_data.model_dump())
+            return SocialLoginApiResponse(
+                status="signup_required",
+                access_token=None,
+                social_signup_token=social_signup_token,
+                profile=social_data,
+            ), None

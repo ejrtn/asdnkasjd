@@ -188,63 +188,70 @@
             document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
         }
 
-        // DOM 로드 시 소셜 로그인 연동 회원가입 처리
+        // DOM 로드 시 소셜 로그인 연동 회원가입 처리 (sessionStorage 사용)
         window.addEventListener('DOMContentLoaded', () => {
-            const rawSocialEmail = getCookie('social_id');
-            const socialEmail = rawSocialEmail ? rawSocialEmail.replaceAll('"', '') : null;
-            const socialName = getCookie('social_name');
-            const socialNickname = getCookie('social_nickname');
-            const socialPhoneNumber = getCookie('social_phone_number');
-            const socialBirthday = getCookie('social_birthday');
-            const socialGender = getCookie('social_gender');
-            const socialProvider = getCookie('social_provider')
-            if (socialEmail) {
-                const idInput = document.getElementById('id');
-                const nameInput = document.getElementById('name');
-                const nicknameInput = document.getElementById('nickname');
-                const phoneNumberInput = document.getElementById('phone_number');
-                const birthdayInput = document.getElementById('birthday');
-                const genderInput = document.getElementById('gender');
+            const socialProfileStr = sessionStorage.getItem('social_profile');
+            
+            if (socialProfileStr) {
+                try {
+                    const profile = JSON.parse(socialProfileStr);
+                    
+                    const idInput = document.getElementById('id');
+                    const nameInput = document.getElementById('name');
+                    const nicknameInput = document.getElementById('nickname');
+                    const phoneNumberInput = document.getElementById('phone_number');
+                    const birthdayInput = document.getElementById('birthday');
+                    const genderInput = document.getElementById('gender');
 
-                // URL 디코딩 필요 시 decodeURIComponent 사용
-                idInput.value = decodeURIComponent(socialEmail);
-                idInput.readOnly = true; // 소셜 이메일 변경 불가
-                nameInput.value = decodeURIComponent(socialName);
-                nameInput.readOnly = true; // 소셜 이메일 변경 불가
-                nicknameInput.value = decodeURIComponent(socialNickname);
-                
-                if(socialProvider != 'google'){
-                    phoneNumberInput.value = decodeURIComponent(socialPhoneNumber);
-                    phoneNumberInput.readOnly = true;
-                    birthdayInput.value = decodeURIComponent(socialBirthday);
-                    birthdayInput.readOnly = true;
-                    genderInput.value = decodeURIComponent(socialGender);
-                    genderInput.disabled = true;
+                    if (profile.id) {
+                        idInput.value = profile.id;
+                        idInput.readOnly = true;
+                    }
+                    if (profile.name) {
+                        nameInput.value = profile.name;
+                        nameInput.readOnly = true;
+                        
+                        if (!profile.nickname) {
+                            nicknameInput.value = profile.name;
+                        }
+                    }
+                    if (profile.nickname) {
+                        nicknameInput.value = profile.nickname;
+                    }
+                    
+                    if(profile.provider != 'google'){
+                        if (profile.phone_number) {
+                            phoneNumberInput.value = profile.phone_number;
+                            phoneNumberInput.readOnly = true;
+                        }
+                        if (profile.birthday) {
+                            birthdayInput.value = profile.birthday;
+                            birthdayInput.readOnly = true;
+                        }
+                        if (profile.gender) {
+                            genderInput.value = profile.gender;
+                            genderInput.disabled = true;
+                        }
+                    }
+
+                    // 소셜 로그인은 이메일 인증 패스 처리
+                    const verifyBtn = idInput.closest('.auth-row')?.querySelector('.btn-verify');
+                    if (verifyBtn) verifyBtn.style.display = 'none';
+
+                    const codeInput = document.getElementById('code');
+                    const codeRow = codeInput?.closest('.auth-row');
+                    if (codeRow) codeRow.style.display = 'none';
+
+                    // 소셜 로그인은 인증 완료 상태로 설정
+                    isCodeVerified = true;
+                    const codeVerifiedStatus = document.getElementById('code-verified-status');
+                    if (codeVerifiedStatus) {
+                        codeVerifiedStatus.style.display = 'inline-flex';
+                    }
+
+                } catch(e) {
+                    console.error("소셜 프로필 파싱 오류", e);
                 }
-
-                // 소셜 로그인은 이메일 인증 패스 처리
-                const verifyBtn = idInput.closest('.auth-row')?.querySelector('.btn-verify');
-                if (verifyBtn) verifyBtn.style.display = 'none';
-
-                const codeInput = document.getElementById('code');
-                const codeRow = codeInput?.closest('.auth-row');
-                if (codeRow) codeRow.style.display = 'none';
-
-                // 소셜 로그인은 인증 완료 상태로 설정
-                isCodeVerified = true;
-                const codeVerifiedStatus = document.getElementById('code-verified-status');
-                if (codeVerifiedStatus) {
-                    codeVerifiedStatus.style.display = 'inline-flex';
-                }
-
-                // 일회성 데이터이므로 읽은 후 쿠키 삭제
-                deleteCookie('social_id');
-                deleteCookie('social_name');
-                deleteCookie('social_nickname');
-                deleteCookie('social_phone_number');
-                deleteCookie('social_birthday');
-                deleteCookie('social_gender');
-                deleteCookie('social_provider');
             }
         });
 
@@ -407,6 +414,11 @@
                 is_alarm_agreed: document.getElementById('is_alarm_agreed').checked,
             }
 
+            const getSignupToken = sessionStorage.getItem('social_signup_token');
+            if(getSignupToken) {
+                data.social_signup_token = getSignupToken;
+            }
+
             try {
                 const response = await fetch('/api/v1/users', {
                     method: 'POST',
@@ -431,6 +443,11 @@
 
                 const result = await response.json();
                 alert(result.detail);
+                
+                // 가입 완료 후 임시 스토리지 비우기
+                sessionStorage.removeItem('social_signup_token');
+                sessionStorage.removeItem('social_profile');
+                
                 location.href = "/login"
             } catch (e) {
                 alert("가입 실패");

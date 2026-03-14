@@ -84,6 +84,27 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> 
     return str(encoded_jwt)
 
 
+def create_social_signup_token(data: dict) -> str:
+    """
+    미가입 소셜 로그인 유저를 위한 짧은 수명의 임시 회원가입 토큰 생성
+    """
+    to_encode = data.copy()
+    expire = datetime.now(UTC) + timedelta(minutes=30)
+    to_encode.update({"exp": expire, "type": "social_signup"})
+    encoded_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    return str(encoded_jwt)
+
+
+def decode_social_signup_token(token: str) -> dict:
+    """
+    소셜 회원가입 토큰 검증 및 데이터 반환
+    """
+    payload = decode_token(token)
+    if payload.get("type") != "social_signup":
+        raise ValueError("유효한 소셜 회원가입 토큰이 아닙니다.")
+    return payload
+
+
 def encrypt_data(data: str) -> str:
     """
     AES 알고리즘을 사용하여 민감한 평문 데이터를 암호화합니다.
