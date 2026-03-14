@@ -632,14 +632,11 @@ async function handleSaveHealthProfile() {
   if (response.ok) {
     showToast("건강정보가 저장되었습니다.", "success");
 
-    // 1. 가이드 생성 트리거 (비동기로 실행)
+    // 가이드 생성 트리거 (비동기로 실행)
     fetchWithAuth("/api/v1/guides", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
-
-    // 2. 가이드 생성 중 상태 표시 (공통 스크립트에서 자동 폴링 재개되도록)
-    localStorage.setItem('health_guide_generating', 'true');
 
   } else {
     const errorText = await response.text();

@@ -185,6 +185,7 @@ function renderHealthProfile() {
 }
 
 function renderGuide() {
+
     if (!guideData) return;
 
     // --- Section 1: 복약 안전성 ---
@@ -231,7 +232,7 @@ function renderGuide() {
     const integratedPoint = document.getElementById('integrated-point');
     const integratedBox = document.querySelector('#section-2 .guide-integrated-box');
 
-    if (currentStatus.diseases.length > 0 && s2.disease_guides && s2.disease_guides.length > 0) {
+    if (s2.disease_guides && s2.disease_guides.length > 0) {
         integratedBox.classList.remove('hidden');
         diseaseGuidesContent.innerHTML = `
             <div class="guide-disease-grid">
@@ -338,6 +339,12 @@ function setupGuideEventListeners() {
     if (ttsBtn) {
         ttsBtn.addEventListener('click', toggleTTS);
     }
+
+    // 전역 완료 이벤트 리스너 추가 (common.js에서 발생)
+    window.addEventListener('guide-generation-completed', () => {
+        console.log("🔔 가이드 생성 완료 이벤트 수신 - 데이터를 갱신합니다.");
+        generateNewGuide();
+    });
 }
 
 function toggleTTS() {

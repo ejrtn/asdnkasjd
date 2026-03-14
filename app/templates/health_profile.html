@@ -3,7 +3,7 @@
 {% block title %}Cloud9 Care - 건강정보{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/health_profile.css?v=2">
+<link rel="stylesheet" href="{{ static_v('health_profile.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -335,5 +335,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/health_profile.js"></script>
+<script src="{{ static_v('health_profile.js') }}"></script>
 {% endblock %}

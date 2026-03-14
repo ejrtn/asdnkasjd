@@ -39,7 +39,7 @@ class GuideService:
             }
 
         # 상태 업데이트: 생성 중(activity=True)
-        await self._update_loading_state(user_id)
+        await self.update_loading_state(user_id)
 
         # 최신 상태 다시 로드
         current = await self.llm_service.get_by_user_id(user_id)
@@ -118,7 +118,7 @@ class GuideService:
             "created_at": datetime.now(),
         }
 
-    async def _update_loading_state(self, user_id: str | None) -> None:
+    async def update_loading_state(self, user_id: str | None) -> None:
         try:
             saved = await self.llm_service.get_by_user_id(user_id)
             await self.llm_service.update_or_create(

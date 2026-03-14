@@ -755,6 +755,7 @@ async function fetchUploadHistory() {
         if (response.ok) {
             const result = await response.json();
             const data = result.content || [];
+            console.log(data)
             if (list1) renderUploadHistory(list1, data);
             if (list2) renderUploadHistory(list2, data);
         } else {
@@ -891,11 +892,6 @@ function renderUploadHistory(container, historyList) {
         });
     });
 }
-
-// 최초 로딩 시 데이터 패치
-document.addEventListener('DOMContentLoaded', () => {
-    fetchUploadHistory();
-});
 
 // 최초 로딩 시 데이터 패치
 document.addEventListener('DOMContentLoaded', () => {

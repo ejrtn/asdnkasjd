@@ -60,7 +60,7 @@ class Config(BaseSettings):
     # Chat Settings
     CHAT_MODEL: str = ""
     CHAT_HISTORY_LIMIT: int = 8
-    RESET_DB_ON_STARTUP: bool = False
+    RESET_DB_ON_STARTUP: bool = True
 
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 6  # API 호출용 토큰 (360분)

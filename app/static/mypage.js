@@ -178,6 +178,18 @@ window.onload = async () => {
     document.querySelector('.mypage_container .is_marketing_agreed').checked = user.is_marketing_agreed;
     document.querySelector('.mypage_container .is_alarm_agreed').checked = user.is_alarm_agreed;
 
+    // 소셜 로그인 회원의 경우 비밀번호 변경 UI 숨김 처리
+    if (user.provider !== 'local') {
+      const passwordTabs = document.querySelectorAll(".password-chenge-move");
+      const passwordSection = document.querySelector(".password-chenge");
+      
+      passwordTabs.forEach(tab => tab.style.display = 'none');
+      if (passwordSection) passwordSection.style.display = 'none';
+      
+      // 보안 관리 헤더 텍스트도 "계정 보안" 등으로 우회하거나 탭 구성에 따라 조정 가능하지만, 
+      // 일단 비밀번호 변경 자체를 원천 차단하는 것이 목표
+    }
+
     syncAlarmToggleUI();
     bindAlarmToggle();
     setMyPageMode('main');

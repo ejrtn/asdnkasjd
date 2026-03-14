@@ -19,6 +19,8 @@ class User(models.Model):
     nickname = fields.CharField(max_length=40)  # 앱에서 활동할 닉네임
     name = fields.CharField(max_length=20)  # 사용자 본명
     password = fields.CharField(max_length=128)  # 보안용 암호화 비밀번호
+    provider = fields.CharField(max_length=20, default="local")  # 가입 경로 (local, google, naver)
+    social_id = fields.CharField(max_length=100, null=True)  # 소셜 고유 식별자
     phone_number = fields.CharField(max_length=11)  # 연락처
     birthday = fields.CharField(max_length=10)  # 생년월일 (YYYY-MM-DD 형식)
     gender = fields.CharField(max_length=10)  # 성별 (예: "남성", "여성", "기타")

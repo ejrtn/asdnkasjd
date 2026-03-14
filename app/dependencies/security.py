@@ -45,21 +45,9 @@ async def get_request_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         # Redis 세션 확인 (중복 로그인 방지 및 세션 강제 종료 대응)
         stored_token = await redis_client.get(f"session:{user_email}")
 
-        # 디버그 로그 (임시)
-        print("DEBUG user_email:", user_email)
-        print("DEBUG token type:", type(token), "value:", token[:30] if token else None)
-        print("DEBUG stored_token raw type:", type(stored_token), "value:", stored_token[:30] if stored_token else None)
-
         # bytes 타입 처리
         if isinstance(stored_token, bytes):
             stored_token = stored_token.decode("utf-8")
-
-        print(
-            "DEBUG stored_token decoded type:",
-            type(stored_token),
-            "value:",
-            stored_token[:30] if stored_token else None,
-        )
 
         if not stored_token or stored_token != token:
             raise credentials_exception

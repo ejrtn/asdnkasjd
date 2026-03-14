@@ -61,6 +61,7 @@ async def get_me(user: Annotated[User, Depends(get_request_user)]) -> UserMeResp
         is_privacy_agreed=user.is_privacy_agreed,
         is_marketing_agreed=user.is_marketing_agreed,
         is_alarm_agreed=user.is_alarm_agreed,
+        provider=user.provider,
     )
 
 

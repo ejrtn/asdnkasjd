@@ -4,7 +4,7 @@
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="/static/guide.css?v=3">
+<link rel="stylesheet" href="{{ static_v('guide.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -240,5 +240,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/guide.js?v=4"></script>
+<script src="{{ static_v('guide.js') }}"></script>
 {% endblock %}

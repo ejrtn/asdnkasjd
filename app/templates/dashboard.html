@@ -3,7 +3,7 @@
 {% block title %}대시보드 - Cloud9 Care{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/dashboard.css?v=2">
+<link rel="stylesheet" href="{{ static_v('dashboard.css') }}">
 <style>
   /* 확대 기능 */
   body.zoom-large .hero-slider {
@@ -311,7 +311,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/dashboard.js"></script>
+<script src="{{ static_v('dashboard.js') }}"></script>
 <script>
   async function get_latest_day_uploads() {
     const res = await fetchWithAuth('/api/v1/ocr/last-prescription', { method: 'GET' });

@@ -8,8 +8,8 @@
 
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="/static/base.css?v=1">
-    <link rel="stylesheet" href="/static/chatbot.css">
+    <link rel="stylesheet" href="{{ static_v('base.css') }}">
+    <link rel="stylesheet" href="{{ static_v('chatbot.css') }}">
 
     {% block head %}{% endblock %}
     <style>
@@ -1589,7 +1589,7 @@
         </div>
     </div>
 
-    <script src="/static/common.js?v=1"></script>
+    <script src="/static/common.js?v=2"></script>
     <script src="/static/chatbot.js"></script>
     <script src="/static/base.js"></script>
 

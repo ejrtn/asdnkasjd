@@ -472,7 +472,7 @@ body.zoom-large .radio-item label {
     overflow: visible;
     transition: width 0.3s ease, padding 0.3s ease;
     position: relative;
-    z-index: 2000;
+    z-index: 1;
 }
 
 .nav-item {
