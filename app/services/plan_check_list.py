@@ -44,22 +44,53 @@ class PlanCheckListService:
 
     async def sync_pill_plans(self, user_id: str):
         """
-        현재 복용 중인 약물과 알람 정보를 바탕으로 오늘의 복약 체크리스트를 동기화합니다.
+        현재 설정된 모든 활성 알람 정보를 바탕으로 오늘의 체크리스트를 동기화합니다.
         """
-        # 1. 기존 'pill' 타입 항목만 삭제 (새로 동기화하므로)
+        # 1. 기존 'pill' 타입 항목 삭제 (알람 기반 항목들)
         await self._repo.delete_all_by_type(user_id, plan_type="pill")
 
-        # 2. 활성화된 복약 알람 조회 (current_med가 있는 경우)
-        alarms = await Alarm.filter(user_id=user_id, alarm_type="MED", is_active=True).prefetch_related("current_med")
+        # 2. 활성화된 모든 알람 조회
+        alarms = await Alarm.filter(user_id=user_id, is_active=True).prefetch_related("current_med")
+
+        # 알람 타입별 한글 명칭 매핑
+        type_map = {
+            "MED": "복약",
+            "BP_MORNING": "혈압 아침 측정",
+            "BP_EVENING": "혈압 저녁 측정",
+            "BS_FASTING": "혈당 공복 측정",
+            "BS_POSTMEAL": "혈당 식후 측정",
+            "BS_BEDTIME": "혈당 취침 전 측정",
+        }
 
         for alarm in alarms:
-            if alarm.current_med:
-                # 사용자가 요청한 형식: [약이름] [HH:mm] 알람 설정
-                time_str = self._format_time(alarm.alarm_time)
-                content = f"{alarm.current_med.medication_name} {time_str} 알람 설정"
-                # 이미 존재하는지 확인 (중복 방지)
-                if not await self._repo.exists_by_content_and_type(user_id, content, "pill"):
-                    await self._repo.create({"user_id": user_id, "content": content, "plan_type": "pill"})
+            time_str = self._format_time(alarm.alarm_time)
+
+            if alarm.alarm_type == "MED" and alarm.current_med:
+                content = f"[{time_str}] {alarm.current_med.medication_name} 복약 알람"
+            else:
+                alarm_name = type_map.get(alarm.alarm_type, "측정")
+                content = f"[{time_str}] {alarm_name} 알람"
+
+            # 이미 존재하는지 확인 (중복 방지)
+            if not await self._repo.exists_by_content_and_type(user_id, content, "pill"):
+                await self._repo.create({"user_id": user_id, "content": content, "plan_type": "pill"})
+
+    async def sync_llm_plans(self, user_id: str):
+        """
+        AI(LLM)를 통해 맞춤형 건강 관리 플랜을 생성하고 체크리스트에 저장합니다.
+        """
+        from app.services.health_profile import HealthProfileService
+
+        hp_service = HealthProfileService()
+        recommendation_result = await hp_service.health_profile_recommend_plan(user_id)
+
+        if recommendation_result and "content" in recommendation_result:
+            # 기존 'llm' 타입 항목 삭제
+            await self._repo.delete_all_by_type(user_id, plan_type="llm")
+
+            checklist = recommendation_result["content"].get("checklist", [])
+            for content in checklist:
+                await self._repo.create({"user_id": user_id, "content": content, "plan_type": "llm"})
 
     async def sync_automated_plans(self, user_id: str):
         """

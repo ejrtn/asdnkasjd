@@ -176,6 +176,73 @@
         border-radius: 10px;
         cursor: pointer;
     }
+
+    /* 추가된 동기화 액션 */
+    .sync-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .tooltip-container {
+        position: relative;
+        flex: 1;
+    }
+
+    .sync-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 15px;
+        border: 1.5px solid #d4a373;
+        background: #fff;
+        color: #d4a373;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(212, 163, 115, 0.1);
+    }
+
+    .sync-btn:hover {
+        background: #fdf8f3;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(212, 163, 115, 0.15);
+    }
+
+    .sync-btn.ai-btn {
+        background: #d4a373;
+        color: #fff;
+    }
+
+    .sync-btn.ai-btn:hover {
+        background: #c39462;
+    }
+
+    .btn-desc {
+        font-size: 11px;
+        color: #99abbd;
+        margin-top: 8px;
+        display: block;
+        line-height: 1.5;
+        text-align: center;
+        padding: 0 5px;
+    }
+
+    /* 로딩 상태 */
+    .sync-btn.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    /* 목록 창 */
+    .plan-list{
+        overflow-y: auto;
+        height: 356px;
+    }
 </style>
 {% endblock %}
 
@@ -194,6 +261,22 @@
 
     <div class="plan-progress-bar">
         <div id="progress-fill" style="width: 0%;"></div>
+    </div>
+
+    <!-- 동기화 및 추천 버튼 영역 -->
+    <div class="sync-actions">
+        <div class="tooltip-container">
+            <button onclick="syncAlarms()" id="sync-alarms-btn" class="sync-btn" title="설정된 복약/측정 알람을 체크리스트로 불러옵니다.">
+                <span>🔄</span> 알람 동기화
+            </button>
+            <span class="btn-desc">삭제한 복약/기록 알람을 <br>다시 불러옵니다.</span>
+        </div>
+        <div class="tooltip-container">
+            <button onclick="recommendAI()" id="recommend-ai-btn" class="sync-btn ai-btn" title="AI가 건강 상태를 분석하여 맞춤 플랜을 추천합니다.">
+                <span>✨</span> AI 추천 다시 받기
+            </button>
+            <span class="btn-desc">건강 정보를 바탕으로 <br>5개 플랜을 다시 생성합니다.</span>
+        </div>
     </div>
 
     <!-- 플랜 리스트 -->
@@ -283,7 +366,8 @@
 
     // 아이템 삭제 함수
     async function deleteItem(btn) {
-        if (confirm('이 계획을 삭제할까요?')) {
+        const msg = "정말 삭제하시겠습니까?\n\n(삭제된 항목은 '알람 동기화' 또는 'AI 추천 다시 받기' 버튼으로 다시 불러올 수 있습니다.)";
+        if (confirm(msg)) {
             const itemId = btn.closest('.plan-item').dataset.id;
             const response = await fetchWithAuth('/api/v1/plan_check_list/' + itemId, {
                 method: 'DELETE',
@@ -294,6 +378,54 @@
             }
             btn.closest('.plan-item').remove();
             updateProgress();
+        }
+    }
+
+    // 알람 동기화 함수
+    async function syncAlarms() {
+        const btn = document.getElementById('sync-alarms-btn');
+        btn.classList.add('loading');
+        btn.innerHTML = '<span>⏳</span> 동기화 중...';
+
+        try {
+            const response = await fetchWithAuth('/api/v1/plan_check_list/sync-alarms', {
+                method: 'POST'
+            });
+            if (response && response.ok) {
+                alert('알람 동기화가 완료되었습니다.');
+                loadItems();
+            } else {
+                alert('동기화에 실패했습니다.');
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            btn.classList.remove('loading');
+            btn.innerHTML = '<span>🔄</span> 알람 동기화';
+        }
+    }
+
+    // AI 추천 다시 받기 함수
+    async function recommendAI() {
+        const btn = document.getElementById('recommend-ai-btn');
+        btn.classList.add('loading');
+        btn.innerHTML = '<span>⏳</span> 생성 중...';
+
+        try {
+            const response = await fetchWithAuth('/api/v1/plan_check_list/recommend-ai', {
+                method: 'POST'
+            });
+            if (response && response.ok) {
+                alert('AI 추천 플랜이 새롭게 생성되었습니다.');
+                loadItems();
+            } else {
+                alert('추천 플랜 생성에 실패했습니다.');
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            btn.classList.remove('loading');
+            btn.innerHTML = '<span>✨</span> AI 추천 다시 받기';
         }
     }
 
