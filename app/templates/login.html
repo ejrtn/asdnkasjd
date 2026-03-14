@@ -182,10 +182,20 @@
             // 동일 출처(백엔드 도메인)에서 온 응답 처리
             if (event.data) {
                 if (event.data.status === 'login_success') {
-                    // 쿠키에 토큰이 저장되었으므로 대시보드로 이동 (이동 시 common.js가 localStorage에 복사함)
+                    // JSON API 응답에서 토큰 가져오기
+                    if (event.data.access_token) {
+                        localStorage.setItem("access_token", event.data.access_token);
+                        localStorage.setItem("auth_token", event.data.access_token);
+                        // user_id는 JWT를 디코딩해서 쓰거나 백엔드 응답에 포함해야 하지만 임시로 유지
+                        // TODO: user_id 응답에 추가하거나 디코딩
+                    }
                     window.location.href = "/dashboard";
                 } else if (event.data.status === 'signup_required') {
-                    // 쿠키에 소셜 정보가 저장되었으므로 회원가입으로 이동
+                    // JSON API 응답에서 토큰 및 프로필 가져오기
+                    if (event.data.social_signup_token) {
+                        sessionStorage.setItem("social_signup_token", event.data.social_signup_token);
+                        sessionStorage.setItem("social_profile", JSON.stringify(event.data.profile));
+                    }
                     window.location.href = "/signup";
                 }
             }

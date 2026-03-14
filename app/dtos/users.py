@@ -26,6 +26,7 @@ class SignUpRequest(BaseModel):
     is_privacy_agreed: bool
     is_marketing_agreed: bool
     is_alarm_agreed: bool
+    social_signup_token: str | None = None
 
 
 # 회원가입 응답
@@ -74,6 +75,18 @@ class SocialLoginRequest(BaseModel):
     gender: str
 
 
+class SocialLoginApiRequest(BaseModel):
+    code: str
+    state: str | None = None
+
+
+class SocialLoginApiResponse(BaseModel):
+    status: str
+    access_token: str | None = None  # login_success 시 제공
+    social_signup_token: str | None = None  # signup_required 시 제공
+    profile: SocialLoginRequest | None = None  # signup_required 시 제공
+
+
 # 구글 인가 URL 응답
 class GoogleAuthUrlResponse(BaseModel):
     auth_url: str
@@ -82,13 +95,6 @@ class GoogleAuthUrlResponse(BaseModel):
 # 네이버 인가 URL 응답
 class NaverAuthUrlResponse(BaseModel):
     auth_url: str
-
-
-# 카카오 콜백 응답
-class SocialLoginResponse(BaseModel):
-    user_id: str
-    is_new_user: bool
-    access_token: str
 
 
 # 정보 조회 응답
