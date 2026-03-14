@@ -1,7 +1,7 @@
 let sugarChart = null;
-let selectedSaveMeasureType = "";
+let selectedSaveMeasureType = "공복";
 let sugarRecords = [];
-let activeSugarFilter = "전체";
+let activeSugarFilter = "공복";
 let activeSugarRecordFilter = "공복";
 
 function switchSugarMode(mode, button) {
@@ -15,15 +15,29 @@ function selectSaveMeasureType(value, button) {
 
 function applySugarFilter(filterValue, button) {
   activeSugarFilter = filterValue;
-  BloodNotebook.selectChip('#view-filter-chip-group .notebook-chip', 'is-active', button);
+  activeSugarRecordFilter = filterValue;
+
+  syncSugarViewFilters(filterValue);
+
   renderSugarSummary();
   renderSugarChart();
+  renderSugarRecordList();
 }
 
 function applySugarRecordFilter(filterValue, button) {
-  activeSugarRecordFilter = filterValue;
-  BloodNotebook.selectChip('#sugar-record-filter-chip-group .notebook-chip', 'is-active', button);
-  renderSugarRecordList();
+  applySugarFilter(filterValue, button)
+}
+
+function syncSugarViewFilters(filterValue) {
+  // 추이 필터 칩 갱신
+  document.querySelectorAll('#view-sugar-filter-chip-group .notebook-chip').forEach(chip => {
+    chip.classList.toggle('is-active', chip.getAttribute('data-filter') === filterValue);
+  });
+  
+  // 기록 목록 필터 칩 갱신
+  document.querySelectorAll('#sugar-record-filter-chip-group .notebook-chip').forEach(chip => {
+    chip.classList.toggle('is-active', chip.getAttribute('data-filter') === filterValue);
+  });
 }
 
 function getFilteredSugarRecords() {

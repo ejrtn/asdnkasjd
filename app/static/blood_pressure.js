@@ -1,7 +1,7 @@
 let pressureChart = null;
-let selectedSavePressureType = "";
+let selectedSavePressureType = "아침";
 let pressureRecords = [];
-let activePressureFilter = "전체";
+let activePressureFilter = "아침";
 let activePressureRecordFilter = "아침";
 
 function switchPressureMode(mode, button) {
@@ -15,15 +15,30 @@ function selectSavePressureType(value, button) {
 
 function applyPressureFilter(filterValue, button) {
   activePressureFilter = filterValue;
-  BloodNotebook.selectChip('#view-pressure-filter-chip-group .notebook-chip', 'is-active', button);
+  activePressureRecordFilter = filterValue;
+  
+  // UI 칩 동기화
+  syncPressureViewFilters(filterValue);
+  
   renderPressureSummary();
   renderPressureChart();
+  renderPressureRecordList();
 }
 
 function applyPressureRecordFilter(filterValue, button) {
-  activePressureRecordFilter = filterValue;
-  BloodNotebook.selectChip('#pressure-record-filter-chip-group .notebook-chip', 'is-active', button);
-  renderPressureRecordList();
+  applyPressureFilter(filterValue, button);
+}
+
+function syncPressureViewFilters(filterValue) {
+  // 추이 필터 칩 갱신
+  document.querySelectorAll('#view-pressure-filter-chip-group .notebook-chip').forEach(chip => {
+    chip.classList.toggle('is-active', chip.getAttribute('data-filter') === filterValue);
+  });
+  
+  // 기록 목록 필터 칩 갱신
+  document.querySelectorAll('#pressure-record-filter-chip-group .notebook-chip').forEach(chip => {
+    chip.classList.toggle('is-active', chip.getAttribute('data-filter') === filterValue);
+  });
 }
 
 function getFilteredPressureRecords() {

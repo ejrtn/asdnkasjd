@@ -65,7 +65,7 @@
           <div class="notebook-field sugar-field">
             <label>측정 상황</label>
             <div class="notebook-chip-group sugar-chip-group" id="save-measure-chip-group">
-              <button type="button" class="notebook-chip sugar-chip" data-value="공복" onclick="selectSaveMeasureType('공복', this)">공복</button>
+              <button type="button" class="notebook-chip sugar-chip is-active" data-value="공복" onclick="selectSaveMeasureType('공복', this)">공복</button>
               <button type="button" class="notebook-chip sugar-chip" data-value="식후 2시간" onclick="selectSaveMeasureType('식후 2시간', this)">식후 2시간</button>
               <button type="button" class="notebook-chip sugar-chip" data-value="취침 전" onclick="selectSaveMeasureType('취침 전', this)">취침 전</button>
             </div>
@@ -147,8 +147,8 @@
           <span class="c9-badge c9-badge-slate">최근 기록 기준</span>
         </div>
 
-        <div class="notebook-filter-row" id="view-filter-chip-group">
-          <button type="button" class="notebook-chip sugar-chip" data-filter="공복" onclick="applySugarFilter('공복', this)">공복</button>
+        <div class="notebook-filter-row" id="view-sugar-filter-chip-group">
+          <button type="button" class="notebook-chip sugar-chip is-active" data-filter="공복" onclick="applySugarFilter('공복', this)">공복</button>
           <button type="button" class="notebook-chip sugar-chip" data-filter="식후 2시간" onclick="applySugarFilter('식후 2시간', this)">식후 2시간</button>
           <button type="button" class="notebook-chip sugar-chip" data-filter="취침 전" onclick="applySugarFilter('취침 전', this)">취침 전</button>
         </div>
@@ -173,9 +173,9 @@
         </div>
 
         <div class="notebook-record-filter-row" id="sugar-record-filter-chip-group">
-          <button type="button" class="notebook-chip sugar-chip is-active" onclick="applySugarRecordFilter('공복', this)">공복</button>
-          <button type="button" class="notebook-chip sugar-chip" onclick="applySugarRecordFilter('식후 2시간', this)">식후 2시간</button>
-          <button type="button" class="notebook-chip sugar-chip" onclick="applySugarRecordFilter('취침 전', this)">취침 전</button>
+          <button type="button" class="notebook-chip sugar-chip is-active" data-filter="공복" onclick="applySugarRecordFilter('공복', this)">공복</button>
+          <button type="button" class="notebook-chip sugar-chip" data-filter="식후 2시간" onclick="applySugarRecordFilter('식후 2시간', this)">식후 2시간</button>
+          <button type="button" class="notebook-chip sugar-chip" data-filter="취침 전" onclick="applySugarRecordFilter('취침 전', this)">취침 전</button>
         </div>
 
         <div id="sugar-record-list" class="notebook-record-list">
@@ -189,5 +189,5 @@
 
 {% block scripts %}
 <script src="/static/blood_common.js"></script>
-<script src="/static/blood_sugar.js"></script>
+<script src="/static/blood_sugar.js?v=1"></script>
 {% endblock %}
