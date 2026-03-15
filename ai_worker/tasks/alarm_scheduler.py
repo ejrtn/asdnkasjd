@@ -12,6 +12,7 @@ from ai_worker.core.config import Config
 from ai_worker.tasks.fcm import send_push_notification
 from app.models.user import User
 from app.services.alarm import AlarmService
+from app.services.drug_service import DrugService
 from app.services.plan_check_list import PlanCheckListService
 
 config = Config()
@@ -250,6 +251,29 @@ async def sync_all_users_daily_plans() -> None:
     logging.info("[SCHEDULER] Completed daily plan sync")
 
 
+async def sync_drug_master_daily() -> None:
+    """매일 자정 공공데이터포털 API와 동기화 (스테이징 -> 보충 -> 프로덕션 이전)"""
+    logging.info("[SCHEDULER] Starting daily drug master sync with staging & enrichment")
+
+    try:
+        service = DrugService()
+
+        # 1. 스테이징 테이블로 데이터 동기화 및 자동 보충 (batch_size 100으로 상향)
+        # auto_enrich=True일 경우 DrugEnrichmentService를 통해 배치 처리가 수행됨
+        logging.info("[SCHEDULER] (Step 1/2) Syncing to DrugMasterTmp and enriching...")
+        sync_result = await service.sync_drugs(batch_size=100, auto_enrich=True, use_staging=True)
+        logging.info(f"[SCHEDULER] Staging sync complete: {sync_result}")
+
+        # 2. 스테이징 데이터를 프로덕션으로 이전 (원자적 교체)
+        logging.info("[SCHEDULER] (Step 2/2) Promoting enriched data to DrugMaster...")
+        promote_result = await service.promote_tmp_to_production()
+
+        logging.info(f"[SCHEDULER] Daily drug sync & promotion finished: {promote_result}")
+
+    except Exception as e:
+        logging.error(f"[SCHEDULER] Daily drug sync failed: {e}")
+
+
 async def run_alarm_scheduler() -> None:
     """매 분 경계에 맞춰 알람 체크 루프"""
     logging.info("⏰ 알람 스케줄러 루프 시작")
@@ -266,8 +290,13 @@ async def run_alarm_scheduler() -> None:
             await check_and_send_snoozed_alarm_histories()
 
             now_after = datetime.now(tz=tz)
-            if now_after.hour == 0 and now_after.minute == 0:
+            # 매일 자정: 일일 플랜 동기화
+            # 매주 월요일 00:00 (일요일->월요일 자정): 알약 마스터 동기화
+            if now_after.hour == 0 and now_after.minute == 0 and now_after.second < 20:
                 await sync_all_users_daily_plans()
+                # 월요일(0)에만 알약 업데이트 수행
+                if now_after.weekday() == 0:
+                    await sync_drug_master_daily()
 
         except Exception as e:
             logging.exception(f"❌ 알람 스케줄러 오류: {e}")

@@ -157,8 +157,6 @@ class DefaultData:
             await self._create_lifestyle_data(user, clinical_data)
             await self._create_service_data(user, uinfo, clinical_data)
 
-        print("Default data population for multiple users completed successfully.")
-
     async def _create_user(self, uinfo: dict) -> User:
         user_data = {
             "id": uinfo["id"],

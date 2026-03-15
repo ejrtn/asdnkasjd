@@ -1,4 +1,5 @@
 import base64
+import logging
 import os
 import re
 import uuid
@@ -6,37 +7,26 @@ from pathlib import Path
 from typing import Any
 
 import anyio
-import pandas as pd
 from fastapi import UploadFile
+from tortoise.expressions import Q
 
+from app.models.drug_master import DrugMaster
 from app.repositories.upload import UploadRepository
+from app.services.drug_enrichment_service import DrugEnrichmentService
 from app.services.llm_service import LLMService
+
+logger = logging.getLogger(__name__)
 
 
 class UploadService:
     UPLOAD_DIR = "/app/uploads/"
     CHROMA_DB_PATH = "./data/chroma_db"
-    CSV_PATH = "app/data/docs/nedrug_data.csv"
-    EMBEDDING_MODEL = "text-embedding-3-small"
     VISION_MODEL = "gpt-4o-mini"
     COLLECTION_NAME = "pill_database"
 
     def __init__(self):
         self._repo = UploadRepository()
         self.llm_service = LLMService()
-
-        # CSV 로드 및 데이터 정제
-        if os.path.exists(self.CSV_PATH):
-            self.db_df = pd.read_csv(self.CSV_PATH, encoding="utf-8-sig", low_memory=False)
-            # 검색 성능을 위해 결측치를 빈 문자열로 대체하고 대문자로 통일
-            self.db_df["표시앞"] = self.db_df["표시앞"].fillna("").astype(str).str.upper()
-            self.db_df["표시뒤"] = self.db_df["표시뒤"].fillna("").astype(str).str.upper()
-            self.db_df["성상"] = self.db_df["성상"].fillna("").astype(str)
-            self.db_df["색상앞"] = self.db_df["색상앞"].fillna("").astype(str)
-            self.db_df["제형코드명"] = self.db_df["제형코드명"].fillna("").astype(str)
-            print(f"✅ DB Loaded: {len(self.db_df)} rows")
-        else:
-            print(f"⚠️ Warning: CSV not found at {self.CSV_PATH}")
 
         # 1. 약학정보원 기준 색상 그룹화 (대표색 기준 통합)
         self.COLOR_GROUPS = {
@@ -132,7 +122,40 @@ class UploadService:
             with open(row.file_path, "rb") as f:
                 base64_imgs[row.category] = base64.b64encode(f.read()).decode("utf-8")
 
-        # 2. Vision 분석 요청 (필드 4개로 고정)
+        # 2. Vision 분석 요청
+        ai_feat = await self._get_ai_analysis(base64_imgs)
+        img1 = ai_feat.get("image1", {})
+        img2 = ai_feat.get("image2", {})
+
+        # 3. AI 추출 데이터 정리 및 후보군 생성
+        t1_raw = (img1.get("text") or "").strip().upper()
+        t2_raw = (img2.get("text") or "").strip().upper()
+        cands1 = self._get_expanded_imprints(t1_raw)
+        cands2 = self._get_expanded_imprints(t2_raw)
+
+        # 4. DB 1차 필터링
+        candidates = await self._get_db_candidates(img1)
+
+        # 5. 스코어링 및 필터링
+        final_list = self._score_candidates(candidates, img1, img2, cands1, cands2)
+
+        # 6. 상위 3개 추출 및 정보 보충
+        final_list = sorted(final_list, key=lambda x: x["score"], reverse=True)[:3]
+
+        if not final_list:
+            return {
+                "status": "success",
+                "ai_extracted": ai_feat,
+                "candidates": [],
+                "message": "일치하는 약이 없습니다.",
+            }
+
+        await self._enrich_missing_info(final_list)
+
+        return {"status": "success", "ai_extracted": ai_feat, "candidates": final_list}
+
+    async def _get_ai_analysis(self, base64_imgs):
+        """Vision 분석 요청 및 결과 반환"""
         prompt = """
         의약품 식별 전문가로서 이미지를 분석하여 알약의 특징을 추출해줘.
         반드시 아래의 **JSON** 구조로만 답변해야 해.
@@ -140,31 +163,26 @@ class UploadService:
         [출력 규칙]
         1. text: image1, image2의 OCR 문자(영어, 숫자 조합). 없으면 빈 문자열.
         2. text: 문자가 위/아래 또는 좌/우로 나뉘어 있으면 ','로 구분 (예: 'SK,T')
-        4. text: {'T', 'I', '1', 'L'},
-            {'Q', 'O', 'D', '0'},
-            {'5', 'S'},
-            {'8', 'B'} 이렇게 그룹화 된 부분의 인식이 어려울 거라 특히 확실히 체크해줘 각각 특징을 보고
         3. color: [하양,노랑,주황,분홍,빨강,갈색,연두,초록,청록,파랑,남색,자주,보라,회색,검정,투명] 중 선택
         4. formulation: [정제,경질캡슐,연질캡슐,기타] 중 선택
            - 투명하고 액체가 들어있으면 '연질캡슐', 조립된 형태면 '경질캡슐'.
         5. shape: [원형,타원형,장방형,반원형,삼각형,사각형,마름모형,오각형,육각형,팔각형,기타] 중 선택
 
-        {{
-            "image1" : {{
+        {
+            "image1" : {
                 "text" : "",
                 "color": "",
                 "formulation": "",
                 "shape": ""
-            }},
-            "image2" : {{
+            },
+            "image2" : {
                 "text" : "",
                 "color": "",
                 "formulation": "",
                 "shape": ""
-            }}
-        }}
+            }
+        }
         """
-
         ai_analysis = await self.llm_service.generate_json(
             messages=[
                 {
@@ -185,88 +203,109 @@ class UploadService:
             model=self.VISION_MODEL,
             temperature=0.1,
         )
+        return ai_analysis.get("content", ai_analysis) if isinstance(ai_analysis, dict) else ai_analysis
 
-        ai_feat = ai_analysis.get("content", ai_analysis) if isinstance(ai_analysis, dict) else ai_analysis
+    async def _get_db_candidates(self, img1):
+        """기본 정보를 기반으로 DB에서 후보군 조회"""
 
-        img1 = ai_feat.get("image1", {})
-        img2 = ai_feat.get("image2", {})
-
-        # --- [1] 각인(text) 처리 ---
-        t1 = (img1.get("text") or "").strip().upper()
-        t2 = (img2.get("text") or "").strip().upper()
-
-        # OCR 오차 보정 포함 후보 생성
-        cands1 = self._get_expanded_imprints(t1)
-        cands2 = self._get_expanded_imprints(t2)
-        combined_cands = self._get_expanded_imprints(t1 + t2) + self._get_expanded_imprints(t2 + t1)
-        all_imprints = list(set(cands1 + cands2 + combined_cands))
-
-        # --- [2] 색상(color) 처리 ---
-        ai_color = img1.get("color", "하양")
-        search_colors = self.COLOR_GROUPS.get(ai_color, [ai_color])
-
-        # --- [3] 모양(shape) 처리 ---
         ai_shape = img1.get("shape", "")
-        standard_shapes = ["원형", "타원형", "장방형"]
-        if ai_shape in standard_shapes:
-            shape_condition = self.db_df["성상"].str.contains(ai_shape, na=False)
-        else:
-            shape_condition = ~self.db_df["성상"].str.contains("|".join(standard_shapes), na=False)
-
-        # --- [4] 제형(formulation) 처리 ---
         ai_form = img1.get("formulation", "")
-        if "경질" in ai_form:
-            form_condition = self.db_df["제형코드명"].str.contains("경질캡슐", na=False)
-        elif "연질" in ai_form:
-            form_condition = self.db_df["제형코드명"].str.contains("연질캡슐", na=False)
-        elif "정제" in ai_form:
-            form_condition = self.db_df["제형코드명"].str.contains("정제", na=False)
-        else:
-            form_condition = True
 
-        # --- [5] 필터링 ---
-        df = self.db_df.copy()
-        imprint_mask = (
-            df["표시앞"].isin(all_imprints)
-            | df["표시뒤"].isin(all_imprints)
-            | (df["표시앞"] + df["표시뒤"]).isin(all_imprints)
-        )
+        query = Q()
+        if ai_shape:
+            query |= Q(drug_shape__icontains=ai_shape)
+        if ai_form:
+            query |= Q(form_code_name__icontains=ai_form[:2])
 
-        # 1차 필터 (각인 & 모양 & 제형)
-        candidates = df[imprint_mask & shape_condition & form_condition].copy()
+        return await DrugMaster.filter(query).all()
 
-        # 결과 부족 시 각인만으로 확장
-        if len(candidates) == 0:
-            candidates = df[imprint_mask].copy()
-
-        # --- [6] 스코어링 및 TOP 3 추출 ---
+    def _score_candidates(self, candidates, img1, img2, cands1, cands2):
+        """후보군들에 대해 AI 분석값과 비교하여 스코어링"""
         final_list = []
-        for _, row in candidates.iterrows():
-            score = 0.5  # 각인 통과 기본점수
+        ai_shape = img1.get("shape", "")
+        ai_form = img1.get("formulation", "")
 
-            # 색상 일치 가점 (+0.3)
-            db_color = str(row["색상앞"]) + str(row["색상뒤"])
-            if any(c in db_color for c in search_colors):
-                score += 0.3
+        for row in candidates:
+            db_f_text = (row.print_front or "").strip().upper()
+            db_b_text = (row.print_back or "").strip().upper()
+            db_shape = row.drug_shape or ""
+            db_form = row.form_code_name or ""
 
-            # 제형 정확도 가점 (+0.2)
-            if ai_form[:2] in str(row["제형코드명"]):
-                score += 0.2
+            # 색상 그룹화
+            ai_color1 = img1.get("color", "")
+            ai_color2 = img2.get("color", "")
+            search_colors1 = self.COLOR_GROUPS.get(ai_color1, [ai_color1])
+            search_colors2 = self.COLOR_GROUPS.get(ai_color2, [ai_color2])
 
-            final_list.append(
-                {
-                    "name": row["품목명"],
-                    "company": row["업소명"],
-                    "score": round(score, 2),
-                    "image_path": row["큰제품이미지"],
-                    "reason": "분석 결과 가장 일치하는 의약품",
-                }
+            # 시나리오 A & B 계산
+            score_a = self._calculate_match(
+                db_f_text, db_b_text, row.color_class1, row.color_class2, cands1, cands2, search_colors1, search_colors2
+            )
+            score_b = self._calculate_match(
+                db_f_text, db_b_text, row.color_class1, row.color_class2, cands2, cands1, search_colors2, search_colors1
             )
 
-        # 점수순 정렬 후 상위 3개만 반환
-        final_list = sorted(final_list, key=lambda x: x["score"], reverse=True)[:3]
+            # 공통 항목
+            common_score = 0
+            if ai_shape and ai_shape in db_shape:
+                common_score += 0.2
+            if ai_form and ai_form[:2] in db_form:
+                common_score += 0.2
 
-        return {"status": "success", "ai_extracted": ai_feat, "candidates": final_list}
+            total_score = round(max(score_a, score_b) + common_score, 2)
+
+            if total_score > 0.3:
+                final_list.append(
+                    {
+                        "drug_id": row.item_seq,
+                        "name": row.item_name,
+                        "company": row.entp_name,
+                        "score": total_score,
+                        "image_path": row.item_image,
+                        "reason": f"일치도 {int(total_score * 100)}% 분석 결과",
+                        "efcy_qesitm": row.efcy_qesitm,
+                        "use_method_qesitm": row.use_method_qesitm,
+                        "atpn_warn_qesitm": row.atpn_warn_qesitm,
+                        "atpn_qesitm": row.atpn_qesitm,
+                        "intrc_qesitm": row.intrc_qesitm,
+                        "se_qesitm": row.se_qesitm,
+                        "deposit_method_qesitm": row.deposit_method_qesitm,
+                        "source": row.source,
+                    }
+                )
+        return final_list
+
+    def _calculate_match(
+        self, db_f_text, db_b_text, db_f_color, db_b_color, cands_f, cands_b, search_colors_f, search_colors_b
+    ):
+        """특정 방향 매칭 스코어 계산"""
+        score = 0
+        if db_f_text and db_f_text in cands_f:
+            score += 0.2
+        if db_b_text and db_b_text in cands_b:
+            score += 0.2
+        if any(c in (db_f_color or "") for c in search_colors_f):
+            score += 0.1
+        if any(c in (db_b_color or "") for c in search_colors_b):
+            score += 0.1
+        return score
+
+    async def _enrich_missing_info(self, final_list):
+        """부족한 약물 정보를 LLM으로 실시간 보충"""
+
+        enricher = DrugEnrichmentService()
+
+        for item in final_list:
+            if not item.get("efcy_qesitm"):
+                drug_record = await DrugMaster.filter(item_seq=item["drug_id"]).first()
+                if drug_record:
+                    enriched_data = await enricher._generate_drug_info(drug_record)
+                    if enriched_data:
+                        update_dict = enriched_data.model_dump()
+                        update_dict["source"] = "AI"
+                        await drug_record.update_from_dict(update_dict).save()
+                        for key, value in update_dict.items():
+                            item[key] = value
 
     async def get_upload_file(self, user: Any | None) -> dict[str, Any]:
         """

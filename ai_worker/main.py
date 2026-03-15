@@ -41,6 +41,8 @@ MODELS = [
     "app.models.user",
     "app.models.plan_check_list",
     "app.models.llm_life_guide",
+    "app.models.drug_master",
+    "app.models.drug_master_tmp",
 ]
 
 # 전역 변수로 스케줄러 태스크 관리

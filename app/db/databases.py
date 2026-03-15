@@ -25,6 +25,8 @@ TORTOISE_APP_MODELS = [
     "app.models.blood_sugar_record",
     "app.models.health_profile",
     "app.models.plan_check_list",
+    "app.models.drug_master",
+    "app.models.drug_master_tmp",
 ]
 
 TORTOISE_ORM = {

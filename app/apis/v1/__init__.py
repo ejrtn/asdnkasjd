@@ -7,6 +7,7 @@ from app.apis.v1.chat_routers import chat_router
 from app.apis.v1.common_routers import common_router
 from app.apis.v1.current_med_routers import current_med_router
 from app.apis.v1.dashboard_routers import router as dashboard_router
+from app.apis.v1.drug_routers import drug_router
 from app.apis.v1.guide_routers import guide_router
 from app.apis.v1.health_routers import health_router
 from app.apis.v1.insights_routers import router as insights_router
@@ -26,6 +27,7 @@ api_v1_router.include_router(auth_router)
 api_v1_router.include_router(user_router)
 api_v1_router.include_router(health_router)
 api_v1_router.include_router(upload_router)
+api_v1_router.include_router(drug_router)
 api_v1_router.include_router(ocr_router)
 api_v1_router.include_router(analysis_router)
 api_v1_router.include_router(result_router)
