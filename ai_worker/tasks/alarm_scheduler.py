@@ -275,7 +275,7 @@ async def run_alarm_scheduler() -> None:
         # 다음 체크 시점 계산 (20초 단위 정렬: 00, 20, 40초)
         now = datetime.now(tz=tz)
         current_second = now.second + (now.microsecond / 1_000_000)
-        
+
         # 20초 단위로 올림 (0->20, 20->40, 40->60)
         next_boundary = ((int(current_second) // 20) + 1) * 20
         seconds_until_next = next_boundary - current_second
