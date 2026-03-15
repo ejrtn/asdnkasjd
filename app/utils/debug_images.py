@@ -13,7 +13,6 @@ def save_debug_image(image_bytes: bytes, prefix: str = "ocr_debug") -> str | Non
     전처리된 이미지를 디버깅 목적으로 로컬 디렉토리에 저장합니다.
     환경 변수 DEBUG_SAVE_PREPROCESSED_IMAGES가 True일 때만 동작합니다.
     """
-    print(f"DEBUG_SAVE_PREPROCESSED_IMAGES 설정값: {config.DEBUG_SAVE_PREPROCESSED_IMAGES}")
 
     if not config.DEBUG_SAVE_PREPROCESSED_IMAGES:
         return None

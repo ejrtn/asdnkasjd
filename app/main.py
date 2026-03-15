@@ -16,6 +16,7 @@ from app.db.databases import TORTOISE_ORM
 from app.utils.default_data import DefaultData
 
 logger = logging.getLogger("seed")
+logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
@@ -86,9 +87,6 @@ app = FastAPI(
 )
 # initialize_tortoise(app)  # lifespan에서 직접 관리하므로 주석 처리
 
-# Tortoise-ORM의 SQL 로그를 활성화
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("tortoise.db_client").setLevel(logging.DEBUG)
 
 # [추가된 기능] 정적 파일 및 템플릿 설정
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -96,6 +94,20 @@ uploads_dir = os.path.join(os.path.dirname(__file__), "../uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 templates = Jinja2Templates(directory="app/templates")
+
+
+def get_static_v(path: str) -> str:
+    """
+    정적 파일의 URL에 파일 수정 시간을 기반으로 한 버전(?v=...)을 자동으로 추가합니다.
+    """
+    static_file_path = os.path.join("app/static", path)
+    if os.path.exists(static_file_path):
+        mtime = int(os.path.getmtime(static_file_path))
+        return f"/static/{path}?v={mtime}"
+    return f"/static/{path}"
+
+
+templates.env.globals["static_v"] = get_static_v
 
 
 def _is_logged_in(request: Request) -> bool:

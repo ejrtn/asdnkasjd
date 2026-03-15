@@ -123,7 +123,10 @@ class HealthProfileService:
         if request.medications:
             await self.current_med_repo.create_many(user_id, [m.model_dump() for m in request.medications])
 
-        # 5. 무거운 작업(AI 추천 및 동기화)을 백그라운드로 이동
+        # 5. 가이드 생성 트리거 (DB activity=True 및 백그라운드 태스크 등록)
+        await self.guide_service.generate_guide(user_id, background_tasks)
+
+        # 6. 무거운 작업(AI 추천 및 동기화)을 백그라운드로 이동
         if background_tasks:
             background_tasks.add_task(self._background_save_tasks, user_id)
         else:

@@ -3,8 +3,8 @@
 {% block title %}Cloud9 Care - 혈압 수첩{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/blood_common.css">
-<link rel="stylesheet" href="/static/blood_pressure.css">
+<link rel="stylesheet" href="{{ static_v('blood_common.css') }}">
+<link rel="stylesheet" href="{{ static_v('blood_pressure.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
@@ -191,6 +191,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/blood_common.js"></script>
-<script src="/static/blood_pressure.js?v=2"></script>
+<script src="{{ static_v('blood_common.js') }}"></script>
+<script src="{{ static_v('blood_pressure.js') }}"></script>
 {% endblock %}

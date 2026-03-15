@@ -327,12 +327,46 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
     window.addEventListener('load', initFCM);
 }
 
+let __healthProfilePollInterval = null;
+
 function stopHealthProfilePolling() {
     if (__healthProfilePollInterval) {
         clearInterval(__healthProfilePollInterval);
         __healthProfilePollInterval = null;
     }
-    localStorage.removeItem('health_guide_generating');
+}
+
+// 모든 페이지 공통: 가이드 생성 상태 폴링 및 알림
+async function checkGlobalGuideStatus() {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    try {
+        const res = await fetchWithAuth('/api/v1/guides', { method: 'GET' });
+        if (!res || !res.ok) return;
+
+        const data = await res.json();
+
+        // 생성 중인 경우 폴링 시작 (이미 시작되어 있으면 중복 방지)
+        if (data.activity === true) {
+            if (!__healthProfilePollInterval) {
+                console.log("📡 AI 가이드 생성 중... 상태 모니터링을 시작합니다.");
+                __healthProfilePollInterval = setInterval(checkGlobalGuideStatus, 5000);
+            }
+        }
+        // 생성 완료된 경우
+        else if (data.activity === false && __healthProfilePollInterval) {
+            console.log("✅ AI 가이드 생성 완료!");
+            stopHealthProfilePolling();
+            showAppToast("맞춤 건강 가이드가 생성되었습니다! '건강 가이드' 메뉴에서 확인해 보세요.", "success", "가이드 생성 완료");
+
+            // 가이드 페이지라면 페이지 데이터 갱신을 위해 이벤트 발생
+            window.dispatchEvent(new CustomEvent('guide-generation-completed'));
+        }
+    } catch (e) {
+        console.error("가이드 상태 체크 실패:", e);
+        stopHealthProfilePolling();
+    }
 }
 
 
@@ -421,10 +455,8 @@ window.addEventListener('load', () => {
         initFCM();
     }
 
-    // 2. 가이드 생성 폴링 재개 (생성 중이었던 경우)
-    if (localStorage.getItem('health_guide_generating') === 'true') {
-        health_profile();
-    }
+    // 2. 가이드 생성 상태 체크 (생성 중이면 폴링 시작)
+    checkGlobalGuideStatus();
 
     // 3. 알람 폴링 (FCM 백업)
     pollDueAlarms();

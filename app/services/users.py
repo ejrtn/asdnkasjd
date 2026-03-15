@@ -24,7 +24,6 @@ from app.utils.common import normalize_phone_number, redis_client
 from app.utils.security import (
     create_access_token,
     create_refresh_token,
-    create_social_signup_token,
     decode_social_signup_token,
     hash_password,
     verify_password,
@@ -187,36 +186,52 @@ class UserManageService:
 
     async def find_email(self, name: str, phone_number: str) -> str | None:
         """
-        이름과 전화번호로 이메일을 찾습니다.
+        이름과 전화번호로 이메일을 찾습니다. (일반 계정만 해당)
         """
         normalized_phone = normalize_phone_number(phone_number)
-        user: User = await self.user_repo.get_by_name_and_phone(name, normalized_phone)  # type: ignore[assignment]
+        # provider='local' 조건 추가
+        user: User = await self.user_repo._model.get_or_none(name=name, phone_number=normalized_phone, provider="local")  # type: ignore[assignment]
 
         return str(user.id) if user else None
 
     async def verify_user_for_reset(self, email: str, name: str, phone_number: str) -> None:
         """
-        비밀번호 재설정을 위한 사용자 정보 검증
+        비밀번호 재설정을 위한 사용자 정보 검증 (일반 계정만 해당)
         """
         normalized_phone = normalize_phone_number(phone_number)
         user: User = await self.user_repo.get_by_id(email)
-        if not user or user.name != name or user.phone_number != normalized_phone:
+        if not user or user.provider != "local" or user.name != name or user.phone_number != normalized_phone:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="사용자 정보가 일치하지 않습니다.")
 
     async def reset_password(self, id: str, new_password: str) -> None:
         """
-        비밀번호를 재설정합니다.
+        비밀번호를 재설정합니다. (일반 계정만 가능)
         """
         user: User = await self.user_repo.get_by_id(id)
-        if not user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="사용자를 찾을 수 없습니다.")
+        if not user or user.provider != "local":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="사용자 정보를 찾을 수 없습니다.")
         user.password = hash_password(new_password)
         await user.save()
 
     async def change_password(self, user: User, data: ChangePasswordRequest) -> None:
         """
-        비밀번호 변경
+        비밀번호 변경 (일반 계정만 가능)
         """
+        if user.provider != "local":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="소셜 로그인 계정은 비밀번호를 변경할 수 없습니다."
+            )
+
+        # 비밀번호 검증
+        if not verify_password(data.old_password, user.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="아이디 또는 비밀번호가 올바르지 않습니다.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user.password = hash_password(data.new_password)
+        await user.save()
 
         # 비밀번호 검증
         if not verify_password(data.old_password, user.password):
@@ -302,16 +317,33 @@ class UserManageService:
             tokens = await self.social_login(existing_user)
             return SocialLoginApiResponse(
                 status="login_success", access_token=tokens["access_token"], social_signup_token=None, profile=None
-            ), tokens["refresh_token"]  # refresh_token은 router에서 쿠키로 설정하기 위해 튜플로 반환
+            ), tokens["refresh_token"]
         else:
-            # 미가입 유저 -> 소셜 회원가입 임시 토큰 발급
-            social_signup_token = create_social_signup_token(social_data.model_dump())
+            # 미가입 유저 -> 자동 회원가입
+            import uuid
+
+            user_data = {
+                "id": social_data.id,
+                "name": social_data.name,
+                "nickname": social_data.nickname,
+                "password": hash_password(str(uuid.uuid4())),  # 더미 비밀번호
+                "phone_number": normalize_phone_number(social_data.phone_number) if social_data.phone_number else "",
+                "birthday": social_data.birthday,
+                "gender": social_data.gender,
+                "alarm_tf": True,
+                "provider": "google",
+                "social_id": social_data.social_id,
+                "is_terms_agreed": True,
+                "is_privacy_agreed": True,
+            }
+            new_user = await self.user_repo.create_user(user_data)
+            tokens = await self.social_login(new_user)
             return SocialLoginApiResponse(
-                status="signup_required",
-                access_token=None,
-                social_signup_token=social_signup_token,
-                profile=social_data,
-            ), None
+                status="login_success",
+                access_token=tokens["access_token"],
+                social_signup_token=None,
+                profile=None,
+            ), tokens["refresh_token"]
 
     async def naver_login(self, code: str, state: str | None = None) -> tuple[SocialLoginApiResponse, str | None]:
         """
@@ -373,11 +405,28 @@ class UserManageService:
                 status="login_success", access_token=tokens["access_token"], social_signup_token=None, profile=None
             ), tokens["refresh_token"]
         else:
-            # 회원가입 필요 -> 소셜 회원가입 임시 토큰 발급
-            social_signup_token = create_social_signup_token(social_data.model_dump())
+            # 미가입 유저 -> 자동 회원가입
+            import uuid
+
+            user_data = {
+                "id": social_data.id,
+                "name": social_data.name,
+                "nickname": social_data.nickname,
+                "password": hash_password(str(uuid.uuid4())),  # 더미 비밀번호
+                "phone_number": normalize_phone_number(social_data.phone_number) if social_data.phone_number else "",
+                "birthday": social_data.birthday or "",
+                "gender": social_data.gender or "",
+                "alarm_tf": True,
+                "provider": "naver",
+                "social_id": social_data.social_id,
+                "is_terms_agreed": True,
+                "is_privacy_agreed": True,
+            }
+            new_user = await self.user_repo.create_user(user_data)
+            tokens = await self.social_login(new_user)
             return SocialLoginApiResponse(
-                status="signup_required",
-                access_token=None,
-                social_signup_token=social_signup_token,
-                profile=social_data,
-            ), None
+                status="login_success",
+                access_token=tokens["access_token"],
+                social_signup_token=None,
+                profile=None,
+            ), tokens["refresh_token"]

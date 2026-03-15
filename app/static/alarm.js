@@ -108,6 +108,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     await refreshAlarmPageState();
 });
 
+// 전역 클릭 핸들러: 시간 입력 필드의 텍스트 영역(또는 label)을 클릭해도 선택창이 열리도록 함
+document.addEventListener('click', (e) => {
+    // 1. input[type="time"] 자체를 클릭한 경우
+    if (e.target && e.target.type === 'time') {
+        if (typeof e.target.showPicker === 'function') {
+            try { e.target.showPicker(); } catch (err) { console.warn('showPicker failed:', err); }
+        }
+    }
+    // 2. label 또는 label 내부 요소를 클릭하여 input[type="time"]이 타겟팅된 경우
+    else {
+        const label = e.target.closest('label');
+        if (label && label.htmlFor) {
+            const input = document.getElementById(label.htmlFor);
+            if (input && input.type === 'time') {
+                if (typeof input.showPicker === 'function') {
+                    try { input.showPicker(); } catch (err) { console.warn('showPicker failed:', err); }
+                }
+            }
+        }
+    }
+});
+
 window.addEventListener('alarm-history-updated', async () => {
     const historyPanel = document.getElementById('alarm-mode-history');
     if (historyPanel && historyPanel.classList.contains('active')) {
@@ -271,7 +293,7 @@ function renderMeds() {
         const finalActive = masterAlarmEnabled && hasActiveAlarm;
 
         return `
-            <div class="med-item ${selectedMedId === med.id ? 'selected' : ''}" onclick="showMedDetail(${med.id})">
+            <div class="med-item ${selectedMedId === med.id ? 'selected' : ''}" data-id="${med.id}" onclick="showMedDetail(${med.id})">
                 <div class="med-item-main">
                     <div class="med-name">${med.medication_name}</div>
                     <div class="med-meta">알람 ${medAlarms.length}개</div>
@@ -296,6 +318,16 @@ function renderMeds() {
 
 function showMedDetail(medId) {
     selectedMedId = medId;
+
+    // UI 업데이트: 선택된 약물 배경색 즉시 변경
+    const medItems = document.querySelectorAll('.med-item');
+    medItems.forEach(item => {
+        if (parseInt(item.getAttribute('data-id')) === medId) {
+            item.classList.add('selected');
+        } else {
+            item.classList.remove('selected');
+        }
+    });
     const med = currentMeds.find(m => m.id === medId);
     if (!med) return;
 
@@ -312,8 +344,8 @@ function showMedDetail(medId) {
     const detailHtml = `
         <div class="alarm-time-list">
             ${medAlarms.length === 0
-                ? `<div class="alarm-detail-empty" style="min-height: 160px;">등록된 알람이 없습니다.</div>`
-                : medAlarms.map(alarm => `
+            ? `<div class="alarm-detail-empty" style="min-height: 160px;">등록된 알람이 없습니다.</div>`
+            : medAlarms.map(alarm => `
                     <div class="alarm-time-item ${!masterAlarmEnabled ? 'is-disabled' : ''}">
                         <div class="alarm-time-left">
                             <span>🕔</span>
@@ -337,7 +369,7 @@ function showMedDetail(medId) {
                         </div>
                     </div>
                 `).join('')
-            }
+        }
         </div>
 
         <div class="alarm-add-box ${!masterAlarmEnabled ? 'is-disabled is-master-disabled' : ''}">
@@ -357,6 +389,7 @@ function showMedDetail(medId) {
 }
 
 async function toggleMedAlarms(medId, isActive) {
+    showMedDetail(medId);
     if (!masterAlarmEnabled) {
         showAppToast('마이페이지에서 전체 알람이 OFF 상태입니다.', 'warn', '복약 알람');
         return;

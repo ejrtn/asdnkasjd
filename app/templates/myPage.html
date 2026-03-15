@@ -4,7 +4,7 @@
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="/static/mypage.css?v=2">
+<link rel="stylesheet" href="{{ static_v('mypage.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -236,5 +236,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/mypage.js?v=1"></script>
+<script src="{{ static_v('mypage.js') }}"></script>
 {% endblock %}
