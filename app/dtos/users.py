@@ -112,6 +112,7 @@ class UserMeResponse(BaseSerializerModel):
     is_privacy_agreed: bool
     is_marketing_agreed: bool
     is_alarm_agreed: bool
+    provider: str | None = None
 
     class Config:
         from_attributes = True

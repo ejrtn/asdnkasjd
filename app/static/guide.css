@@ -1,5 +1,22 @@
 /* base.css에서 .guide-page-container, .c9-page-header 공통 처리 */
 
+.guide-updated-at {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-top: 4px;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.guide-updated-at-dot {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1;
+}
+
 .guide-page-container>.c9-page-header {
     align-items: center;
 }
@@ -22,7 +39,7 @@
 
 .guide-layout {
     display: grid;
-    grid-template-columns: 350px minmax(0, 1fr);
+    grid-template-columns: 400px minmax(0, 1fr);
     gap: 20px;
     align-items: start;
     width: 100%;
@@ -179,6 +196,18 @@
 
 .guide-section-card.line-indigo {
     border-left: 7px solid #6366f1;
+}
+
+.guide-section-card.line-orange {
+    border-left: 7px solid #f97316;
+}
+
+.guide-section-card.line-green {
+    border-left: 7px solid #22c55e;
+}
+
+.guide-section-card.line-pink {
+    border-left: 7px solid #ec4899;
 }
 
 .guide-section-card.line-slate {

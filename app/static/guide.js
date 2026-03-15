@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentStatus = { diseases: [], allergies: [], meds: [], profile: null, bp_records: [], bs_records: [] };
 let guideData = null;
+let guideCreatedAt = null;
 let isSpeaking2 = false;
 const synthesis2 = window.speechSynthesis;
 
@@ -98,7 +99,9 @@ async function generateNewGuide(isPolling = false) {
 
         if (data.generated_content) {
             guideData = data.generated_content;
+            guideCreatedAt = data.created_at || null;
             renderGuide();
+            renderGuideTimestamp();
 
             if (loadingState) loadingState.classList.add('hidden');
             if (content) {
@@ -112,6 +115,32 @@ async function generateNewGuide(isPolling = false) {
         if (!isPolling) {
             setTimeout(() => generateNewGuide(false), 5000);
         }
+    }
+}
+
+function renderGuideTimestamp() {
+    const el = document.getElementById('guide-updated-at');
+    if (!el) return;
+    if (!guideCreatedAt) {
+        el.innerText = '';
+        return;
+    }
+    try {
+        const d = new Date(guideCreatedAt);
+        // KST: UTC+9
+        const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+        const year = kst.getUTCFullYear();
+        const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(kst.getUTCDate()).padStart(2, '0');
+        const hour = String(kst.getUTCHours()).padStart(2, '0');
+        const min = String(kst.getUTCMinutes()).padStart(2, '0');
+        el.innerHTML = `
+        <span style="display:block;margin-left:45px;">
+        <span class="guide-updated-at-dot"></span> 최근 건강 정보 반영 &nbsp; ${year}.${month}.${day} ${hour}:${min}
+        </span>
+        `;
+    } catch (e) {
+        el.innerText = '';
     }
 }
 
@@ -133,14 +162,24 @@ function renderHealthProfile() {
 
     if (currentStatus.bp_records.length > 0) {
         const latestBP = currentStatus.bp_records[0];
-        bpText.innerText = `${latestBP.systolic}/${latestBP.diastolic}`;
+        bpText.innerHTML = `
+            <span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border-radius:6px;padding:1px 6px;margin-left:4px;">
+                ${latestBP.measure_type || ''}
+            </span><br>
+            ${latestBP.systolic}/${latestBP.diastolic}mmHg
+        `;
     } else {
         bpText.innerText = '기록 없음';
     }
 
     if (currentStatus.bs_records.length > 0) {
         const latestBS = currentStatus.bs_records[0];
-        bsText.innerText = `${latestBS.glucose_mg_dl}mg/dL`;
+        bsText.innerHTML = `
+            <span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border-radius:6px;padding:1px 6px;margin-left:4px;">
+                ${latestBS.measure_type || ''}
+            </span><br>
+            ${latestBS.glucose_mg_dl}mg/dL
+        `;
     } else {
         bsText.innerText = '기록 없음';
     }
@@ -196,17 +235,14 @@ function renderGuide() {
     const safetyCautions = document.getElementById('general-cautions-list');
 
     statusTag.innerText = s1.status;
-    section1.className = 'guide-section-card line-blue'; // Default color
+    section1.className = 'guide-section-card line-blue'; // Fixed color
 
     if (s1.status.includes('위험')) {
         statusTag.className = 'c9-badge c9-badge-danger';
-        section1.className = 'guide-section-card line-red';
     } else if (s1.status.includes('주의')) {
         statusTag.className = 'c9-badge c9-badge-warn';
-        section1.className = 'guide-section-card line-amber';
     } else {
         statusTag.className = 'c9-badge c9-badge-success';
-        section1.className = 'guide-section-card line-indigo';
     }
 
     // 약물이 없을 때의 문구 처리 (LLM이 준 content를 우선하되, 비어있으면 기본 문구)
@@ -215,14 +251,18 @@ function renderGuide() {
         : s1.content.replace(/\n/g, '<br>');
 
     const safetyNotesBox = document.getElementById('safety-notes-box');
-    if (currentStatus.meds.length === 0) {
+    const cautionsArray = s1.general_cautions || [];
+    // 일반 주의사항은 LLM 데이터 기준으로 표시 (프로필 로딩 race condition 방지)
+    // status가 '상호작용 없음'이거나 약물이 없을 때만 상태 뱃지와 노트박스를 숨김
+    const hasNoMeds = s1.status && s1.status.includes('상호작용 없음') && cautionsArray.length === 0;
+    if (hasNoMeds) {
         statusTag.classList.add('hidden');
         if (safetyNotesBox) safetyNotesBox.classList.add('hidden');
     } else {
         statusTag.classList.remove('hidden');
         if (safetyNotesBox) safetyNotesBox.classList.remove('hidden');
-        safetyCautions.innerHTML = s1.general_cautions.length > 0
-            ? s1.general_cautions.map(c => `<li>${c}</li>`).join('')
+        safetyCautions.innerHTML = cautionsArray.length > 0
+            ? cautionsArray.map(c => `<li>${c}</li>`).join('')
             : '<li>특별한 주의사항이 없습니다.</li>';
     }
 
@@ -231,9 +271,11 @@ function renderGuide() {
     const diseaseGuidesContent = document.getElementById('disease-guides-content');
     const integratedPoint = document.getElementById('integrated-point');
     const integratedBox = document.querySelector('#section-2 .guide-integrated-box');
+    const diseaseReferenceFooter = document.getElementById('disease-reference-footer');
 
     if (s2.disease_guides && s2.disease_guides.length > 0) {
         integratedBox.classList.remove('hidden');
+        if (diseaseReferenceFooter) diseaseReferenceFooter.classList.remove('hidden');
         diseaseGuidesContent.innerHTML = `
             <div class="guide-disease-grid">
                 ${s2.disease_guides.map(dg => `
@@ -257,11 +299,13 @@ function renderGuide() {
         integratedPoint.innerText = s2.integrated_point || "";
     } else {
         integratedBox.classList.add('hidden');
+        if (diseaseReferenceFooter) diseaseReferenceFooter.classList.add('hidden');
         diseaseGuidesContent.innerHTML = `
             <div>등록된 질환이 없어 별도의 생활습관 가이드가 필요하지 않습니다.</div>
             <div class="mt-1">아주 건강하시네요!</div>
         `;
     }
+
 
     // --- Section 3: 건강 관리 수칙 ---
     const s3 = guideData.section3;

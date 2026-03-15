@@ -85,8 +85,9 @@ class GuideService:
                 temperature=0.4,
             )
 
-            # 4. 질환 누락 보정 및 저장
+            # 4. 질환 및 건강수칙 누락 보정 및 저장
             fixed_content = self._fix_missing_diseases(content_json, health_data["disease_list"])
+            fixed_content = self._fix_missing_health_guides(fixed_content)
 
             data = {
                 "user_current_status": prompt,
@@ -112,6 +113,21 @@ class GuideService:
                     "title": "질환 기반 생활습관 가이드",
                     "disease_guides": [{"name": "내 기저질환", "tips": ["충분한 수분을 섭취하세요."]}],
                     "integrated_point": "균형 잡힌 생활 패턴 유지를 권장합니다.",
+                },
+                "section3": {
+                    "title": "오늘의 건강 관리 수칙",
+                    "health_guides": [
+                        {
+                            "name": "운동",
+                            "tips": ["주 3회, 30분 이상 가벼운 걷기 등 자신에게 맞는 운동을 꾸준히 실천해 보세요."],
+                        },
+                        {
+                            "name": "식단",
+                            "tips": ["규칙적인 식사와 균형 잡힌 영양 섭취가 면역력 유지에 도움이 됩니다."],
+                        },
+                        {"name": "수면", "tips": ["하루 7~8시간의 충분한 수면으로 몸의 피로를 풀어주세요."]},
+                        {"name": "흡연/음주", "tips": ["금연과 절주는 모든 대사 질환 예방의 첫걸음입니다."]},
+                    ],
                 },
             },
             "activity": False,  # 더미는 완료 상태로 표시
@@ -272,6 +288,34 @@ class GuideService:
 
             sec2["disease_guides"] = guides
             content_json["section2"] = sec2
+        except Exception:
+            pass
+        return content_json
+
+    def _fix_missing_health_guides(self, content_json: dict) -> dict:
+        try:
+            sec3 = content_json.get("section3") or {}
+            guides = sec3.get("health_guides") or []
+
+            # 현재 있는 카테고리 이름들 수집
+            guide_names = {g.get("name") for g in guides if isinstance(g, dict)}
+
+            required_categories = {
+                "운동": "주 3회, 30분 이상 가벼운 걷기 등 자신에게 맞는 운동을 꾸준히 실천해 보세요.",
+                "식단": "규칙적인 식사와 균형 잡힌 영양 섭취가 면역력 유지에 도움이 됩니다.",
+                "수면": "하루 7~8시간의 충분한 수면으로 몸의 피로를 풀어주세요.",
+                "흡연/음주": "금연과 절주는 모든 대사 질환 예방의 첫걸음입니다.",
+            }
+
+            # 누락된 필수 카테고리 강제 추가
+            for req_name, default_tip in required_categories.items():
+                # '흡연/음주' 처럼 복합어나 비슷한 이름이 처리안되는 경우를 위해 정확히 매칭
+                if req_name not in guide_names:
+                    guides.append({"name": req_name, "tips": [default_tip]})
+
+            # (선택) UI의 정돈된 표시를 위해 고정된 순서로 정렬할 수 있으나, 일단 추가만으로 충분함
+            sec3["health_guides"] = guides
+            content_json["section3"] = sec3
         except Exception:
             pass
         return content_json
