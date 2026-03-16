@@ -227,11 +227,11 @@ def get_social_callback_html(provider: str) -> str:
                 const badge = document.getElementById('app-toast-badge');
                 const titleEl = document.getElementById('app-toast-title');
                 const msgEl = document.getElementById('app-toast-message');
-                
+
                 titleEl.textContent = title;
                 msgEl.textContent = message;
                 badge.textContent = type === 'success' ? '✅' : (type === 'warn' ? '⚠️' : 'ℹ️');
-                
+
                 toast.classList.add('show');
                 return new Promise(resolve => setTimeout(resolve, 2000));
             }}

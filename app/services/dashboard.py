@@ -120,7 +120,7 @@ class DashboardService:
             completed_plans = await PlanCheckList.filter(user=user, is_completed=True).count()
             mission_rate = int(completed_plans / total_plans * 100) if total_plans > 0 else 0
 
-            raw_content = response.choices[0].message.content
+            raw_content = response.choices[0].message.content or ""
             insights_data = json.loads(raw_content)
             tips = insights_data["insights"]
             return {"result": tips, "mission_rate": mission_rate}

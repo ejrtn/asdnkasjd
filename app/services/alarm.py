@@ -152,7 +152,7 @@ class AlarmService:
         if request.is_active is not None:
             alarm.is_active = request.is_active
         if request.repeat_days is not None:
-            alarm.repeat_days = self._serialize_repeat_days(request.repeat_days)
+            alarm.repeat_days = self._serialize_repeat_days(request.repeat_days)  # type: ignore[assignment]
         await alarm.save()
 
         if alarm.alarm_type == "MED":
@@ -426,7 +426,7 @@ class AlarmService:
 
         history.is_confirmed = True
         history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
-        history.snoozed_until = None
+        history.snoozed_until = None  # type: ignore[assignment]
         await history.save(update_fields=["is_confirmed", "read_at", "snoozed_until"])
 
         await self._trim_user_alarm_histories(user)
