@@ -14,6 +14,7 @@ class DoseTime(StrEnum):
     LUNCH = "점심"
     DINNER = "저녁"
     BEDTIME = "취침 전"
+    UNKNOWN = "모름"
 
 
 class AddedFrom(StrEnum):

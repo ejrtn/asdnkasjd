@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from pydantic import BaseModel
 
 from app.dependencies.security import get_request_user
+from app.models.current_med import AddedFrom, CurrentMed, DoseTime
+from app.models.pill_recognitions import PillRecognition
 from app.models.upload import Upload
 from app.models.user import User
 from app.repositories.pill import PillRepository
@@ -210,24 +212,43 @@ async def extract_pill_ocr(
     }
 
 
-@ocr_router.post("/pill/select", status_code=status.HTTP_200_OK)
-async def select_pill_candidate(
+@ocr_router.post("/pill/toggle-sync", status_code=status.HTTP_200_OK)
+async def toggle_pill_sync(
     recognition_id: Annotated[int, Form()],
     pill_name: Annotated[str, Form()],
     pill_description: Annotated[str, Form()],
     user: Annotated[User, Depends(get_request_user)],
 ):
     """
-    사용자가 여러 후보 중 최종적으로 선택한 알약 정보를 업데이트합니다.
+    사용자가 선택한 후보 알약을 현재 복용 목록에 추가하거나 이미 있으면 제거(토글)합니다.
     """
-    from app.models.pill_recognitions import PillRecognition
 
+    # 1. 인식 레코드 확인
     recognition = await PillRecognition.get_or_none(id=recognition_id, user=user)
     if not recognition:
         raise HTTPException(status_code=404, detail="식별 레코드를 찾을 수 없습니다.")
 
-    recognition.pill_name = pill_name
-    recognition.pill_description = pill_description
-    await recognition.save()
+    # 2. 이미 등록된 약물인지 확인 (recognition_id 기반)
+    existing_med = await CurrentMed.get_or_none(pill_recognition=recognition, medication_name=pill_name)
 
-    return {"message": "알약 정보가 업데이트되었습니다.", "pill_name": pill_name}
+    if existing_med:
+        # 이미 있으면 삭제 (토글 오프)
+        await existing_med.delete()
+        synced = False
+        message = f"'{pill_name}'이(가) 복용 목록에서 제거되었습니다."
+    else:
+        # 없으면 추가 (토글 온)
+        await CurrentMed.create(
+            user=user,
+            medication_name=pill_name,
+            pill_recognition=recognition,
+            added_from=AddedFrom.UNKNOWN,
+            dose_time=DoseTime.UNKNOWN,
+            one_dose_count="1",
+            daily_dose_count="1",
+        )
+
+        synced = True
+        message = f"'{pill_name}'이(가) 복용 목록에 추가되었습니다."
+
+    return {"success": True, "synced": synced, "message": message}

@@ -308,11 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append('file', file);
 
                     const token = localStorage.getItem('access_token');
-                    const response = await fetch('/api/v1/ocr/prescription', {
+                    const response = await fetchWithAuth('/api/v1/ocr/prescription', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
                         body: formData
                     });
 
@@ -338,18 +335,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const formData = new FormData();
-                formData.append('front_file', selectedFiles[0]);
-                formData.append('back_file', selectedFiles[1]);
+                formData.append('files', selectedFiles[0]);
+                formData.append('files', selectedFiles[1]);
 
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/api/v1/ocr/pill', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
+                const response = await fetchWithAuth("/api/v1/uploads", {
+                    method: "POST",
                     body: formData
                 });
-
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -357,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
-                updateAnalysisUI('medication', data.preview_text);
+                updateAnalysisUI('medication', data);
 
                 // 두 파일 모두 메인 뷰에 추가
                 addMainPreview('medication', selectedFiles[0]);
@@ -405,10 +397,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Group by hospital name (Ensure flat grouping)
             const grouped = prescriptionSessionResults.reduce((acc, current) => {
                 // 병원명이 없거나 빈 공백인 경우 처리
-                const hospital = (current.hospital_name && current.hospital_name.trim()) 
-                    ? current.hospital_name.trim() 
+                const hospital = (current.hospital_name && current.hospital_name.trim())
+                    ? current.hospital_name.trim()
                     : '병원명 미확인';
-                
+
                 if (!acc[hospital]) acc[hospital] = [];
                 acc[hospital].push(current);
                 return acc;
@@ -418,12 +410,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (const hospital in grouped) {
                 const results = grouped[hospital];
-                
+
                 let hospitalBlocksHtml = results.map(res => {
                     const pId = res.prescription_id || res.id || 'unknown';
                     const pDate = res.prescribed_date || '날짜 정보 없음';
                     const drugList = res.drugs || [];
-                    
+
                     let drugListHtml = '';
                     if (drugList.length > 0) {
                         drugListHtml = drugList.map(d => {
@@ -503,43 +495,59 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         // 2. 알약(Medication/Pill) 데이터 처리
-        else if (type === 'medication' && typeof data === 'object') {
+        else if (type === 'medication' && (Array.isArray(data) || typeof data === 'object')) {
             targetBox.style.display = 'block';
+            console.log(data);
 
-            const recognitionId = data.id;
-            const candidates = data.candidates || [];
-            const displayText = data.display_text || '';
-            const appearance = data.appearance || {};
+            // 새로운 배열 구조 또는 기존 객체 구조 대응
+            const candidates = Array.isArray(data) ? data : (data.candidates || []);
+            const firstItem = candidates[0] || {};
+            
+            // 시각 분석 정보 추출 (첫 번째 후보의 raw_result 또는 data.ai_extracted 사용)
+            const aiInfo = firstItem.raw_result ? Object.values(firstItem.raw_result)[0] : (data.ai_extracted ? Object.values(data.ai_extracted)[0] : {});
+            
+            const displayText = firstItem.pill_name || data.display_text || '';
+            const appearance = {
+                marking: aiInfo.text || '',
+                color: aiInfo.color || '',
+                shape: aiInfo.shape || '',
+                formulation: aiInfo.formulation || ''
+            };
 
             let candidatesHtml = '';
             if (candidates.length > 0) {
                 candidatesHtml = candidates.map((c, index) => {
-                    const confidencePercent = Math.round(c.confidence * 100);
-                    const isTop = index === 0;
+                    const score = c.score !== undefined ? c.score : (c.confidence || 0);
+                    const confidencePercent = Math.round(score * 100);
+                    const pillName = c.name || c.pill_name || '알 수 없는 약품';
+                    const pillInfo = c.efcy_qesitm || c.pill_description || c.medication_info || '정보 없음';
+                    const pillImg = c.image_path || c.image_url;
+                    // 각 후보별 고유 ID 사용
+                    const cid = c.id || '';
 
                     return `
-                        <div class="pill-candidate-card" style="margin-bottom: 12px; border: 2px solid ${isTop ? '#7c3aed' : '#e2e8f0'}; border-radius: 12px; padding: 12px; background: white; transition: all 0.2s;">
+                        <div class="pill-candidate-card" style="margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; background: white; transition: all 0.2s;">
                             <div style="display: flex; gap: 12px;">
-                                ${c.image_url ?
-                            `<img src="${c.image_url}" style="width: 80px; height: 60px; object-fit: contain; border-radius: 6px; background: #f8fafc; border: 1px solid #eee;">` :
+                                ${pillImg ?
+                            `<img src="${pillImg}" style="width: 80px; height: 60px; object-fit: contain; border-radius: 6px; background: #f8fafc; border: 1px solid #eee;">` :
                             `<div style="width: 80px; height: 60px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px;">💊</div>`
                         }
                                 <div style="flex: 1;">
                                     <div style="display: flex; justify-content: space-between; align-items: start;">
-                                        <div style="font-weight: 700; color: #1e293b; font-size: 14px;">${c.pill_name}</div>
-                                        <div style="background: ${isTop ? '#7c3aed' : '#94a3b8'}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 14px;">${pillName}</div>
+                                        <div style="background: #94a3b8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
                                             ${confidencePercent}% 일치
                                         </div>
                                     </div>
                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                        ${c.medication_info || '정보 없음'}
+                                        ${pillInfo}
                                     </div>
-                                    <button class="btn-select-pill" 
-                                            data-id="${recognitionId}" 
-                                            data-name="${c.pill_name}" 
-                                            data-info="${c.medication_info}"
-                                            style="margin-top: 8px; width: 100%; border: none; background: ${isTop ? '#7c3aed' : '#f1f5f9'}; color: ${isTop ? 'white' : '#475569'}; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                                        ${isTop ? '이 약이 맞아요' : '선택하기'}
+                                    <button class="btn-toggle-sync" 
+                                            data-id="${cid}" 
+                                            data-name="${pillName}" 
+                                            data-info="${pillInfo}"
+                                            style="margin-top: 8px; width: 100%; border: 2px solid #7c3aed; background: white; color: #7c3aed; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+                                        ➕ 복용 정보 등록
                                     </button>
                                 </div>
                             </div>
@@ -554,8 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
                     <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 10px; border-left: 4px solid #7c3aed; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                         <div style="font-size: 11px; color: #94a3b8; margin-bottom: 2px;">🤖 분석된 검색 조건</div>
-                        <div style="font-size: 13px; font-weight: 600; color: #475569;">${displayText}</div>
-                        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">각인: ${appearance.marking || '-'} | 색상: ${appearance.color || '-'} | 모양: ${appearance.shape || '-'}</div>
+                        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">각인: ${appearance.marking || '-'} | 색상: ${appearance.color || '-'} | 모양: ${appearance.shape || '-'} | 제형: ${appearance.formulation || '-'}</div>
                     </div>
                     
                     <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center;">
@@ -569,14 +576,20 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             // 이벤트 리스너 등록
-            resultContainer.querySelectorAll('.btn-select-pill').forEach(btn => {
+            resultContainer.querySelectorAll('.btn-toggle-sync').forEach(btn => {
                 btn.onclick = async () => {
                     const id = btn.dataset.id;
                     const name = btn.dataset.name;
                     const info = btn.dataset.info;
 
                     try {
-                        const response = await fetch('/api/v1/ocr/pill/select', {
+                        if (!id) {
+                            console.error('Missing recognition_id');
+                            alert('식별 정보가 누락되었습니다. 다시 시도해 주세요.');
+                            return;
+                        }
+
+                        const response = await fetchWithAuth('/api/v1/ocr/pill/toggle-sync', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams({
@@ -586,22 +599,33 @@ document.addEventListener('DOMContentLoaded', () => {
                             })
                         });
 
+                        const result = await response.json();
+
                         if (response.ok) {
-                            alert(`'${name}'(으)로 최종 선택되었습니다.`);
-                            // UI 업데이트 (선택된 상태 표시)
-                            resultContainer.querySelectorAll('.pill-candidate-card').forEach(card => {
-                                card.style.opacity = '0.5';
-                                card.style.border = '2px solid #e2e8f0';
-                            });
-                            btn.closest('.pill-candidate-card').style.opacity = '1';
-                            btn.closest('.pill-candidate-card').style.border = '2px solid #10b981';
-                            btn.textContent = '선택됨 ✅';
-                            btn.style.background = '#10b981';
-                            btn.style.color = 'white';
-                            btn.disabled = true;
+                            if (result.synced) {
+                                // 등록됨 상태
+                                btn.textContent = '✅ 등록 취소';
+                                btn.style.background = '#7c3aed';
+                                btn.style.color = 'white';
+                                btn.closest('.pill-candidate-card').style.borderColor = '#7c3aed';
+                                btn.closest('.pill-candidate-card').style.background = '#f5f3ff';
+                            } else {
+                                // 미등록 상태로 원복
+                                btn.textContent = '➕ 복용 정보 등록';
+                                btn.style.background = 'white';
+                                btn.style.color = '#7c3aed';
+                                btn.closest('.pill-candidate-card').style.borderColor = '#e2e8f0';
+                                btn.closest('.pill-candidate-card').style.background = 'white';
+                            }
+                            
+                            if (typeof showToast === 'function') {
+                                showToast(result.message);
+                            } else {
+                                console.log(result.message);
+                            }
                         }
                     } catch (e) {
-                        console.error('Pill Selection Error:', e);
+                        console.error('Pill Sync Toggle Error:', e);
                     }
                 };
             });
@@ -703,12 +727,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const pId in syncGroups) {
                     if (pId === 'unknown') continue;
 
-                    const response = await fetch(`/api/v1/ocr/prescriptions/${pId}/sync`, {
+                    const response = await fetchWithAuth(`/api/v1/ocr/prescriptions/${pId}/sync`, {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
                         body: JSON.stringify({ drug_names: syncGroups[pId] })
                     });
 
@@ -719,7 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 성공 피드백: 알럿 대신 토스트 사용 및 창 유지
                 showToast(`${totalSynced}개의 약물이 복용 명단에 추가되었습니다.`);
-                
+
                 // 선택된 약물들의 스타일 초기화 및 선택 해제 (창은 닫지 않음)
                 selectedItems.forEach(item => {
                     item.classList.remove('selected');

@@ -394,6 +394,7 @@ function addMed() {
   t += '<option>점심</option>';
   t += '<option>저녁</option>';
   t += '<option>취침 전</option>';
+  t += '<option>모름</option>';
   t += '</select>';
   t += '</td>';
   t += '<td>';

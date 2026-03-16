@@ -113,7 +113,7 @@ class UploadService:
 
         # 1-1. 분석 수행
         result = await self.pill_name_result(created_uploads)
-
+        db_data = []
         # 1-2. 분석 결과 DB 저장 (모든 후보군 기록)
         if result.get("status") == "success" and result.get("candidates"):
             front_up = next((u for u in created_uploads if u.category == "pill_front"), None)
@@ -122,19 +122,20 @@ class UploadService:
             if front_up:
                 # 후보군 리스트를 돌며 각각 새로운 행(row)으로 저장합니다.
                 for cand in result["candidates"]:
-                    await PillRecognition.create(
-                        pill_name=cand["name"],
-                        pill_description=cand.get("efcy_qesitm"),
-                        confidence=cand["score"],
-                        model_version=self.VISION_MODEL,
-                        raw_result=result.get("ai_extracted"),
-                        user_id=user.id,
-                        front_upload=front_up,  # ForeignKey이므로 여러 번 create 가능
-                        back_upload=back_up,
+                    db_data.append(
+                        await PillRecognition.create(
+                            pill_name=cand["name"],
+                            pill_description=cand.get("efcy_qesitm"),
+                            confidence=cand["score"],
+                            model_version=self.VISION_MODEL,
+                            raw_result=result.get("ai_extracted"),
+                            user_id=user.id,
+                            front_upload=front_up,  # ForeignKey이므로 여러 번 create 가능
+                            back_upload=back_up,
+                        )
                     )
-                logger.info(f"Saved {len(result['candidates'])} recognition candidates for upload_id: {front_up.id}")
 
-        return result
+        return db_data
 
     # ==================================================
     # Identification Logic
