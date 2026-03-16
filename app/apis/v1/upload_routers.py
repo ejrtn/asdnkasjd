@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app.dependencies.security import get_request_user
 from app.dtos.upload import LatestDayUploadsResponse
@@ -41,6 +41,20 @@ async def get_upload_history(user: Annotated[User, Depends(get_request_user)]):
     return {"status": "success", "content": history}
 
 
+@upload_router.get("/{upload_id}/analysis")
+async def get_upload_analysis_detail(upload_id: int, user: Annotated[User, Depends(get_request_user)]):
+    """
+    [UPLOAD] 특정 업로드 이력의 상세 분석 결과 조회
+    """
+    upload_service = UploadService()
+
+    detail = await upload_service.get_upload_analysis_detail(user, upload_id)
+
+    if not detail:
+        raise HTTPException(status_code=404, detail="분석 결과를 찾을 수 없습니다.")
+    return {"status": "success", "content": detail}
+
+
 @upload_router.delete("/{upload_id}")
 async def delete_upload(upload_id: int, user: Annotated[User, Depends(get_request_user)]):
     """
@@ -50,6 +64,5 @@ async def delete_upload(upload_id: int, user: Annotated[User, Depends(get_reques
     success = await upload_service.delete_upload_file(user, upload_id)
     if success:
         return {"status": "success", "message": "파일이 삭제되었습니다."}
-    from fastapi import HTTPException
 
     raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다.")

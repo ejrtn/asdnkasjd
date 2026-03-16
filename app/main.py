@@ -90,9 +90,11 @@ app = FastAPI(
 
 # [추가된 기능] 정적 파일 및 템플릿 설정
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-uploads_dir = os.path.join(os.path.dirname(__file__), "../uploads")
+
+uploads_dir = "app/uploads"
 os.makedirs(uploads_dir, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 templates = Jinja2Templates(directory="app/templates")
 
 

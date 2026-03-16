@@ -23,7 +23,7 @@ prescription_service = PrescriptionService()
 pill_repo = PillRepository()
 
 # 업로드 디렉토리 설정
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+UPLOAD_DIR = "/app/uploads/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 

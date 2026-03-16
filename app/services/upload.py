@@ -349,6 +349,75 @@ class UploadService:
 
         return self._format_upload_response(processed_results)
 
+    async def get_upload_analysis_detail(self, user: Any, upload_id: int) -> dict[str, Any] | None:
+        """
+        특정 업로드에 대한 분석 결과 상세 내용을 반환합니다.
+        처방전인 경우 병원 및 처방 약품 목록,
+        알약인 경우 식별된 알약 정보를 프론트엔드 포맷(ai_extracted, candidates)에 맞춰 반환합니다.
+        """
+        upload = await self._repo.get_upload_by_id_with_relations(upload_id, user.id)
+        if not upload:
+            return None
+
+        if upload.category == "prescription":
+            prescription = getattr(upload, "prescription", None)
+            if not prescription:
+                return None
+
+            hospital = {
+                "hospital_name": getattr(prescription, "hospital_name", ""),
+                "prescription_date": prescription.prescribed_date.strftime("%Y-%m-%d")
+                if getattr(prescription, "prescribed_date", None)
+                else "",
+            }
+
+            candidates = []
+            for drug in getattr(prescription, "drugs", []):
+                candidates.append(
+                    {
+                        "name": getattr(drug, "standard_drug_name", ""),
+                        "dosage": getattr(drug, "dosage_amount", ""),
+                        "frequency": getattr(drug, "daily_frequency", ""),
+                        "duration": getattr(drug, "duration_days", ""),
+                    }
+                )
+            return {"file_path": getattr(upload, "file_path", ""), "hospital": hospital, "candidates": candidates}
+
+        elif upload.category in ["pill_front", "pill_back"]:
+            regs_front = getattr(upload, "pill_recognitions_front", [])
+            regs_back = getattr(upload, "pill_recognitions_back", [])
+
+            data = regs_front
+            if len(regs_front) < len(regs_back):
+                data = regs_back
+
+            candidates = []
+            for cand in data:
+                candidates.append(
+                    {
+                        "name": getattr(cand, "pill_name", ""),
+                        "score": float(getattr(cand, "confidence", 1.0) or 1.0),
+                        "efcy_qesitm": getattr(cand, "pill_description", "") or "",
+                    }
+                )
+
+            ai_extracted: dict = {}
+            if data and hasattr(data[0], "raw_result"):
+                ai_extracted = getattr(data[0], "raw_result", {}) or {}
+
+            return {
+                "upload": [
+                    await self._repo.get_upload_by_id_with_relations(getattr(data[0], "back_upload_id", None), user.id),
+                    await self._repo.get_upload_by_id_with_relations(
+                        getattr(data[0], "front_upload_id", None), user.id
+                    ),
+                ],
+                "ai_extracted": ai_extracted,
+                "candidates": candidates,
+            }
+
+        return None
+
     async def get_upload_history(self, user: Any) -> list[dict]:
         """
         사용자의 전체 업로드 히스토리를 가져와 프론트엔드 표시에 맞게 가공합니다.
@@ -363,8 +432,10 @@ class UploadService:
 
         history_map = {}
         for upload in uploads:
-            # 날짜 (YYYY-MM-DD 형식으로만)
-            created_date = upload.created_at.strftime("%Y-%m-%d")
+            # 프론트엔드 렌더링에 필요한 날짜/시간 전체
+            created_datetime = upload.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            # 분(minute) 단위까지 같고 타입이 같을 때 하나의 이력으로 묶음
+            group_time_key = upload.created_at.strftime("%Y-%m-%d %H:%M")
 
             # 카테고리 (UI 표시용)
             if upload.category == "prescription":
@@ -379,10 +450,10 @@ class UploadService:
             file_url = f"/uploads/{file_name_only}"
             original_name = upload.original_name or file_name_only
 
-            # 같은 날짜 + 같은 타입인 경우 한 항목으로 보여줌
-            key = f"{created_date}_{display_type}"
+            # 같은 시간(분) + 같은 타입인 경우 한 항목으로 묶어줌
+            key = f"{group_time_key}_{display_type}"
             if key not in history_map:
-                history_map[key] = {"id": upload.id, "date": created_date, "type": display_type, "images": []}
+                history_map[key] = {"id": upload.id, "date": created_datetime, "type": display_type, "images": []}
 
             history_map[key]["images"].append({"name": original_name, "url": file_url})
 

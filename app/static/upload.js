@@ -729,6 +729,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const response = await fetchWithAuth(`/api/v1/ocr/prescriptions/${pId}/sync`, {
                         method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({ drug_names: syncGroups[pId] })
                     });
 
@@ -761,159 +764,278 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 업로드 히스토리 불러오기
-async function fetchUploadHistory() {
-    const list1 = document.getElementById('upload-history-list-prescription');
-    const list2 = document.getElementById('upload-history-list-pill');
+// 업로드 히스토리 전역 상태
+let uploadHistoryData = [];
+let currentHistoryFilter = 'all';
 
-    // 두 컨테이너 중 하나라도 없으면 여기서 에러표시를 할 필요는 없지만,
-    // 둘 다 없다면 굳이 페치할 필요 없음.
-    if (!list1 && !list2) return;
+// 최초 로딩 시 이벤트 리스너 및 데이터 패치
+document.addEventListener('DOMContentLoaded', () => {
+    fetchUploadHistory();
+
+    // 필터 버튼 이벤트
+    const filterBtns = document.querySelectorAll('.history-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('is-active'));
+            this.classList.add('is-active');
+            currentHistoryFilter = this.getAttribute('data-filter');
+            filterHistory();
+        });
+    });
+});
+
+async function fetchUploadHistory() {
+    const container = document.getElementById('upload-history-list');
+    if (!container) return;
 
     try {
         const response = await fetchWithAuth('/api/v1/uploads/history');
         if (response.ok) {
             const result = await response.json();
-            const data = result.content || [];
-            console.log(data)
-            if (list1) renderUploadHistory(list1, data);
-            if (list2) renderUploadHistory(list2, data);
+            uploadHistoryData = result.content || [];
+            
+            filterHistory(); // 필터 적용 후 렌더링
         } else {
             console.error("히스토리 데이터를 불러오지 못했습니다.");
-            const errorHtml = `<div style="text-align: center; color: #ef4444; padding: 20px 0;">히스토리를 불러오는 중 오류가 발생했습니다.</div>`;
-            if (list1) list1.innerHTML = errorHtml;
-            if (list2) list2.innerHTML = errorHtml;
+            container.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px 0;">데이터 로드 실패</div>`;
         }
     } catch (e) {
         console.error("히스토리 Fetch 중 에러: ", e);
-        const errorHtml = `<div style="text-align: center; color: #ef4444; padding: 20px 0;">히스토리를 불러오는 중 오류가 발생했습니다.</div>`;
-        if (list1) list1.innerHTML = errorHtml;
-        if (list2) list2.innerHTML = errorHtml;
+        container.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px 0;">오류가 발생했습니다.</div>`;
     }
 }
 
-// 업로드 히스토리 렌더링
-function renderUploadHistory(container, historyList) {
+function filterHistory() {
+    const container = document.getElementById('upload-history-list');
     if (!container) return;
 
+    const queryInput = document.getElementById('history-search');
+    const query = queryInput ? queryInput.value.toLowerCase() : '';
+
+    let filtered = uploadHistoryData;
+
+    // 1. 타입 필터링
+    if (currentHistoryFilter === 'prescription') {
+        filtered = filtered.filter(item => item.type === '처방전');
+    } else if (currentHistoryFilter === 'pill') {
+        filtered = filtered.filter(item => item.type === '알약 분석');
+    }
+
+    // 2. 검색어 필터링
+    if (query) {
+        filtered = filtered.filter(item => 
+            item.type.toLowerCase().includes(query) || 
+            (item.date && item.date.toLowerCase().includes(query))
+        );
+    }
+    
+    renderTreeHistory(container, filtered);
+}
+
+function renderTreeHistory(container, historyList) {
     if (!historyList || historyList.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 20px 0;">아직 업로드한 기록이 없습니다.</div>`;
+        container.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 60px 0;">검색 결과가 없거나 업로드한 기록이 없습니다.</div>`;
         return;
     }
 
+    const groupedByDate = historyList.reduce((acc, item) => {
+        const fullDate = item.date || ''; 
+        const parts = fullDate.split(' ');
+        const dateStr = parts[0] || '날짜 미상';
+        const timeStr = parts[1] ? parts[1].substring(0, 5) : '--:--';
+        
+        const displayType = item.type === '처방전' ? '처방전' : '알약 분석';
+        const icon = displayType === '처방전' ? '📄' : '💊';
+
+        if (!acc[dateStr]) acc[dateStr] = [];
+        acc[dateStr].push({ ...item, time: timeStr, displayType, icon });
+        return acc;
+    }, {});
+
     let html = '';
-    historyList.forEach((item, index) => {
-        const icon = item.type === '처방전' ? '📄' : '💊';
-        const dateStr = item.date;
-        const uniqueId = `history-images-${container.id}-${index}`;
+    // 날짜 최신순 정렬
+    const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
 
-        // 이미지 목록 서브 HTML 생성
-        let imagesHtml = '';
-        if (item.images && item.images.length > 0) {
-            item.images.forEach(img => {
-                imagesHtml += `
-                    <div class="history-image-item" data-url="${img.url}" style="padding: 8px 10px; margin-top: 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; transition: background 0.2s;">
-                        <span>🖼️</span>
-                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${img.name}</span>
-                    </div>
-                `;
-            });
-        } else {
-            imagesHtml = `<div style="font-size: 13px; color: #94a3b8; padding: 5px;">이미지가 없습니다.</div>`;
-        }
-
+    sortedDates.forEach(date => {
         html += `
-            <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                <!-- 타이틀 (클릭 시 아코디언 토글) + X 버튼 -->
-                <div class="history-title-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; cursor: pointer;">
-                    <div style="display: flex; align-items: center; font-size: 16px; font-weight: 500; color: #334155; flex: 1;">
-                        <span style="font-size: 20px; margin-right: 12px; opacity: 0.8;">${icon}</span>
-                        <span>${dateStr} ${item.type}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="history-arrow" style="font-size: 16px; color: #94a3b8; transition: transform 0.3s;">▼</div>
-                        <button class="history-delete-btn" data-id="${item.id}" title="삭제"
-                            style="background: none; border: none; cursor: pointer; font-size: 16px; color: #cbd5e1; padding: 4px 6px; border-radius: 4px; line-height: 1; transition: color 0.2s;"
-                            onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">✕</button>
-                    </div>
+            <div class="tree-date-group">
+                <div class="tree-date-header">${date}</div>
+        `;
+        
+        const items = groupedByDate[date];
+        items.forEach((item, index) => {
+            const isLast = (index === items.length - 1);
+            const branchSymbol = isLast ? '└' : '├';
+            
+            html += `
+                <div class="tree-item" onclick="showHistoryAnalysis('${item.id}', this, '${item.displayType}')">
+                    <span class="tree-branch">${branchSymbol}</span>
+                    <span class="tree-time">${item.time}</span>
+                    <span class="tree-icon">${item.icon}</span>
+                    <span class="tree-title">${item.displayType} 상세보기</span>
                 </div>
-                <!-- 확장 영역 (이미지 목록) -->
-                <div id="${uniqueId}" style="display: none; padding-left: 35px; padding-right: 10px; flex-direction: column; gap: 5px; margin-top: 5px;">
-                    ${imagesHtml}
+            `;
+        });
+        
+        html += `</div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 히스토리 항목 클릭 시 우측에 분석 결과 표시
+async function showHistoryAnalysis(uploadId, element, type) {
+    // 1. 활성화 상태 표시
+    document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('is-active'));
+    element.classList.add('is-active');
+
+    const detailContainer = document.getElementById('history-detail-content');
+    if (!detailContainer) return;
+
+    detailContainer.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 60px 0;">상세 분석 결과를 불러오는 중입니다...</div>`;
+
+    try {
+        const response = await fetchWithAuth(`/api/v1/uploads/${uploadId}/analysis`);
+        if (response.ok) {
+            const result = await response.json();
+            const content = result.content;
+            
+            // 기존 렌더링 로직 재활용 (단, 연동 버튼 출력 없이 HTML 문자열만 받아옵니다)
+            let analysisHtml = '';
+            if (type === '처방전') {
+                analysisHtml = generatePrescriptionDetailHtml(content);
+            } else {
+                analysisHtml = generatePillDetailHtml(content);
+            }
+
+            // (보기 전용) 다시 분석 버튼 추가
+            const reanalyzeBtnHtml = `
+                <button class="btn-reanalyze" onclick="goToReanalyze()">
+                    <span>🔄</span>
+                    다시 업로드해서 분석하기
+                </button>
+            `;
+
+            detailContainer.classList.remove('analysis-result-empty');
+            detailContainer.innerHTML = analysisHtml + reanalyzeBtnHtml;
+            
+        } else {
+            detailContainer.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px 0;">결과를 불러오지 못했습니다.</div>`;
+        }
+    } catch (error) {
+        console.error("히스토리 상세 Fetch 에러:", error);
+        detailContainer.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px 0;">오류가 발생했습니다.</div>`;
+    }
+}
+
+// 기존 분석 결과 생성 로직(처방전) - HTML 문자열만 반환
+function generatePrescriptionDetailHtml(data) {
+    if (!data.candidates || data.candidates.length === 0) {
+        return `<div style="color: #64748b; padding: 20px 0;">분석된 처방전 데이터가 없습니다.</div>`;
+    }
+    
+    let html = '';
+    
+    if (data.hospital) {
+        html += `
+            <div class="hospital-group" style="background: #f8fbff; padding: 15px; border-radius: 12px; border: 1px solid #e1f0ff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; width: 100%;">
+                <div>
+                    <img src="${data.file_path.replace("/app","")}" style="width: 100px;height: 100px; object-fit: cover;">
+                </div>
+                <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #007bff; text-align: center;">
+                    <div style="color: #666; font-size: 11px; margin-bottom: 2px;">🏥 병원명</div>
+                    <div style="font-weight: 700; font-size: 16px; color: #007bff;">${data.hospital.hospital_name}</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #7f8c8d;">
+                    <span>📅 처방일: ${data.hospital.prescription_date || '날짜 정보 없음'}</span>
+                </div>
+            <div>
+        `;
+    }
+    
+    data.candidates.forEach(pill => {
+        const name = pill.name || '';
+        const dosage = pill.dosage || '';
+        const frequency = pill.frequency || '';
+        const duration = pill.duration || '';
+        
+        html += `
+            <div class="prescription-drug-item" 
+                 style="margin-bottom: 8px; padding: 12px 15px; background: #fff; border-radius: 10px; border: 1px solid #e1e8f0; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;">
+                <div style="display: flex; align-items: center; flex: 1;">
+                    <span style="font-size: 18px; margin-right: 10px;">💊</span>
+                    <span style="font-weight: 600; color: #2c3e50; line-height: 1.2;">${name}</span>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #7f8c8d; min-width: 80px;">
+                    <span style="display: inline-block; background: #f8f9fa; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;">${dosage || '1정'}</span>
+                    <br>
+                    <span>${frequency ? frequency + '회' : '-'} / ${duration ? duration + '일분' : '-'}</span>
                 </div>
             </div>
         `;
     });
-
-    container.innerHTML = html;
-
-    // 이벤트 리스너 바인딩 (아코디언 토글)
-    const titleRows = container.querySelectorAll('.history-title-row');
-    titleRows.forEach(row => {
-        row.addEventListener('click', function () {
-            const arrow = this.querySelector('.history-arrow');
-            const expandArea = this.nextElementSibling;
-            if (expandArea.style.display === 'none') {
-                expandArea.style.display = 'flex';
-                arrow.style.transform = 'rotate(180deg)';
-            } else {
-                expandArea.style.display = 'none';
-                arrow.style.transform = 'rotate(0deg)';
-            }
-        });
-    });
-
-    // 이벤트 리스너 바인딩 (X 삭제 버튼)
-    const deleteBtns = container.querySelectorAll('.history-delete-btn');
-    deleteBtns.forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation(); // 아코디언 토글 방지
-            const uploadId = this.getAttribute('data-id');
-            if (!uploadId) return;
-
-            if (!confirm('이 업로드 기록을 삭제하시겠습니까?')) return;
-
-            try {
-                const response = await fetchWithAuth(`/api/v1/uploads/${uploadId}`, {
-                    method: 'DELETE',
-                });
-                if (response.ok) {
-                    // 성공 시 히스토리 새로고침
-                    fetchUploadHistory();
-                } else {
-                    showAppToast('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.', 'warn', '오류');
-                }
-            } catch (err) {
-                console.error('삭제 에러:', err);
-                showAppToast('삭제 중 오류가 발생했습니다.', 'warn', '오류');
-            }
-        });
-    });
-
-    // 이벤트 리스너 바인딩 (이미지 이름 클릭 시 줌 모달 띄우기)
-    const imageItems = container.querySelectorAll('.history-image-item');
-    imageItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.stopPropagation(); // 부모 토글 이벤트 방지
-            const url = this.getAttribute('data-url');
-            if (url && typeof showZoomModal === 'function') {
-                showZoomModal(url);
-            } else {
-                // fall back logic
-                const zoomOverlay = document.getElementById('zoom-overlay');
-                const zoomImg = document.getElementById('zoom-img');
-                if (zoomOverlay && zoomImg) {
-                    zoomImg.src = url;
-                    zoomOverlay.classList.add('show');
-                } else {
-                    window.open(url, '_blank');
-                }
-            }
-        });
-    });
+    html += `   </div>
+            </div>`
+    return html;
 }
 
-// 최초 로딩 시 데이터 패치
-document.addEventListener('DOMContentLoaded', () => {
-    fetchUploadHistory();
-});
+// 기존 분석 결과 생성 로직(알약) - HTML 문자열만 반환
+function generatePillDetailHtml(data) {
+    
+    appearance = {
+        'text': (data.ai_extracted.image1.text || '-') + " , " + (data.ai_extracted.image2.text || '-'),
+        'color': data.ai_extracted.image1.color + " , " + data.ai_extracted.image2.color,
+        'shape': data.ai_extracted.image1.shape,
+        'formulation': data.ai_extracted.image1.formulation,
+    }
+
+    if (!data.candidates || data.candidates.length === 0) {
+        return `<div style="color: #64748b; padding: 20px 0;">분석된 처방전 데이터가 없습니다.</div>`;
+    }
+    console.log(data)
+    let html = `
+        <div>
+            <img src="${data.upload[0].file_path.replace("/app","")}" style="width: 100px;height: 100px; object-fit: cover;">
+            <img src="${data.upload[0].file_path.replace("/app","")}" style="width: 100px;height: 100px; object-fit: cover;">
+        </div>
+        <div style="background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
+            <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 10px; border-left: 4px solid #7c3aed; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 2px;">🤖 분석된 검색 조건</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">각인: ${appearance.text || '-'} | 색상: ${appearance.color || '-'} | 모양: ${appearance.shape || '-'} | 제형: ${appearance.formulation || '-'}</div>
+            </div>
+        <div style="font-size: 14px; font-weight: 800; color: #475569; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">🔍 발견된 알약 후보군</div>    
+    `;
+    data.candidates.forEach(pill => {
+        const scoreColor = pill.score > 0.8 ? '#10b981' : (pill.score > 0.6 ? '#f59e0b' : '#ef4444');
+        const scorePercent = Math.round(pill.score * 100);
+        html += `
+                <div class="pill-candidates-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    <div class="pill-candidate-card" style="margin-bottom: 15px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 15px; font-weight: 800; color: #1e293b;">${pill.name}</div>
+                            </div>
+                            <div style="background: ${scoreColor}15; color: ${scoreColor}; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700;">
+                                일치도 ${scorePercent}%
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1; font-size: 13px; color: #475569; line-height: 1.6; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                                ${pill.efcy_qesitm || '효능/효과 정보가 없습니다.'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    });
+    html += `</div>`
+    return html;
+}
+
+function goToReanalyze() {
+    // 처방전 탭을 띄우고 파일 업로드 모달을 여는 처리
+    const prescriptionTabBtn = document.querySelector('.prescription-tab[data-tab="prescription"]');
+    if (prescriptionTabBtn) {
+        prescriptionTabBtn.click();
+    }
+}

@@ -49,3 +49,13 @@ class UploadRepository:
         """
         deleted_count = await self._model.filter(id=upload_id, user_id=user_id).delete()
         return bool(deleted_count > 0)
+
+    async def get_upload_by_id_with_relations(self, upload_id: int, user_id: str):
+        """
+        특정 업로드 ID에 대해 연관된 분석 결과(처방전, 알약 등)를 함께 로드하여 반환합니다.
+        """
+        return (
+            await self._model.filter(id=upload_id, user_id=user_id)
+            .prefetch_related("prescription__drugs", "pill_recognitions_front", "pill_recognitions_back")
+            .first()
+        )

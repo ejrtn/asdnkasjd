@@ -36,6 +36,12 @@
             <span class="prescription-tab-title">알약 이미지</span>
             <span class="prescription-tab-desc">이미지로 알약 정보 찾기</span>
         </button>
+
+        <button class="prescription-tab" type="button" data-tab="history" onclick="switchAnalysisTab('history', this)">
+            <span class="prescription-tab-icon">🗂️</span>
+            <span class="prescription-tab-title">히스토리</span>
+            <span class="prescription-tab-desc">과거 업로드 기록 확인</span>
+        </button>
     </section>
 
     <div id="tab-prescription" class="analysis-panel active">
@@ -75,21 +81,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 히스토리 영역 시작 -->
-            <div style="margin-top: 30px;">
-                <div
-                    style="background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px 20px; font-size: 18px; font-weight: 600; color: #334155; display: flex; align-items: center; justify-content: space-between;">
-                    히스토리
-                </div>
-
-                <div id="upload-history-list-prescription"
-                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; padding: 0 10px;">
-                    <!-- JS에서 동적으로 데이터 삽입 -->
-                    <div style="text-align: center; color: #94a3b8; padding: 20px 0;">히스토리를 불러오는 중입니다...</div>
-                </div>
-            </div>
-            <!-- 히스토리 영역 끝 -->
         </section>
     </div>
 
@@ -120,21 +111,45 @@
                     </div>
                 </div>
             </div>
+        </section>
+    </div>
 
-            <!-- 히스토리 영역 시작 -->
-            <div style="margin-top: 30px;">
-                <div
-                    style="background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px 20px; font-size: 18px; font-weight: 600; color: #334155; display: flex; align-items: center; justify-content: space-between;">
-                    히스토리
+    <!-- 히스토리 전용 탭 -->
+    <div id="tab-history" class="analysis-panel">
+        <section class="c9-soft-card prescription-card">
+            <div class="c9-section-head" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="c9-section-title">
+                    <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff;">🗂️</span>
+                    업로드 히스토리
+                </h3>
+            </div>
+
+            <!-- 사이드바(목록) + 디테일(분석결과) 레이아웃 -->
+            <div class="upload-analysis-grid history-grid">
+                <div class="history-sidebar">
+                    <div class="history-filters">
+                        <button class="history-filter-btn is-active" data-filter="all">전체</button>
+                        <button class="history-filter-btn" data-filter="pill">알약</button>
+                        <button class="history-filter-btn" data-filter="prescription">처방전</button>
+                    </div>
+                    <!-- <div class="history-search-container">
+                        <input type="text" id="history-search" class="history-search-input" placeholder="히스토리 검색..." oninput="filterHistory()">
+                    </div> -->
+                    <div class="history-list tree-view" id="upload-history-list">
+                        <div style="text-align: center; color: #94a3b8; padding: 20px 0;">히스토리를 불러오는 중입니다...</div>
+                    </div>
                 </div>
 
-                <div id="upload-history-list-pill"
-                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; padding: 0 10px;">
-                    <!-- JS에서 동적으로 데이터 삽입 -->
-                    <div style="text-align: center; color: #94a3b8; padding: 20px 0;">히스토리를 불러오는 중입니다...</div>
+                <div class="analysis-card" id="history-analysis-box" style="background: #fdfdfd;">
+                    <h4 class="analysis-card-title">
+                        <span>🔍</span>
+                        <span>분석 내역 상세</span>
+                    </h4>
+                    <div class="analysis-result-text analysis-result-empty" id="history-detail-content">
+                        왼쪽 히스토리 목록에서 항목을 클릭하면 상세 분석 결과를 확인할 수 있습니다.
+                    </div>
                 </div>
             </div>
-            <!-- 히스토리 영역 끝 -->
         </section>
     </div>
 </div>
