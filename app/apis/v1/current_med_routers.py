@@ -18,8 +18,10 @@ async def get_current_meds(user: Annotated[User, Depends(get_request_user)]) -> 
         CurrentMedResponse(
             id=med.id,
             medication_name=med.medication_name,
-            added_from=med.added_from,
-            start_date=str(med.start_date),
+            one_dose_amount=med.one_dose_amount,
+            one_dose_count=med.one_dose_count,
+            total_days=med.total_days,
+            instructions=med.instructions,
         )
         for med in meds
     ]
@@ -30,20 +32,22 @@ async def create_current_med(
     request: CurrentMedSaveRequest, user: Annotated[User, Depends(get_request_user)]
 ) -> CurrentMedResponse:
     """현재 복용약 수기 등록"""
-    from datetime import date
-
     med = await CurrentMed.create(
         user=user,
         medication_name=request.medication_name,
-        added_from=request.added_from,
-        start_date=date.today(),
+        one_dose_amount=request.one_dose_amount,
+        one_dose_count=request.one_dose_count,
+        total_days=request.total_days,
+        instructions=request.instructions,
     )
 
     return CurrentMedResponse(
         id=med.id,
         medication_name=med.medication_name,
-        added_from=med.added_from,
-        start_date=str(med.start_date),
+        one_dose_amount=med.one_dose_amount,
+        one_dose_count=med.one_dose_count,
+        total_days=med.total_days,
+        instructions=med.instructions,
     )
 
 

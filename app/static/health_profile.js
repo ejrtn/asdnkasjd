@@ -229,25 +229,10 @@ function renderMedications(list) {
     let t = '';
     t += '<tr>';
     t += `<td><input type="text" class="med_name" placeholder="약물이름" value="${med.medication_name || ''}"></td>`;
-    t += `<td><input type="text" class="med_dose" placeholder="500mg" value="${med.one_dose || ''}"></td>`;
+    t += `<td><input type="text" class="med_dose" placeholder="500mg" value="${med.one_dose_amount || ''}"></td>`;
     t += `<td><input type="text" class="med_count" placeholder="1정" value="${med.one_dose_count || ''}"></td>`;
-    t += '<td>';
-    t += '<select class="med_time">';
-    t += '<option style="display:none;">시간 선택</option>';
-    t += `<option ${med.dose_time == '아침' ? 'selected' : ''}>아침</option>`;
-    t += `<option ${med.dose_time == '점심' ? 'selected' : ''}>점심</option>`;
-    t += `<option ${med.dose_time == '저녁' ? 'selected' : ''}>저녁</option>`;
-    t += `<option ${med.dose_time == '취침 전' ? 'selected' : ''}>취침 전</option>`;
-    t += '</select>';
-    t += '</td>';
-    t += '<td>';
-    t += '<select class="med_from">';
-    t += `<option ${med.added_from == '병원 처방' ? 'selected' : ''}>병원 처방</option>`;
-    t += `<option ${med.added_from == '약국 구매' ? 'selected' : ''}>약국 구매</option>`;
-    t += `<option ${med.added_from == '모름' ? 'selected' : ''}>모름</option>`;
-    t += '</select>';
-    t += '</td>';
-    t += `<td><input type="month" class="med_start" value="${med.start_date || ''}"></td>`;
+    t += `<td><input type="text" class="med_days" placeholder="3일" value="${med.total_days || ''}"></td>`;
+    t += `<td><input type="text" class="med_instructions" placeholder="식후 30분" value="${med.instructions || ''}"></td>`;
     t += '<td><button type="button" class="delete-btn">×</button></td>';
     t += '</tr>';
 
@@ -387,24 +372,8 @@ function addMed() {
   t += '<td><input type="text" class="med_name" placeholder="약물이름"></td>';
   t += '<td><input type="text" class="med_dose" placeholder="500mg"></td>';
   t += '<td><input type="text" class="med_count" placeholder="1정"></td>';
-  t += '<td>';
-  t += '<select class="med_time">';
-  t += '<option style="display:none;">시간 선택</option>';
-  t += '<option>아침</option>';
-  t += '<option>점심</option>';
-  t += '<option>저녁</option>';
-  t += '<option>취침 전</option>';
-  t += '<option>모름</option>';
-  t += '</select>';
-  t += '</td>';
-  t += '<td>';
-  t += '<select class="med_from">';
-  t += '<option>병원 처방</option>';
-  t += '<option>약국 구매</option>';
-  t += '<option>모름</option>';
-  t += '</select>';
-  t += '</td>';
-  t += '<td><input type="month" class="med_start"></td>';
+  t += '<td><input type="text" class="med_days" placeholder="3일"></td>';
+  t += '<td><input type="text" class="med_instructions" placeholder="식후 30분"></td>';
   t += '<td><button type="button" class="delete-btn">×</button></td>';
   t += '</tr>';
 
@@ -465,26 +434,17 @@ function validateMedications() {
 
   for (const tr of rows) {
     const name = tr.querySelector(".med_name")?.value?.trim();
-    const time = tr.querySelector(".med_time")?.value;
     const dose = tr.querySelector(".med_dose")?.value?.trim();
     const doseCount = tr.querySelector(".med_count")?.value?.trim();
-    const addedFrom = tr.querySelector(".med_from")?.value;
-    const startDate = tr.querySelector(".med_start")?.value;
+    const days = tr.querySelector(".med_days")?.value?.trim();
+    const instructions = tr.querySelector(".med_instructions")?.value?.trim();
 
-    const hasAnyValue = !!(name || dose || doseCount || (time && time !== "시간 선택") || addedFrom || startDate);
+    const hasAnyValue = !!(name || dose || doseCount || days || instructions);
 
-    if (hasAnyValue) {
-      if (!name) {
-        activateHealthTab("medication");
-        showToast("약물명을 입력해주세요.", "error");
-        return false;
-      }
-
-      if (!time || time === "시간 선택") {
-        activateHealthTab("medication");
-        showToast(`"${name}"의 복용 시간을 선택해주세요.`, "error");
-        return false;
-      }
+    if (hasAnyValue && !name) {
+      activateHealthTab("medication");
+      showToast("약물명을 입력해주세요.", "error");
+      return false;
     }
   }
 
@@ -573,20 +533,18 @@ async function handleSaveHealthProfile() {
   const medications = [];
   document.querySelectorAll("#med-container tbody tr").forEach(tr => {
     const name = tr.querySelector(".med_name").value.trim();
-    const time = tr.querySelector(".med_time").value;
     const oneDose = tr.querySelector(".med_dose").value.trim();
     const oneDoseCount = tr.querySelector(".med_count").value.trim();
-    const addedFrom = tr.querySelector(".med_from").value;
-    const startDate = tr.querySelector(".med_start").value;
+    const days = tr.querySelector(".med_days").value.trim();
+    const instructions = tr.querySelector(".med_instructions").value.trim();
 
-    if (name && time && time !== "시간 선택") {
+    if (name) {
       medications.push({
         medication_name: name,
-        dose_time: time,
-        one_dose: oneDose || null,
+        one_dose_amount: oneDose || null,
         one_dose_count: oneDoseCount || null,
-        added_from: addedFrom || null,
-        start_date: startDate || null
+        total_days: days || null,
+        instructions: instructions || null
       });
     }
   });

@@ -71,22 +71,20 @@ class BloodSugarRecordResponse(BaseModel):
 class CurrentMedResponse(BaseModel):
     id: int
     medication_name: str
-    one_dose: str | None = None
+    one_dose_amount: str | None = None
     one_dose_count: str | None = None
-    dose_time: str | None = None
-    added_from: str | None = None
-    start_date: str | None = None
+    total_days: str | None = None
+    instructions: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class CurrentMedSaveRequest(BaseModel):
     medication_name: str  # 필수
-    dose_time: str  # 필수
-    one_dose: str | None = None
+    one_dose_amount: str | None = None
     one_dose_count: str | None = None
-    added_from: str | None = None
-    start_date: str | None = None
+    total_days: str | None = None
+    instructions: str | None = None
 
 
 class HealthProfileDetailResponse(BaseModel):
