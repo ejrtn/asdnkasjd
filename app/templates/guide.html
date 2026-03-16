@@ -142,8 +142,8 @@
 
                             <div class="guide-head-actions">
                                 <button id="tts-btn" class="c9-btn c9-btn-soft">
-                                    <span id="tts-icon">📢</span>
-                                    <span id="tts-text">가이드 읽어주기</span>
+                                    <span id="tts-icon">🔊</span>
+                                    <span id="tts-text">가이드 음성 안내</span>
                                 </button>
                             </div>
                         </div>
@@ -186,11 +186,11 @@
                         <div id="guide-sections" class="hidden c9-stack-20 w-full">
                             <div id="section-2" class="guide-section-card line-teal">
                                 <div class="guide-section-title-row">
-                                    <h3 class="guide-section-title">1) 질환 기반 생활습관 가이드</h3>
+                                    <h3 class="guide-section-title"> ① 질환 기반 생활습관 가이드</h3>
                                 </div>
                                 <div id="disease-guides-content" class="guide-section-body"></div>
                                 <div class="guide-integrated-box hidden">
-                                    <span class="guide-integrated-icon">🔄</span>
+                                    <span class="guide-integrated-icon">📌</span>
                                     <div>
                                         <h4 class="guide-integrated-title">통합 관리 포인트</h4>
                                         <p id="integrated-point" class="guide-integrated-text"></p>
@@ -199,22 +199,23 @@
 
                                 <!-- RAG Citations Footnote -->
                                 <div id="disease-reference-footer"
-                                    class="mt-5 pt-4 border-t border-teal-100/50 text-center hidden">
-                                    <div class="flex items-center justify-center gap-1 text-xs text-gray-500">
-                                        <span class="text-teal-400">ⓘ</span>
-                                        <span class="font-semibold">
-                                            참고 출처: 국가건강정보포털, 질병관리청 건강정보
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 mt-1">
+                                    class="mt-5 pt-3 border-t border-gray-200 text-center hidden">
+
+                                    <p class="text-[13px] text-gray-500">
+                                        <span class="text-teal-400 mr-1">ⓘ</span>
+                                        참고 출처: 국가건강정보포털, 질병관리청 건강정보
+                                    </p>
+
+                                    <p class="text-[10px] text-gray-500 mt-1">
                                         본 가이드는 공공기관 건강정보를 참고하여 생성되었습니다.
                                     </p>
+
                                 </div>
                             </div>
 
                             <div id="section-1" class="guide-section-card line-blue">
                                 <div class="guide-section-title-row">
-                                    <h3 class="guide-section-title">2) 복약 안전성 및 주의사항</h3>
+                                    <h3 class="guide-section-title"> ② 복약 안전성 및 주의사항</h3>
                                     <span id="safety-status-tag" class="c9-badge c9-badge-success"></span>
                                 </div>
                                 <div id="safety-content" class="guide-section-body"></div>
@@ -227,10 +228,13 @@
                             </div>
 
                             <div id="section-3" class="guide-section-card line-indigo">
-                                <h3 class="guide-section-title guide-plan-title">3) 오늘의 건강 관리 수칙</h3>
+                                <h3 class="guide-section-title guide-plan-title"> ③ 오늘의 건강 관리 수칙</h3>
                                 <div id="checklist-container" class="guide-disease-grid mt-4"></div>
-                                <p class="text-[11px] text-gray-400 mt-6" id="disclaimer-text"></p>
                             </div>
+                            <p class="text-[13px] text-gray-500 mt-3 text-center">
+                                <span class="text-amber-500 mr-1">⚠</span>
+                                <span id="disclaimer-text"></span>
+                            </p>
                         </div>
                     </div>
                 </section>

@@ -266,7 +266,7 @@ function renderGuide() {
             : '<li>특별한 주의사항이 없습니다.</li>';
     }
 
-    // --- Section 1: 질환 기반 생활습관 가이드 ---
+    // --- Section 2: 질환 기반 생활습관 가이드 ---
     const s2 = guideData.section2;
     const diseaseGuidesContent = document.getElementById('disease-guides-content');
     const integratedPoint = document.getElementById('integrated-point');
@@ -312,15 +312,41 @@ function renderGuide() {
     const section3Title = document.querySelector('#section-3 .guide-plan-title');
     const checklistContainer = document.getElementById('checklist-container');
 
-    section3Title.innerText = "3) 오늘의 건강 관리 수칙";
+    section3Title.innerText = "③ 오늘의 건강 관리 수칙";
 
-    // Support both new 'health_guides' and old 'checklist' format
+    // 4대 필수 카테고리 기본 가이드 (백엔드 보정이 놓친 경우 프론트에서 최후 방어)
+    const REQUIRED_CATEGORIES = [
+        { name: '운동', tip: '주 3회, 30분 이상 가벼운 걷기 등 자신에게 맞는 운동을 꾸준히 실천해 보세요.' },
+        { name: '식단', tip: '규칙적인 식사와 균형 잡힌 영양 섭취가 면역력 유지에 도움이 됩니다.' },
+        { name: '수면', tip: '하루 7~8시간의 충분한 수면으로 몸의 피로를 풀어주세요.' },
+        { name: '흡연/음주', tip: '금연과 절주는 모든 대사 질환 예방의 첫걸음입니다.' }
+    ];
+
+    // health_guides를 우선 사용, 없으면 checklist 팁들을 공통 hints로 변환
     let healthGuides = s3.health_guides || [];
     if (healthGuides.length === 0 && s3.checklist && s3.checklist.length > 0) {
-        healthGuides = [{
-            name: "공통 관리 수칙",
-            tips: s3.checklist
-        }];
+        // 체크리스트 형식 → 4대 카테고리로 분배 (항목을 나눠서 할당)
+        const tips = s3.checklist;
+        const chunkSize = Math.ceil(tips.length / 4);
+        healthGuides = REQUIRED_CATEGORIES.map((cat, i) => ({
+            name: cat.name,
+            tips: tips.slice(i * chunkSize, (i + 1) * chunkSize).length > 0
+                ? tips.slice(i * chunkSize, (i + 1) * chunkSize)
+                : [cat.tip]
+        }));
+    }
+
+    // 4대 카테고리 누락 보정 (프론트 최후 방어선)
+    if (healthGuides.length > 0) {
+        const existingNames = new Set(healthGuides.map(hg => hg.name));
+        for (const cat of REQUIRED_CATEGORIES) {
+            if (!existingNames.has(cat.name)) {
+                healthGuides.push({ name: cat.name, tips: [cat.tip] });
+            }
+        }
+    } else {
+        // 완전히 빈 경우 기본값으로 채우기
+        healthGuides = REQUIRED_CATEGORIES.map(cat => ({ name: cat.name, tips: [cat.tip] }));
     }
 
     if (healthGuides.length > 0) {

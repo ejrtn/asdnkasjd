@@ -377,9 +377,11 @@ class GuideService:
 
         # 1. 저장된 가이드가 있고 '완료' 상태인 경우 즉시 반환
         if saved and saved.activity is False:
+            # 저장된 구버전 가이드도 4대 카테고리 보정 적용 (DB에 옛날 형식이 남아 있을 경우 대비)
+            fixed_content = self._fix_missing_health_guides(saved.generated_content or {})
             return {
                 "user_current_status": saved.user_current_status,
-                "generated_content": saved.generated_content,
+                "generated_content": fixed_content,
                 "activity": False,
                 "created_at": saved.created_at,
             }
