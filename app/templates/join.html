@@ -60,16 +60,20 @@
                         <div class="auth-form-group">
                             <label for="id" class="auth-label">이메일 (ID)</label>
                             <div class="auth-row">
-                                <input class="auth-input" type="email" id="id" name="id" required placeholder="example@mail.com">
-                                <button type="button" class="auth-btn-inline btn-verify" onclick="sendCode()">인증 요청</button>
+                                <input class="auth-input" type="email" id="id" name="id" required
+                                    placeholder="example@mail.com">
+                                <button type="button" class="auth-btn-inline btn-verify" onclick="sendCode()">인증
+                                    요청</button>
                             </div>
                         </div>
 
                         <div class="auth-form-group">
                             <label for="code" class="auth-label">인증번호</label>
                             <div class="auth-row">
-                                <input class="auth-input" type="text" id="code" name="code" required placeholder="6자리 번호 입력">
-                                <button type="button" class="auth-btn-inline btn-verify" onclick="checkCode()">인증 확인</button>
+                                <input class="auth-input" type="text" id="code" name="code" required
+                                    placeholder="6자리 번호 입력">
+                                <button type="button" class="auth-btn-inline btn-verify" onclick="checkCode()">인증
+                                    확인</button>
                             </div>
                             <div id="code-verified-status" class="auth-inline-status" style="display: none;">인증 완료</div>
                         </div>
@@ -82,7 +86,8 @@
 
                             <div class="auth-form-group">
                                 <label for="nickname" class="auth-label">닉네임</label>
-                                <input class="auth-input" type="text" name="nickname" id="nickname" maxlength="20" required>
+                                <input class="auth-input" type="text" name="nickname" id="nickname" maxlength="20"
+                                    required>
                             </div>
                         </div>
 
@@ -94,13 +99,15 @@
 
                             <div class="auth-form-group">
                                 <label for="password_check" class="auth-label">비밀번호 확인</label>
-                                <input class="auth-input" type="password" name="password_check" id="password_check" required>
+                                <input class="auth-input" type="password" name="password_check" id="password_check"
+                                    required>
                             </div>
                         </div>
 
                         <div class="auth-form-group">
                             <label for="phone_number" class="auth-label">전화번호</label>
-                            <input class="auth-input" type="text" name="phone_number" id="phone_number" maxlength="11" placeholder="01012345678" required>
+                            <input class="auth-input" type="text" name="phone_number" id="phone_number" maxlength="11"
+                                placeholder="01012345678" required>
                         </div>
                     </div>
 
@@ -144,13 +151,15 @@
                             </div>
 
                             <div class="auth-agreement-item">
-                                <input type="checkbox" class="agree-item" id="is_privacy_agreed" name="is_privacy_agreed">
+                                <input type="checkbox" class="agree-item" id="is_privacy_agreed"
+                                    name="is_privacy_agreed">
                                 <span>개인정보 처리방침 동의 <span class="auth-required">(필수)</span></span>
                                 <span class="item-open">보기</span>
                             </div>
 
                             <div class="auth-agreement-item">
-                                <input type="checkbox" class="agree-item" id="is_marketing_agreed" name="is_marketing_agreed">
+                                <input type="checkbox" class="agree-item" id="is_marketing_agreed"
+                                    name="is_marketing_agreed">
                                 <span>마케팅 정보 수신 동의 (선택)</span>
                                 <span class="item-open">보기</span>
                             </div>
@@ -171,6 +180,19 @@
         </div>
     </div>
 
+    <div id="app-toast" class="app-toast" aria-live="polite" aria-atomic="true">
+        <div class="app-toast-inner">
+            <div class="app-toast-badge" id="app-toast-badge">✅</div>
+            <div class="app-toast-content">
+                <div class="app-toast-title" id="app-toast-title">안내</div>
+                <div class="app-toast-message" id="app-toast-message">저장되었습니다.</div>
+            </div>
+            <button class="app-toast-close" type="button" id="app-toast-close" aria-label="닫기">×</button>
+        </div>
+    </div>
+
+    <script src="/static/common.js"></script>
+    <script src="/static/base.js"></script>
     <script>
 
         let isCodeVerified = false;
@@ -191,11 +213,11 @@
         // DOM 로드 시 소셜 로그인 연동 회원가입 처리 (sessionStorage 사용)
         window.addEventListener('DOMContentLoaded', () => {
             const socialProfileStr = sessionStorage.getItem('social_profile');
-            
+
             if (socialProfileStr) {
                 try {
                     const profile = JSON.parse(socialProfileStr);
-                    
+
                     const idInput = document.getElementById('id');
                     const nameInput = document.getElementById('name');
                     const nicknameInput = document.getElementById('nickname');
@@ -210,7 +232,7 @@
                     if (profile.name) {
                         nameInput.value = profile.name;
                         nameInput.readOnly = true;
-                        
+
                         if (!profile.nickname) {
                             nicknameInput.value = profile.name;
                         }
@@ -218,8 +240,8 @@
                     if (profile.nickname) {
                         nicknameInput.value = profile.nickname;
                     }
-                    
-                    if(profile.provider != 'google'){
+
+                    if (profile.provider != 'google') {
                         if (profile.phone_number) {
                             phoneNumberInput.value = profile.phone_number;
                             phoneNumberInput.readOnly = true;
@@ -249,7 +271,7 @@
                         codeVerifiedStatus.style.display = 'inline-flex';
                     }
 
-                } catch(e) {
+                } catch (e) {
                     console.error("소셜 프로필 파싱 오류", e);
                 }
             }
@@ -258,7 +280,7 @@
         // 1. 인증번호 발송 함수
         async function sendCode() {
             const userId = document.getElementById('id').value;
-            if (!userId) return alert("이메일을 입력해주세요.");
+            if (!userId) return showAppToast("이메일을 입력해주세요.", "warn", "확인 필요");
 
             try {
                 const response = await fetch(
@@ -269,12 +291,12 @@
                 // 다른 HTTP 에러만 콘솔 출력
                 if (!response.ok) {
                     console.error("API Error:", response.status);
-                    alert("에러가 발생했습니다.");
+                    showAppToast("에러가 발생했습니다.", "warn", "오류");
                     return;
                 } else {
                     const result = await response.json();
                     if (result.detail.includes("이미")) {
-                        alert(result.detail);
+                        showAppToast(result.detail, "warn", "가입 확인");
                         return;
                     }
                 }
@@ -290,30 +312,30 @@
 
                 if (!response1.ok) {
                     console.error("Send Code Error:", response1.status);
-                    alert("인증코드 발송 실패");
+                    showAppToast("인증코드 발송 실패", "warn", "오류");
                     return;
                 }
 
                 const result1 = await response1.json();
-                
+
                 isCodeVerified = false;
                 const codeVerifiedStatus = document.getElementById('code-verified-status');
                 if (codeVerifiedStatus) {
                     codeVerifiedStatus.style.display = 'none';
                 }
-                
-                alert(result1.message);
+
+                showAppToast(result1.message, "success", "인증코드");
 
             } catch (e) {
-                alert("발송 실패");
+                showAppToast("발송 실패", "warn", "오류");
             }
         }
         async function checkCode() {
             const userId = document.getElementById('id').value;
-            if (!userId) return alert("이메일을 입력해주세요.");
+            if (!userId) return showAppToast("이메일을 입력해주세요.", "warn", "확인 필요");
 
             const code = document.getElementById('code').value;
-            if (!code) return alert("인증번호를 입력해주세요.");
+            if (!code) return showAppToast("인증번호를 입력해주세요.", "warn", "확인 필요");
 
             try {
                 // 정상일 때 인증코드 확인
@@ -328,19 +350,19 @@
                 // 인증 틀림 (정상 처리)
                 if (response.status === 400) {
                     const result = await response.json();
-                    alert(result.detail);
+                    showAppToast(result.detail, "warn", "인증 실패");
                     return;
                 }
 
                 if (!response.ok) {
                     console.error("API Error:", response.status);
-                    alert("에러가 발생했습니다.");
+                    showAppToast("에러가 발생했습니다.", "warn", "오류");
                     return;
                 }
 
                 const result = await response.json();
-                alert(result.message);
-                
+                showAppToast(result.message, "success", "인증 완료");
+
                 isCodeVerified = true;
                 const codeVerifiedStatus = document.getElementById('code-verified-status');
                 if (codeVerifiedStatus) {
@@ -348,7 +370,7 @@
                 }
 
             } catch (e) {
-                alert("발송 실패");
+                showAppToast("발송 실패", 'warn', '오류');
             }
         }
 
@@ -357,45 +379,45 @@
             e.preventDefault();
 
             if (document.getElementById('id').value == '') {
-                alert("이메일을 입력해주세요.")
+                showAppToast("이메일을 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (document.getElementById('name').value == '') {
-                alert("이름을 입력해주세요.")
+                showAppToast("이름을 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (document.getElementById('password').value == '') {
-                alert("비밀번호를 입력해주세요.")
+                showAppToast("비밀번호를 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (document.getElementById('password_check').value == '') {
-                alert("비밀번호 확인을 입력해주세요.")
+                showAppToast("비밀번호 확인을 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (document.getElementById('password').value != document.getElementById('password_check').value) {
-                alert("비밀번호가 다릅니다..")
+                showAppToast("비밀번호가 다릅니다.", "warn", "확인 필요");
                 return;
             }
             if (document.getElementById('phone_number').value == '') {
-                alert("전화번호를 입력해주세요.")
+                showAppToast("전화번호를 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (document.querySelector('.birthday').value == '') {
-                alert("생년월일 입력해주세요.")
+                showAppToast("생년월일을 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (!document.querySelector(".gender").value) {
-                alert("성별 입력해주세요.")
+                showAppToast("성별을 입력해주세요.", "warn", "확인 필요");
                 return;
             }
             if (!isCodeVerified) {
-                alert("이메일 인증해주시기 바랍니다.")
+                showAppToast("이메일 인증을 완료해주세요.", "warn", "확인 필요");
                 return;
             }
 
             if (!document.getElementById('is_terms_agreed').checked ||
                 !document.getElementById('is_privacy_agreed').checked) {
-                alert("필수 약관에 동의해주세요.");
+                showAppToast("필수 약관에 동의해주세요.", "warn", "확인 필요");
                 return;
             }
 
@@ -415,7 +437,7 @@
             }
 
             const getSignupToken = sessionStorage.getItem('social_signup_token');
-            if(getSignupToken) {
+            if (getSignupToken) {
                 data.social_signup_token = getSignupToken;
             }
 
@@ -431,26 +453,28 @@
                 // 인증 틀림 (정상 처리)
                 if (response.status === 409) {
                     const result = await response.json();
-                    alert(result.detail);
+                    showAppToast(result.detail, "warn", "가입 실패");
                     return;
                 }
 
                 if (!response.ok) {
                     console.error("API Error:", response.status);
-                    alert("에러가 발생했습니다.");
+                    showAppToast("에러가 발생했습니다.", "warn", "오류");
                     return;
                 }
 
                 const result = await response.json();
-                alert(result.detail);
-                
+                showAppToast(result.detail, "success", "가입 완료");
+
                 // 가입 완료 후 임시 스토리지 비우기
                 sessionStorage.removeItem('social_signup_token');
                 sessionStorage.removeItem('social_profile');
-                
-                location.href = "/login"
+
+                setTimeout(() => {
+                    location.href = "/login"
+                }, 1500);
             } catch (e) {
-                alert("가입 실패");
+                showAppToast("가입 실패", "warn", "오류");
             }
         });
 
@@ -471,4 +495,5 @@
 
     </script>
 </body>
+
 </html>

@@ -239,7 +239,7 @@
     }
 
     /* 목록 창 */
-    .plan-list{
+    .plan-list {
         overflow-y: auto;
         height: 356px;
     }
@@ -272,7 +272,8 @@
             <span class="btn-desc">삭제한 복약/기록 알람을 <br>다시 불러옵니다.</span>
         </div>
         <div class="tooltip-container">
-            <button onclick="recommendAI()" id="recommend-ai-btn" class="sync-btn ai-btn" title="AI가 건강 상태를 분석하여 맞춤 플랜을 추천합니다.">
+            <button onclick="recommendAI()" id="recommend-ai-btn" class="sync-btn ai-btn"
+                title="AI가 건강 상태를 분석하여 맞춤 플랜을 추천합니다.">
                 <span>✨</span> AI 추천 다시 받기
             </button>
             <span class="btn-desc">건강 정보를 바탕으로 <br>5개 플랜을 다시 생성합니다.</span>
@@ -392,10 +393,10 @@
                 method: 'POST'
             });
             if (response && response.ok) {
-                alert('알람 동기화가 완료되었습니다.');
+                showAppToast('알람 동기화가 완료되었습니다.', 'success', '알람 동기화');
                 loadItems();
             } else {
-                alert('동기화에 실패했습니다.');
+                showAppToast('동기화에 실패했습니다.', 'warn', '알람 동기화');
             }
         } catch (e) {
             console.error(e);
@@ -416,10 +417,10 @@
                 method: 'POST'
             });
             if (response && response.ok) {
-                alert('AI 추천 플랜이 새롭게 생성되었습니다.');
+                showAppToast('AI 추천 플랜이 새롭게 생성되었습니다.', 'success', 'AI 추천');
                 loadItems();
             } else {
-                alert('추천 플랜 생성에 실패했습니다.');
+                showAppToast('추천 플랜 생성에 실패했습니다.', 'warn', 'AI 추천');
             }
         } catch (e) {
             console.error(e);

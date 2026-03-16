@@ -115,6 +115,19 @@
         </div>
     </div>
 
+    <div id="app-toast" class="app-toast" aria-live="polite" aria-atomic="true">
+        <div class="app-toast-inner">
+            <div class="app-toast-badge" id="app-toast-badge">✅</div>
+            <div class="app-toast-content">
+                <div class="app-toast-title" id="app-toast-title">안내</div>
+                <div class="app-toast-message" id="app-toast-message">저장되었습니다.</div>
+            </div>
+            <button class="app-toast-close" type="button" id="app-toast-close" aria-label="닫기">×</button>
+        </div>
+    </div>
+
+    <script src="/static/common.js"></script>
+    <script src="/static/base.js"></script>
     <script>
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -135,7 +148,7 @@
 
                 if (response.status === 401) {
                     const result = await response.json();
-                    alert(result.detail);
+                    showAppToast(result.detail, 'warn', '로그인 실패');
                     return;
                 }
 
@@ -146,14 +159,16 @@
                     localStorage.setItem("auth_token", result.access_token);
                     localStorage.setItem("user_id", result.id);
 
-                    alert("로그인 성공!");
-                    location.href = "/dashboard";
+                    showAppToast("로그인 성공!", "success", "로그인");
+                    setTimeout(() => {
+                        location.href = "/dashboard";
+                    }, 1000);
                 } else {
                     const result = await response.json().catch(() => ({}));
-                    alert("로그인 실패: " + (result.detail || "정보를 확인해주세요."));
+                    showAppToast("로그인 실패: " + (result.detail || "정보를 확인해주세요."), 'warn', '로그인 실패');
                 }
             } catch (err) {
-                alert("서버 통신 오류가 발생했습니다.");
+                showAppToast("서버 통신 오류가 발생했습니다.", 'warn', '오류');
             }
         };
         document.querySelector(".auth-social-btn.btn-google").addEventListener("click", async () => {

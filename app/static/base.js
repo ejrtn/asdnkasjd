@@ -191,7 +191,7 @@ function bindSearchUI() {
         searchBtn.addEventListener('click', function () {
             const searchTerm = searchInput ? searchInput.value.trim() : '';
             if (searchTerm) {
-                alert(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`);
+                showAppToast(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`, "info", "검색");
             }
         });
     }
