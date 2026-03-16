@@ -2,12 +2,12 @@ from typing import Any
 
 from app.dtos.chat import ChatRequest, ChatResponse
 from app.models.user import User
+from app.rag.context_builder import build_context_from_search_results
+from app.rag.vector_store import search_similar_documents
 from app.repositories.blood_pressure_record import BloodPressureRecordRepository
 from app.repositories.blood_sugar_record import BloodSugarRecordRepository
 from app.repositories.chat_memory_repository import ChatMemoryRepository
 from app.repositories.llm_life_guide import LLMLifeGuideRepository
-from app.rag.context_builder import build_context_from_search_results
-from app.rag.vector_store import search_similar_documents
 from app.services.llm_service import LLMService
 
 
