@@ -1,5 +1,4 @@
 /* base.css에서 .guide-page-container, .c9-page-header 공통 처리 */
-
 .guide-updated-at {
     font-size: 11px;
     color: #94a3b8;
@@ -15,18 +14,6 @@
     color: #cbd5e1;
     font-size: 14px;
     line-height: 1;
-}
-
-.guide-page-container>.c9-page-header {
-    align-items: center;
-}
-
-.guide-page-container>.c9-page-header .c9-page-title {
-    margin: 0;
-}
-
-.guide-page-container>.c9-page-header .c9-muted {
-    margin-top: 8px;
 }
 
 .guide-page-container {
@@ -485,13 +472,15 @@
     width: 100%;
     display: flex;
     align-items: center;
+    /* 세로 중앙 정렬 */
     justify-content: space-between;
-    gap: 16px;
+    gap: 20px;
+    /* 제목과 버튼 사이 최소 간격 */
     margin-bottom: 0;
 }
 
 .guide-head-card .c9-section-title {
-    display: flex;
+    /* display: flex; */
     align-items: center;
     gap: 12px;
     min-height: 38px;
@@ -501,6 +490,12 @@
     letter-spacing: -0.01em;
     color: #1f2937;
     margin: 0;
+    white-space: nowrap;
+
+    word-break: keep-all;
+    /* 단어 단위 줄바꿈으로 깔끔하게 */
+    min-width: 0;
+    /* flex 안에서 텍스트 오버플로우 방지 */
 }
 
 .guide-head-card .c9-section-title-icon {
@@ -514,7 +509,13 @@
     flex-shrink: 0;
 }
 
-.guide-head-card .c9-btn {
+.guide-head-actions {
+    flex-shrink: 0;
+    /* 제목이 길어져도 버튼 영역이 좁아지지 않음 */
+}
+
+.guide-head-card .c9-btn,
+.guide-head-actions .c9-btn {
     min-height: 46px;
     padding: 0 18px;
     border-radius: 14px;
@@ -525,6 +526,7 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+    /* 버튼 텍스트 줄바꿈 방지 */
 }
 
 .guide-head-card .guide-info-icon {
@@ -535,14 +537,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-}
-
-.guide-header-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-left: auto;
 }
 
 .guide-mode-tabs {
@@ -789,7 +783,7 @@
     background: #f59e0b;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     .guide-layout {
         grid-template-columns: 1fr;
     }
@@ -812,16 +806,6 @@
         padding: 20px 22px;
     }
 
-    .guide-head-card .c9-section-head {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .guide-head-card .c9-btn {
-        width: 100%;
-        justify-content: center;
-    }
-
     .guide-plan-head {
         flex-direction: column;
         align-items: flex-start;
@@ -837,8 +821,38 @@
     }
 
     .guide-mode-tabs {
-        width: 100%;
+        width: auto;
         justify-content: flex-start;
         flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .guide-head-card .c9-section-head {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 720px) {
+    .guide-head-card .c9-section-head {
+        flex-direction: column;
+        /* 세로 배치로 전환 */
+        align-items: flex-start;
+        /* 왼쪽 정렬 */
+        gap: 16px;
+        /* 세로 배치 시 제목과 버튼 사이 간격 */
+        flex-wrap: wrap;
+        /* 다시 줄바꿈 허용 */
+    }
+
+    .guide-head-actions {
+        width: 100%;
+        /* 모바일에서 버튼 영역을 꽉 채우기 */
+    }
+
+    .guide-head-actions .c9-btn {
+        width: 100%;
+        /* 가득 찬 버튼 */
+        justify-content: center;
     }
 }

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Cloud9 Care - 생활 안내 가이드{% endblock %}
+{% block title %}Cloud9 Care - 하루 건강 미션{% endblock %}
 
 {% block head %}
+<<<<<<< Updated upstream
 <style>
     /* 컨테이너 */
     .plan-container {
@@ -244,21 +245,66 @@
         height: 356px;
     }
 </style>
+=======
+<link rel="stylesheet" href="{{ static_v('plan_check_list.css') }}">
+>>>>>>> Stashed changes
 {% endblock %}
 
 {% block content %}
-<div class="plan-container">
-    <div class="plan-header">
-        <div class="plan-title-area">
-            <h2>오늘의 실행 플랜</h2>
-            <p class="plan-subtitle">체크한 항목은 나의 관리 기록으로 저장됩니다.</p>
+<div class="page-wrap plan-page">
+    
+    <!-- 표준화된 공통 헤더 (c9-page-header) -->
+    <section class="c9-page-header">
+        <div class="header-text-area">
+            <h1 class="c9-page-title">오늘의 실행 플랜</h1>
+            <p class="c9-page-copy c9-muted">
+                체크한 항목은 나의 관리 기록으로 영구 저장됩니다.
+            </p>
         </div>
-        <div class="success-rate-area">
-            <span id="success-rate">0%</span>
-            <p>SUCCESS RATE</p>
+        
+        <div class="c9-header-meta">
+            <div class="success-rate-area">
+                <span id="success-rate">0%</span>
+                <span class="success-rate-caption">SUCCESS RATE</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 플랜 본문 영역 -->
+    <div class="plan-container">
+        <div class="plan-progress-bar">
+            <div id="progress-fill" style="width: 0%;"></div>
+        </div>
+
+        <!-- 동기화 및 추천 버튼 영역 -->
+        <div class="sync-actions">
+            <div class="tooltip-container">
+                <button onclick="syncAlarms()" id="sync-alarms-btn" class="sync-btn" title="설정된 복약/측정 알람을 체크리스트로 불러옵니다.">
+                    <span>🔄</span> 알람 동기화
+                </button>
+                <span class="btn-desc">삭제한 복약/기록 알람을 <br>다시 불러옵니다.</span>
+            </div>
+            <div class="tooltip-container">
+                <button onclick="recommendAI()" id="recommend-ai-btn" class="sync-btn ai-btn" title="AI가 건강 상태를 분석하여 맞춤 플랜을 추천합니다.">
+                    <span>✨</span> AI 추천 다시 받기
+                </button>
+                <span class="btn-desc">건강 정보를 바탕으로 <br>5개 플랜을 다시 생성합니다.</span>
+            </div>
+        </div>
+
+        <!-- 플랜 리스트 -->
+        <div id="plan-list" class="plan-list">
+            <!-- 기본 아이템 예시 JS 렌더링 영역 -->
+        </div>
+
+        <!-- 추가 입력창 -->
+        <div class="plan-input-group">
+            <input type="text" id="new-plan-input" placeholder="새로운 미션을 입력하세요...">
+            <button onclick="addItem()" class="add-btn">추가</button>
         </div>
     </div>
 
+<<<<<<< Updated upstream
     <div class="plan-progress-bar">
         <div id="progress-fill" style="width: 0%;"></div>
     </div>
@@ -290,10 +336,13 @@
         <input type="text" id="new-plan-input" placeholder="새로운 플랜을 입력하세요...">
         <button onclick="addItem()" class="add-btn">추가</button>
     </div>
+=======
+>>>>>>> Stashed changes
 </div>
 {% endblock %}
 
 {% block scripts %}
+<<<<<<< Updated upstream
 <script>
 
 
@@ -462,3 +511,7 @@
     window.onload = loadItems;
 </script>
 {% endblock %}
+=======
+<script src="{{ static_v('plan_check_list.js') }}"></script>
+{% endblock %}
+>>>>>>> Stashed changes
