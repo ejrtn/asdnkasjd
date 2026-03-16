@@ -2,8 +2,7 @@ import asyncio
 import logging
 from typing import Any, cast
 
-from tortoise.expressions import F
-from tortoise.query_utils import Q
+from tortoise.expressions import F, Q
 
 from app.dtos.drug_enrichment import DrugEnrichmentData
 from app.models.drug_master_tmp import DrugMasterTmp

@@ -11,6 +11,7 @@ from fastapi import UploadFile
 from tortoise.expressions import Q
 
 from app.models.drug_master import DrugMaster
+from app.models.pill_recognitions import PillRecognition
 from app.repositories.upload import UploadRepository
 from app.services.drug_enrichment_service import DrugEnrichmentService
 from app.services.llm_service import LLMService
@@ -109,7 +110,31 @@ class UploadService:
             )
 
         created_uploads = await self._repo.create_file(user.id, uploaded_db_params)
-        return await self.pill_name_result(created_uploads)
+
+        # 1-1. 분석 수행
+        result = await self.pill_name_result(created_uploads)
+
+        # 1-2. 분석 결과 DB 저장 (모든 후보군 기록)
+        if result.get("status") == "success" and result.get("candidates"):
+            front_up = next((u for u in created_uploads if u.category == "pill_front"), None)
+            back_up = next((u for u in created_uploads if u.category == "pill_back"), None)
+
+            if front_up:
+                # 후보군 리스트를 돌며 각각 새로운 행(row)으로 저장합니다.
+                for cand in result["candidates"]:
+                    await PillRecognition.create(
+                        pill_name=cand["name"],
+                        pill_description=cand.get("efcy_qesitm"),
+                        confidence=cand["score"],
+                        model_version=self.VISION_MODEL,
+                        raw_result=result.get("ai_extracted"),
+                        user_id=user.id,
+                        front_upload=front_up,  # ForeignKey이므로 여러 번 create 가능
+                        back_upload=back_up,
+                    )
+                logger.info(f"Saved {len(result['candidates'])} recognition candidates for upload_id: {front_up.id}")
+
+        return result
 
     # ==================================================
     # Identification Logic
@@ -321,7 +346,7 @@ class UploadService:
         # 그룹화 로직을 별도 메서드로 추출
         processed_results = self._process_pill_data(uploads)
 
-        return await self.upload_pull_status(processed_results)
+        return self._format_upload_response(processed_results)
 
     async def get_upload_history(self, user: Any) -> list[dict]:
         """
@@ -382,19 +407,22 @@ class UploadService:
 
     def _process_pill_data(self, uploads: list[Any]) -> list[Any]:
         """
-        [Mypy 에러 해결]
-        1. groups의 타입을 Dict[str, Dict[str, Any]]로 명시하여 Tuple 에러 방지.
-        2. getattr와 타입 체크를 통해 Attribute 에러 방지.
+        알약 사진들을 그룹화하고 병합합니다. (복잡도 해결을 위해 분리)
         """
+        groups, others = self._group_pill_uploads(uploads)
+        results = self._merge_pill_groups(groups)
+        results.extend(others)
+        return results
+
+    def _group_pill_uploads(self, uploads: list[Any]) -> tuple[dict[str, dict[str, Any]], list[Any]]:
+        """사진을 그룹 이름별로 분류합니다."""
         groups: dict[str, dict[str, Any]] = {}
         others: list[Any] = []
 
-        # 1. 사진 그룹화
         for upload in uploads:
             if upload.category in ["pill_front", "pill_back"]:
                 base = self._get_base_name(upload.file_path)
                 if base not in groups:
-                    # 초기화를 dict로 명확히 함
                     groups[base] = {"front": None, "back": None}
 
                 if upload.category == "pill_front":
@@ -403,8 +431,10 @@ class UploadService:
                     groups[base]["back"] = upload
             else:
                 others.append(upload)
+        return groups, others
 
-        # 2. 그룹 병합
+    def _merge_pill_groups(self, groups: dict[str, dict[str, Any]]) -> list[Any]:
+        """분류된 그룹을 하나의 결과로 병합합니다."""
         results: list[Any] = []
         for group in groups.values():
             front = group["front"]
@@ -414,13 +444,17 @@ class UploadService:
             if not target:
                 continue
 
-            # [Mypy] getattr를 사용하여 안전하게 속성 접근
-            front_asset = getattr(front, "pill_recognition_front", None) if front else None
-            back_asset = getattr(back, "pill_recognition_back", None) if back else None
-            recognition = front_asset or back_asset
+            # [Mypy] 1:N 관계로 변경됨에 따라 첫 번째 결과를 가져옵니다.
+            front_assets = getattr(front, "pill_recognitions_front", []) if front else []
+            back_assets = getattr(back, "pill_recognitions_back", []) if back else []
+
+            recognition = None
+            if front_assets:
+                recognition = front_assets[0]
+            elif back_assets:
+                recognition = back_assets[0]
 
             if recognition:
-                # [Mypy] front/back이 존재할 때만 file_path 접근
                 if front:
                     recognition.front_file_path = front.file_path
                 if back:
@@ -429,84 +463,8 @@ class UploadService:
 
             target.category = "pill"
             results.append(target)
-
-        results.extend(others)
         return results
 
-    async def upload_pull_status(self, data: list) -> dict:
-        """
-        약물 상호작용 및 설명
-        """
-        # API 키가 없으면 더미 데이터 반환
-        if not self.llm_service.client:
-            # If API key is missing, return a dummy JSON directly to show the UI
-            return {
-                "status": "API Key Missing",
-                "content": {
-                    "interaction": "서비스 점검 중",
-                    "pill_list": [],
-                    "disclaimer": "API 키가 설정되지 않았습니다.",
-                },
-            }
-
-        pill_list = []
-        for row in data:
-            # 약 이름 추출 로직 (기존과 동일)
-            if row.category == "prescription" and row.prescription:
-                for drug in row.prescription.drugs:
-                    if drug.standard_drug_name:
-                        pill_list.append(drug.standard_drug_name)
-            elif getattr(row, "pill_recognition", None):
-                if row.pill_recognition.pill_name:
-                    pill_list.append(row.pill_recognition.pill_name)
-
-        pill_list = list(set(pill_list))
-
-        if not pill_list:
-            return {
-                "status": "EMPTY_PILLS",
-                "content": {"interaction": "분석할 약물이 없습니다.", "pill_list": [], "disclaimer": ""},
-            }
-
-        prompt = f"""
-    약사로서 약물에 대한 상호작용 또는 약물에 대한 설명을 해줘
-
-
-    [알약 목록]
-    {", ".join(pill_list) if pill_list else "없음"}
-
-    [작성 규칙]
-    1. severity_display: UI 배지에 노출할 단어 (안전/주의/위험 중 하나).
-    2. summary: 사용자가 가장 먼저 읽어야 할 핵심 상호작용 결과를 20자 이내로 작성.
-    3. pill_names: 분석된 약물 이름을 쉼표로 나열.
-
-    [응답 JSON 구조]
-    {{
-        "severity_display": "주의",
-        "summary": "혈압 수치 변화에 유의하세요",
-        "pill_names": "타이레놀정", "아모디핀정"
-    }}
-    """.strip()
-
-        try:
-            content_json = await self.llm_service.generate_json(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "약사로서 약물에 대한 상호작용 또는 약물에 대한 설명한다. JSON 형식으로만 답변한다.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                model="gpt-4o-mini",
-                temperature=0.4,
-            )
-
-            return {
-                "status": "success",
-                "content": content_json,
-            }
-        except Exception as e:
-            return {
-                "status": "error",
-                "content": {"interaction": "분석 중 오류 발생", "pill_list": [], "disclaimer": str(e)},
-            }
+    def _format_upload_response(self, results: list[Any]) -> dict[str, Any]:
+        """가공된 결과를 최종 응답 형식으로 변환합니다."""
+        return {"status": "success", "content": {"results": results}}

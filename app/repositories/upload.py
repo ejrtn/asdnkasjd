@@ -15,9 +15,11 @@ class UploadRepository:
         """
         여러 개의 복용 약물 정보를 한꺼번에 생성합니다.
         """
-        objs = [self._model(**{**data, "user_id": user_id}) for data in uploads]
-        await self._model.bulk_create(objs)
-        return objs
+        created_objs = []
+        for data in uploads:
+            obj = await self._model.create(**{**data, "user_id": user_id})
+            created_objs.append(obj)
+        return created_objs
 
     async def get_latest_day_uploads(self, user_id: str):
         """
@@ -31,7 +33,7 @@ class UploadRepository:
         end = start + timedelta(days=1)
 
         return await self._model.filter(user_id=user_id, created_at__gte=start, created_at__lt=end).prefetch_related(
-            "prescription__drugs", "pill_recognition_front", "pill_recognition_back"
+            "prescription__drugs", "pill_recognitions_front", "pill_recognitions_back"
         )
 
     async def get_all_uploads(self, user_id: str):
