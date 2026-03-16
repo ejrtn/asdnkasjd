@@ -1,4 +1,3 @@
-from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from tortoise import fields, models
@@ -9,20 +8,6 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class DoseTime(StrEnum):
-    MORNING = "아침"
-    LUNCH = "점심"
-    DINNER = "저녁"
-    BEDTIME = "취침 전"
-    UNKNOWN = "모름"
-
-
-class AddedFrom(StrEnum):
-    UNKNOWN = "모름"
-    HOSPITAL = "병원 처방"
-    PHARMACY = "약국 구매"
-
-
 class CurrentMed(models.Model):
     """
     사용자가 현재 실제로 복용 중인 약물 목록을 관리하는 모델입니다.
@@ -30,14 +15,15 @@ class CurrentMed(models.Model):
     """
 
     id = fields.IntField(pk=True)
-    # 승인된 약물 이름 (여기 데이터가 RAG의 핵심 소스)
+    # 약물 이름 (필수, RAG의 핵심 소스)
     medication_name = fields.CharField(max_length=255)
-    one_dose = fields.CharField(max_length=255, null=True)  # 1회 용량 (예: 500mg)
-    daily_dose_count = fields.CharField(max_length=255, null=True)  # 1일 복용 횟수
-    one_dose_count = fields.CharField(max_length=255, null=True)  # 1회 복용 개수 (예: 1정)
-    dose_time = fields.CharEnumField(DoseTime, description="복용 시간")
-    added_from = fields.CharEnumField(AddedFrom, description="출처")  # 출처 (약국, 처방전)
-    start_date = fields.CharField(max_length=255, null=True)  # 복용 시작 시점
+
+    # UI 구조에 맞춘 선택 필드
+    one_dose_amount = fields.CharField(max_length=255, null=True)  # 1회 투약량 (예: 500mg, 1정)
+    one_dose_count = fields.CharField(max_length=255, null=True)  # 1회 투여횟수
+    total_days = fields.CharField(max_length=255, null=True)  # 총 투약일수
+    instructions = fields.TextField(null=True)  # 용법 (예: 식후 30분)
+
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField("models.User", related_name="current_meds")
 
     # 약물 식별(PillRecognition)과의 1:1 관계

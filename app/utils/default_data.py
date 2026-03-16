@@ -9,7 +9,7 @@ from app.models.blood_pressure_record import BloodPressureRecord, RecordTime
 from app.models.blood_sugar_record import BloodSugarRecord, GlucoseMeasureType
 from app.models.chat_message import ChatMessage
 from app.models.chronic_disease import ChronicDisease
-from app.models.current_med import AddedFrom, CurrentMed, DoseTime
+from app.models.current_med import CurrentMed
 from app.models.health_profile import (
     DietType,
     DrinkingStatus,
@@ -98,43 +98,38 @@ class DefaultData:
         pill_pool = [
             {
                 "name": "타이레놀정 500mg",
-                "dose": "500mg",
-                "count": "1정",
-                "freq": "3회",
-                "time": DoseTime.LUNCH,
-                "from": AddedFrom.HOSPITAL,
+                "dose_amount": "500mg",
+                "dose_count": "1정",
+                "days": "3일",
+                "instr": "식후 30분",
             },
             {
                 "name": "메트포르민 500mg",
-                "dose": "500mg",
-                "count": "1정",
-                "freq": "2회",
-                "time": DoseTime.MORNING,
-                "from": AddedFrom.PHARMACY,
+                "dose_amount": "500mg",
+                "dose_count": "1정",
+                "days": "30일",
+                "instr": "식사 도중 또는 직후",
             },
             {
                 "name": "아모디핀정 5mg",
-                "dose": "5mg",
-                "count": "1정",
-                "freq": "1회",
-                "time": DoseTime.MORNING,
-                "from": AddedFrom.UNKNOWN,
+                "dose_amount": "5mg",
+                "dose_count": "1정",
+                "days": "30일",
+                "instr": "아침 식전",
             },
             {
                 "name": "고지혈정 10mg",
-                "dose": "10mg",
-                "count": "1정",
-                "freq": "1회",
-                "time": DoseTime.MORNING,
-                "from": AddedFrom.PHARMACY,
+                "dose_amount": "10mg",
+                "dose_count": "1정",
+                "days": "30일",
+                "instr": "취침 전",
             },
             {
                 "name": "비타민C 1000mg",
-                "dose": "1000mg",
-                "count": "1정",
-                "freq": "1회",
-                "time": DoseTime.DINNER,
-                "from": AddedFrom.UNKNOWN,
+                "dose_amount": "1000mg",
+                "dose_count": "1정",
+                "days": "90일",
+                "instr": "식후 즉시",
             },
         ]
 
@@ -209,12 +204,10 @@ class DefaultData:
                 user=user,
                 medication_name=p["name"],
                 defaults={
-                    "one_dose": p["dose"],
-                    "daily_dose_count": p["freq"],
-                    "one_dose_count": p["count"],
-                    "dose_time": p["time"],
-                    "added_from": p["from"],
-                    "start_date": (datetime.now() - timedelta(days=30)).strftime("%Y-%m"),
+                    "one_dose_amount": p["dose_amount"],
+                    "one_dose_count": p["dose_count"],
+                    "total_days": p["days"],
+                    "instructions": p["instr"],
                 },
             )
             meds.append(current_med)

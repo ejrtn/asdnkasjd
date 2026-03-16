@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from pydantic import BaseModel
 
 from app.dependencies.security import get_request_user
-from app.models.current_med import AddedFrom, CurrentMed, DoseTime
+from app.models.current_med import CurrentMed
 from app.models.pill_recognitions import PillRecognition
 from app.models.upload import Upload
 from app.models.user import User
@@ -242,10 +242,10 @@ async def toggle_pill_sync(
             user=user,
             medication_name=pill_name,
             pill_recognition=recognition,
-            added_from=AddedFrom.UNKNOWN,
-            dose_time=DoseTime.UNKNOWN,
-            one_dose_count="1",
-            daily_dose_count="1",
+            one_dose_amount=None,
+            one_dose_count=None,
+            total_days=None,
+            instructions=None,
         )
 
         synced = True

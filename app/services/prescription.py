@@ -6,6 +6,7 @@ from typing import Any
 from openai import AsyncOpenAI
 
 from app.core import config
+from app.models.current_med import CurrentMed
 from app.models.ocr_history import OCRHistory
 from app.models.upload import Upload
 from app.models.user import User
@@ -283,7 +284,6 @@ class PrescriptionService:
         [Step 6] 처방전의 약물들을 현재 복용 중인 약물(CurrentMed) 테이블로 복사(연동)합니다.
         drug_names가 제공될 경우 해당 약물들만 선택하여 연동합니다.
         """
-        from app.models.current_med import AddedFrom, CurrentMed, DoseTime
 
         prescription = await self.repo.get_by_id(prescription_id)
         if not prescription or prescription.user_id != user.id:
@@ -297,16 +297,14 @@ class PrescriptionService:
             if drug_names is not None and drug.standard_drug_name not in drug_names:
                 continue
 
-            # 기본적으로 아침 복용으로 설정 (사용자가 나중에 수정 가능하도록 가이드)
+            # 새로운 5가지 필드에 맞춰 데이터 연동
             med = await CurrentMed.create(
                 user=user,
                 medication_name=drug.standard_drug_name,
-                one_dose=f"{drug.dosage_amount or ''}".strip(),
-                daily_dose_count=str(drug.daily_frequency or ""),
-                one_dose_count="1",  # 기본값
-                dose_time=DoseTime.MORNING,
-                added_from=AddedFrom.HOSPITAL,
-                start_date=str(prescription.prescribed_date or date.today()),
+                one_dose_amount=f"{drug.dosage_amount or ''}".strip(),
+                one_dose_count=str(drug.daily_frequency or ""),
+                total_days=str(drug.duration_days or ""),
+                instructions="",
             )
             # 연동 상태 업데이트
             drug.is_linked_to_meds = True
