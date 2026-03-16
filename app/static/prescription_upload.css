@@ -221,8 +221,10 @@
   transition: all 0.22s ease;
   display: flex;
   flex-direction: column;
-  max-height: 850px; /* 고정 최대 높이 상향 */
-  overflow: hidden; /* 내부 스크롤만 허용 */
+  max-height: 850px;
+  /* 고정 최대 높이 상향 */
+  overflow: hidden;
+  /* 내부 스크롤만 허용 */
 }
 
 .analysis-card:hover {
@@ -234,7 +236,8 @@
   font-size: 16px;
   font-weight: 800;
   color: #1f2937;
-  margin-bottom: 35px; /* 공간 확보를 위해 여백 대폭 상향 */
+  margin-bottom: 35px;
+  /* 공간 확보를 위해 여백 대폭 상향 */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -250,14 +253,17 @@
   gap: 15px;
   align-items: stretch;
   overflow-y: auto;
-  padding: 20px 8px 15px 4px; /* 첫 병원명이 잘리지 않도록 상단 패딩 상향 */
-  flex-grow: 1; /* 가용한 공간 모두 차지 */
+  padding: 20px 8px 15px 4px;
+  /* 첫 병원명이 잘리지 않도록 상단 패딩 상향 */
+  flex-grow: 1;
+  /* 가용한 공간 모두 차지 */
 }
 
 /* 스크롤바 커스텀 */
 .analysis-result-text::-webkit-scrollbar {
   width: 6px;
 }
+
 .analysis-result-text::-webkit-scrollbar-thumb {
   background: #e2e8f0;
   border-radius: 10px;
@@ -610,6 +616,7 @@
   display: none;
 }
 
+/* 1024px 이하일 때 (태블릿/모바일 공통) */
 @media (max-width: 1024px) {
   .upload-analysis-grid {
     grid-template-columns: 1fr;
@@ -617,5 +624,28 @@
 
   .prescription-tabs {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 768px 이하일 때 (모바일 기준 - 알람 페이지와 일체감 형성) */
+@media (max-width: 768px) {
+
+  /* 제목과 설명 부분을 왼쪽 정렬로 고정 */
+  .c9-page-title,
+  .c9-muted {
+    text-align: left !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    /* 혹시 안쪽 여백이 있다면 제거 */
+    width: 100%;
+  }
+
+  /* 알람 페이지처럼 헤더 부분도 세로로 쌓이게 하고 싶다면 추가 */
+  .prescription-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* 왼쪽 정렬 */
+    gap: 8px;
   }
 }
