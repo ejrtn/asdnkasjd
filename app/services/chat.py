@@ -4,6 +4,7 @@ from app.dtos.chat import ChatRequest, ChatResponse
 from app.models.user import User
 from app.rag.context_builder import build_context_from_search_results
 from app.rag.vector_store import search_similar_documents
+from app.repositories.alarm import AlarmHistoryRepository, AlarmRepository
 from app.repositories.blood_pressure_record import BloodPressureRecordRepository
 from app.repositories.blood_sugar_record import BloodSugarRecordRepository
 from app.repositories.chat_memory_repository import ChatMemoryRepository
@@ -19,6 +20,8 @@ class ChatService:
         self.llm_life_guide_repo = LLMLifeGuideRepository()
         self.bp_repo = BloodPressureRecordRepository()
         self.bs_repo = BloodSugarRecordRepository()
+        self.alarm_repo = AlarmRepository()
+        self.alarm_history_repo = AlarmHistoryRepository()
 
     def detect_emergency(self, text: str) -> bool:
         """응급 상황 감지"""
@@ -34,12 +37,32 @@ class ChatService:
         else:
             return "일반"
 
+    @staticmethod
+    def _format_alarm_time(alarm_time: object) -> str:
+        """alarm_time이 time 또는 timedelta(MySQL TIME)일 수 있으므로 안전하게 HH:MM 문자열로 변환"""
+        import datetime as dt
+
+        if alarm_time is None:
+            return "-"
+        if isinstance(alarm_time, dt.time):
+            return alarm_time.strftime("%H:%M")
+        if isinstance(alarm_time, dt.timedelta):
+            total_seconds = int(alarm_time.total_seconds())
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes = remainder // 60
+            return f"{hours:02d}:{minutes:02d}"
+        return str(alarm_time)
+
     async def _build_user_health_context(self, user_id: str) -> str | None:
         """
-        저장된 생활안내가이드 + 최근 혈압 + 최근 혈당을 합쳐
+        저장된 생활안내가이드 + 최근 혈압 + 최근 혈당 + 알람 + 오늘 알람 히스토리를 합쳐
         챗봇용 사용자 맞춤 건강 정보 문자열 생성
         """
         try:
+            from datetime import datetime
+
+            from app.core.config import config
+
             user = await User.get_or_none(id=user_id)
             if not user:
                 return None
@@ -64,6 +87,40 @@ class ChatService:
             guide_status = life_guide.user_current_status if life_guide else "저장된 생활안내 가이드 상태 정보 없음"
             guide_content = life_guide.generated_content if life_guide else "저장된 생활안내 가이드 내용 없음"
 
+            # 알람 정보 조회
+            active_alarms = await self.alarm_repo.get_active_alarms_by_user_id(user_id)
+            alarm_lines = []
+            for alarm in active_alarms:
+                med_name = "-"
+                try:
+                    if alarm.current_med_id and alarm.current_med:
+                        med_name = alarm.current_med.medication_name
+                except Exception:
+                    pass
+                # alarm_time이 timedelta(MySQL TIME)일 수 있으므로 안전하게 변환
+                time_str = self._format_alarm_time(alarm.alarm_time)
+                alarm_lines.append(f"- [{alarm.alarm_type}] {time_str} / 약: {med_name}")
+            if not alarm_lines:
+                alarm_lines = ["- 설정된 알람 없음"]
+
+            # 오늘 알람 히스토리 조회
+            now_kst = datetime.now(config.TIMEZONE)
+            today_histories = await self.alarm_history_repo.get_today_histories_by_user_id(user_id, now_kst)
+            history_lines = []
+            for h in today_histories:
+                a_type = h.alarm.alarm_type if h.alarm else "-"
+                med_name = "-"
+                try:
+                    if h.alarm and h.alarm.current_med_id and h.alarm.current_med:
+                        med_name = h.alarm.current_med.medication_name
+                except Exception:
+                    pass
+                sent = h.sent_at_kst.strftime("%H:%M") if h.sent_at_kst else "-"
+                confirmed = "✅ 확인" if h.is_confirmed else "❌ 미확인"
+                history_lines.append(f"- [{a_type}] {sent} / 약: {med_name} / {confirmed}")
+            if not history_lines:
+                history_lines = ["- 오늘 발송된 알람 없음"]
+
             return f"""[사용자 맞춤 건강 정보]
 사용자 상태 요약:
 {guide_status}
@@ -76,6 +133,12 @@ class ChatService:
 
 최근 혈당 기록:
 {chr(10).join(bs_lines)}
+
+현재 활성 알람:
+{chr(10).join(alarm_lines)}
+
+오늘 알람 발송 내역:
+{chr(10).join(history_lines)}
 """.strip()
 
         except Exception as e:
@@ -209,6 +272,7 @@ class ChatService:
                 "role": msg["role"],
                 "content": msg["content"],
                 "created_at": msg["created_at"].isoformat() if msg.get("created_at") else None,
+                "risk_level": msg.get("risk_level", "Normal"),
             }
             for msg in messages
         ]
