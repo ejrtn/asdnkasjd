@@ -21,7 +21,7 @@ class PillRecognition(models.Model):
     confidence = fields.FloatField()  # AI의 확신도 (예: 0.98)
     raw_result: Any = fields.JSONField(null=True)  # 분석 엔진의 전체 결과 데이터
     created_at = fields.DatetimeField(auto_now_add=True)
-    front_upload: fields.ForeignKeyRelation["Upload"] = fields.ForeignKeyField(
+    front_upload: fields.ForeignKeyRelation["Upload"] | None = fields.ForeignKeyField(
         "models.Upload", related_name="pill_recognitions_front", null=True
     )
     back_upload: fields.ForeignKeyRelation["Upload"] | None = fields.ForeignKeyField(

@@ -192,9 +192,17 @@ def get_social_callback_html(provider: str) -> str:
         <meta charset="UTF-8">
         <title>로그인 처리 중...</title>
         <style>
-            body {{ display:flex; justify-content:center; align-items:center; height:100vh; background:#f9fafb; font-family:sans-serif; }}
+            body {{ display:flex; justify-content:center; align-items:center; height:100vh; background:#f9fafb; font-family:sans-serif; overflow: hidden; }}
             .spinner {{ width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }}
             @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+            .app-toast {{ position: fixed; top: 20px; right: 20px; z-index: 9999; display: none; }}
+            .app-toast.show {{ display: block; animation: slideIn 0.3s ease-out; }}
+            @keyframes slideIn {{ from {{ transform: translateX(100%); opacity: 0; }} to {{ transform: translateX(0); opacity: 1; }} }}
+            .app-toast-inner {{ background: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; align-items: center; padding: 12px 16px; min-width: 280px; }}
+            .app-toast-badge {{ font-size: 20px; margin-right: 12px; }}
+            .app-toast-content {{ flex: 1; }}
+            .app-toast-title {{ font-size: 13px; font-weight: 700; color: #111827; }}
+            .app-toast-message {{ font-size: 13px; color: #4b5563; margin-top: 2px; }}
         </style>
     </head>
     <body>
@@ -202,14 +210,39 @@ def get_social_callback_html(provider: str) -> str:
             <div class="spinner"></div>
             <p style="margin-top:20px; color:#4b5563;">로그인 처리 중입니다...</p>
         </div>
+
+        <div id="app-toast" class="app-toast">
+            <div class="app-toast-inner">
+                <div class="app-toast-badge" id="app-toast-badge">⚠️</div>
+                <div class="app-toast-content">
+                    <div class="app-toast-title" id="app-toast-title">안내</div>
+                    <div class="app-toast-message" id="app-toast-message">알림 메시지</div>
+                </div>
+            </div>
+        </div>
+
         <script>
+            function showLocalToast(message, type = 'warn', title = '알림') {{
+                const toast = document.getElementById('app-toast');
+                const badge = document.getElementById('app-toast-badge');
+                const titleEl = document.getElementById('app-toast-title');
+                const msgEl = document.getElementById('app-toast-message');
+
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                badge.textContent = type === 'success' ? '✅' : (type === 'warn' ? '⚠️' : 'ℹ️');
+
+                toast.classList.add('show');
+                return new Promise(resolve => setTimeout(resolve, 2000));
+            }}
+
             async function processLogin() {{
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
 
                 if (!code) {{
-                    alert("인증 코드가 없습니다.");
+                    await showLocalToast("인증 코드가 없습니다.", "warn", "로그인 실패");
                     window.close();
                     return;
                 }}
@@ -227,10 +260,11 @@ def get_social_callback_html(provider: str) -> str:
                         window.opener.postMessage(data, '*');
                         window.close();
                     }} else {{
-                        alert("부모 창을 찾을 수 없습니다.");
+                        await showLocalToast("부모 창을 찾을 수 없습니다.", "warn", "로그인 실패");
+                        window.close();
                     }}
                 }} catch (e) {{
-                    alert("로그인 처리 중 오류가 발생했습니다.");
+                    await showLocalToast("로그인 처리 중 오류가 발생했습니다.", "warn", "오류");
                     window.close();
                 }}
             }}

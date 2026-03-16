@@ -132,7 +132,7 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
         )
 
         if is_snoozed_reopen:
-            history.snoozed_until = None
+            history.snoozed_until = None  # type: ignore[assignment]
             history.snooze_count = 1
             await history.save(update_fields=["snoozed_until", "snooze_count"])
 
@@ -196,7 +196,7 @@ async def confirm_alarm(alarm_id: int, user: Annotated[User, Depends(get_request
     if history:
         history.is_confirmed = True
         history.read_at = history.read_at or datetime.now(tz=ZoneInfo("UTC"))
-        history.snoozed_until = None
+        history.snoozed_until = None  # type: ignore[assignment]
         await history.save(update_fields=["is_confirmed", "read_at", "snoozed_until"])
 
     return {"detail": "확인 완료"}

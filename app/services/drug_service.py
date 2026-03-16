@@ -75,8 +75,21 @@ class DrugService:
 
                 if use_staging:
                     existing = await DrugMaster.get_or_none(item_seq=item_seq)
-                    if existing:
-                        defaults["last_enriched_mfds_date"] = existing.last_enriched_mfds_date
+                    if existing and existing.last_enriched_mfds_date:
+                        # 기존 AI 보충 정보 보존
+                        defaults.update(
+                            {
+                                "efcy_qesitm": existing.efcy_qesitm,
+                                "use_method_qesitm": existing.use_method_qesitm,
+                                "atpn_warn_qesitm": existing.atpn_warn_qesitm,
+                                "atpn_qesitm": existing.atpn_qesitm,
+                                "intrc_qesitm": existing.intrc_qesitm,
+                                "se_qesitm": existing.se_qesitm,
+                                "deposit_method_qesitm": existing.deposit_method_qesitm,
+                                "source": existing.source,
+                                "last_enriched_mfds_date": existing.last_enriched_mfds_date,
+                            }
+                        )
 
                 await model.update_or_create(item_seq=item_seq, defaults=defaults)
                 total += 1
@@ -106,7 +119,23 @@ class DrugService:
 
                 if use_staging:
                     existing = await DrugMaster.get_or_none(item_seq=item_seq)
-                    if existing:
+                    if existing and existing.last_enriched_mfds_date:
+                        # 기존 AI 보충 정보 보존 (e약은요가 제공하지 않는 필드들 위주로)
+                        # e약은요에서 가져온 값(defaults)이 비어있을 때만 기존 AI 정보를 사용하거나
+                        # 혹은 AI 정보가 더 풍부하다면 덮어쓰지 않도록 설계
+                        for field in [
+                            "efcy_qesitm",
+                            "use_method_qesitm",
+                            "atpn_warn_qesitm",
+                            "atpn_qesitm",
+                            "intrc_qesitm",
+                            "se_qesitm",
+                            "deposit_method_qesitm",
+                        ]:
+                            if not defaults.get(field) and getattr(existing, field):
+                                defaults[field] = getattr(existing, field)
+
+                        defaults["source"] = existing.source
                         defaults["last_enriched_mfds_date"] = existing.last_enriched_mfds_date
 
                 await model.update_or_create(item_seq=item_seq, defaults=defaults)

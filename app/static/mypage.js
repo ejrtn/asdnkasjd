@@ -15,7 +15,7 @@ function mypageToast(type, message) {
   const closeBtn = document.getElementById('app-toast-close');
 
   if (!toastEl || !badgeEl || !titleEl || !messageEl) {
-    alert(message);
+    showAppToast(message, type, toast.title);
     return;
   }
 
@@ -182,10 +182,10 @@ window.onload = async () => {
     if (user.provider !== 'local') {
       const passwordTabs = document.querySelectorAll(".password-chenge-move");
       const passwordSection = document.querySelector(".password-chenge");
-      
+
       passwordTabs.forEach(tab => tab.style.display = 'none');
       if (passwordSection) passwordSection.style.display = 'none';
-      
+
       // 보안 관리 헤더 텍스트도 "계정 보안" 등으로 우회하거나 탭 구성에 따라 조정 가능하지만, 
       // 일단 비밀번호 변경 자체를 원천 차단하는 것이 목표
     }

@@ -401,7 +401,7 @@
     }
 
     document.querySelector(".pill-identifier .ok").addEventListener("click", async () => {
-        alert("분석 시작합니다.")
+        showAppToast('분석을 시작합니다.', 'info', '분석 시작');
         const formData = new FormData();
         Object.keys(file_list).forEach(key => {
             formData.append('files', file_list[key]['file']);

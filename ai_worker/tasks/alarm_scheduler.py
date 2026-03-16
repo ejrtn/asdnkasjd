@@ -226,7 +226,7 @@ async def check_and_send_snoozed_alarm_histories() -> None:
             )
 
             history.snooze_count = 1
-            history.snoozed_until = None
+            history.snoozed_until = None  # type: ignore[assignment]
             await history.save(update_fields=["snooze_count", "snoozed_until"])
 
             logging.info(f"[SCHEDULER] snoozed push sent history_id={history.id} alarm_id={alarm.id}")

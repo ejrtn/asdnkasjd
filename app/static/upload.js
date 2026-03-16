@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // --- [Case 2] 알약: 앞/뒷면 두 장을 한 번에 전송 ---
                 if (selectedFiles.length < 2) {
-                    alert("알약 분석을 위해 앞면과 뒷면 사진 두 장을 모두 선택해주세요.");
+                    showAppToast("알약 분석을 위해 앞면과 뒷면 사진 두 장을 모두 선택해주세요.", "warn", "확인 필요");
                     loadingOverlay.classList.remove('active');
                     submitUploadBtn.disabled = false;
                     closeUploadModal.disabled = false;
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Upload Error:', error);
-            alert(`오류 발생: ${error.message}`);
+            showAppToast(`오류 발생: ${error.message}`, "warn", "오류");
             finishUpload();
         }
     });
@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 선택된 약물들 수집 (데이터-처방전-ID 필요)
             const selectedItems = document.querySelectorAll('.prescription-drug-item.selected');
             if (selectedItems.length === 0) {
-                alert('연동할 알약을 하나 이상 선택해 주세요.');
+                showAppToast('연동할 알약을 하나 이상 선택해 주세요.', 'warn', '확인 필요');
                 return;
             }
 
@@ -747,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.style.borderColor = '#e1e8f0';
                 });
             } catch (error) {
-                alert(`오류: ${error.message}`);
+                showAppToast(`오류: ${error.message}`, "warn", "오류");
             }
         });
     }
@@ -881,11 +881,11 @@ function renderUploadHistory(container, historyList) {
                     // 성공 시 히스토리 새로고침
                     fetchUploadHistory();
                 } else {
-                    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                    showAppToast('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.', 'warn', '오류');
                 }
             } catch (err) {
                 console.error('삭제 에러:', err);
-                alert('삭제 중 오류가 발생했습니다.');
+                showAppToast('삭제 중 오류가 발생했습니다.', 'warn', '오류');
             }
         });
     });

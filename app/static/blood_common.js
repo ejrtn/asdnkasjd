@@ -112,7 +112,7 @@ window.BloodNotebook = (() => {
         options.headers['Authorization'] = `Bearer ${accessToken}`;
         response = await fetch(url, options);
       } else {
-        alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+        showAppToast('세션이 만료되었습니다. 다시 로그인해주세요.', 'warn', '세션 만료');
         localStorage.removeItem('access_token');
         localStorage.removeItem('user_id');
         location.href = '/login';

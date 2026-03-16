@@ -32,14 +32,14 @@ async function restoreChatHistory() {
 
     if (!response.ok) {
       console.warn('대화 내역 조회 실패:', response.status);
-      
+
       // 세션이 유효하지 않으면 localStorage도 정리
       if (response.status === 401 || response.status === 404) {
         chatbot.sessionId = null;
         chatbot.messages = [];
         localStorage.removeItem('chatbot_session_id');
       }
-      
+
       const messagesContainer = document.getElementById('chatbot-messages');
       if (messagesContainer && messagesContainer.children.length === 0) {
         addMessage('assistant', '안녕하세요! 👋 Cloud9 Care 챗봇입니다. 무엇을 도와드릴까요?');
@@ -122,9 +122,9 @@ function initChatbot() {
 async function toggleChatbot() {
   const container = document.getElementById('chatbot-container');
   if (!container) return;
-  
+
   chatbot.isOpen = !chatbot.isOpen;
-  
+
   if (chatbot.isOpen) {
     container.classList.add('open');
 
@@ -149,9 +149,9 @@ async function toggleChatbot() {
 async function sendMessage() {
   const input = document.getElementById('chatbot-input');
   if (!input) return;
-  
+
   const message = input.value.trim();
-  
+
   if (!message) return;
 
   // 로그인 토큰 확인
@@ -201,7 +201,7 @@ async function sendMessage() {
     }
 
     const data = await response.json();
-    
+
     // 세션 ID 저장
     if (data.session_id) {
       chatbot.sessionId = data.session_id;
@@ -222,11 +222,11 @@ async function sendMessage() {
   } catch (error) {
     console.error('챗봇 오류:', error);
     hideTypingIndicator();
-    
+
     const errorMessage = error instanceof Error
       ? error.message
       : '죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요.';
-    
+
     addMessage('assistant', errorMessage);
   }
 }
@@ -235,7 +235,7 @@ async function sendMessage() {
 function addMessage(role, content) {
   const messagesContainer = document.getElementById('chatbot-messages');
   if (!messagesContainer) return;
-  
+
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${role}`;
 
@@ -251,7 +251,7 @@ function addMessage(role, content) {
   messageDiv.appendChild(contentDiv);
 
   messagesContainer.appendChild(messageDiv);
-  
+
   // 스크롤을 최하단으로
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -263,7 +263,7 @@ function addMessage(role, content) {
 function showTypingIndicator() {
   const messagesContainer = document.getElementById('chatbot-messages');
   if (!messagesContainer) return;
-  
+
   const typingDiv = document.createElement('div');
   typingDiv.className = 'message assistant';
   typingDiv.id = 'typing-indicator';
@@ -283,7 +283,7 @@ function showTypingIndicator() {
   typingDiv.appendChild(avatar);
   typingDiv.appendChild(typingContent);
   messagesContainer.appendChild(typingDiv);
-  
+
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
@@ -299,7 +299,7 @@ function hideTypingIndicator() {
 function addEmergencyAlert() {
   const messagesContainer = document.getElementById('chatbot-messages');
   if (!messagesContainer) return;
-  
+
   const alertDiv = document.createElement('div');
   alertDiv.className = 'message assistant';
   alertDiv.style.background = '#fff3cd';
@@ -359,13 +359,13 @@ async function endChat() {
   // 환영 메시지 다시 표시
   addMessage('assistant', '안녕하세요! 👋 Cloud9 Care 챗봇입니다. 무엇을 도와드릴까요?');
 
-  alert('챗이 종료되었습니다.');
+  showAppToast('챗이 종료되었습니다.', 'info', '챗봇');
 }
 
 // TTS 토글 (최신 답변만 읽기)
 function readLastMessage() {
   const ttsBtn = document.getElementById('chatbot-tts');
-  
+
   if (isSpeaking) {
     synthesis.cancel();
     isSpeaking = false;
@@ -376,9 +376,9 @@ function readLastMessage() {
 
   // 최신 챗봇 답변만 읽기
   const assistantMessages = chatbot.messages.filter(m => m.role === 'assistant');
-  
+
   if (assistantMessages.length === 0) {
-    alert('읽어줄 메시지가 없습니다.');
+    showAppToast('읽어줄 메시지가 없습니다.', 'info', '음성 안내');
     return;
   }
 
@@ -392,19 +392,19 @@ function readLastMessage() {
   utterance.lang = 'ko-KR';
   utterance.rate = 1.0;
   utterance.pitch = 1.0;
-  
+
   utterance.onend = () => {
     isSpeaking = false;
     ttsBtn.textContent = '🔊';
     ttsBtn.style.background = 'none';
   };
-  
+
   utterance.onerror = () => {
     isSpeaking = false;
     ttsBtn.textContent = '🔊';
     ttsBtn.style.background = 'none';
   };
-  
+
   synthesis.speak(utterance);
 }
 
