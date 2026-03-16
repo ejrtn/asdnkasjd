@@ -59,6 +59,10 @@ async function restoreChatHistory() {
       // 이전 대화 복원
       data.messages.forEach((msg) => {
         addMessage(msg.role, msg.content);
+        // Emergency 응답 뒤에 응급 알림 복원
+        if (msg.role === 'assistant' && msg.risk_level === 'Emergency') {
+          addEmergencyAlert();
+        }
       });
     } else {
       // 대화 내역이 없으면 환영 메시지
@@ -295,26 +299,29 @@ function hideTypingIndicator() {
   }
 }
 
-// 응급 알림 추가
+// 응급 알림 추가 (종료 버튼을 눌러야만 사라짐)
 function addEmergencyAlert() {
   const messagesContainer = document.getElementById('chatbot-messages');
   if (!messagesContainer) return;
 
   const alertDiv = document.createElement('div');
-  alertDiv.className = 'message assistant';
-  alertDiv.style.background = '#fff3cd';
-  alertDiv.style.border = '2px solid #ff6b6b';
-  alertDiv.style.padding = '12px';
-  alertDiv.style.borderRadius = '8px';
-  alertDiv.style.marginTop = '10px';
+  alertDiv.className = 'emergency-alert';
 
   alertDiv.innerHTML = `
-    <strong style="color: #d63031;">⚠️ 응급 상황 감지</strong><br>
-    <p style="margin-top: 8px; font-size: 13px;">
+    <div class="emergency-alert-header">
+      <strong>⚠️ 응급 상황 감지</strong>
+      <button class="emergency-alert-close" title="닫기">×</button>
+    </div>
+    <p>
       즉시 가까운 응급실을 방문하시거나<br>
       119에 연락하시기 바랍니다.
     </p>
   `;
+
+  // 닫기 버튼 이벤트
+  alertDiv.querySelector('.emergency-alert-close').addEventListener('click', () => {
+    alertDiv.remove();
+  });
 
   messagesContainer.appendChild(alertDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;

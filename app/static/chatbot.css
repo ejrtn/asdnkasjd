@@ -241,3 +241,45 @@
 .chatbot-messages::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* 응급 상황 알림 */
+.emergency-alert {
+  background: #fff3cd;
+  border: 2px solid #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.emergency-alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emergency-alert-header strong {
+  color: #d63031;
+  font-size: 14px;
+}
+
+.emergency-alert-close {
+  background: none;
+  border: none;
+  color: #d63031;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.emergency-alert-close:hover {
+  color: #c0392b;
+}
+
+.emergency-alert p {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+}
