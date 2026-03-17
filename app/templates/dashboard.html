@@ -47,6 +47,17 @@
     font-size: 20px;
   }
 
+  #insight-1,
+  #insight-2,
+  #insight-3{
+    display: none;
+  }
+  #insight-1.open,
+  #insight-2.open,
+  #insight-3.open{
+    display: grid;
+  }
+
   body.zoom-large .med-time,
   body.zoom-large .med-name {
     font-size: 18px;
@@ -176,9 +187,10 @@
         </div>
       </div>
       <div class="slide-content insight-content">
-        <div class="insight-item" id="insight-1">최근 7일 평균 혈압은 안정 범위입니다.</div>
-        <div class="insight-item" id="insight-2">수면 시간이 평균보다 40분 감소했습니다.</div>
-        <div class="insight-item" id="insight-3">체중은 큰 변화 없이 유지되고 있습니다.</div>
+        <div class="insight-item" id="insight-0">생성중입니다.</div>
+        <div class="insight-item" id="insight-1"></div>
+        <div class="insight-item" id="insight-2"></div>
+        <div class="insight-item" id="insight-3"></div>
       </div>
     </div>
 
@@ -351,10 +363,15 @@
         return;
       }
       const data = await response.json();
+
       if (data.result && data.result.length === 3) {
         document.getElementById('insight-1').textContent = data.result[0];
         document.getElementById('insight-2').textContent = data.result[1];
         document.getElementById('insight-3').textContent = data.result[2];
+        document.getElementById('insight-0').style.display='none'
+        document.getElementById('insight-1').classList.add("open")
+        document.getElementById('insight-2').classList.add("open")
+        document.getElementById('insight-3').classList.add("open")
       }
 
       if (data.mission_rate !== undefined) {

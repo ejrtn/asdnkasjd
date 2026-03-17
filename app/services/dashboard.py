@@ -120,11 +120,6 @@ class DashboardService:
             completed_plans = await PlanCheckList.filter(user=user, is_completed=True).count()
             mission_rate = int(completed_plans / total_plans * 100) if total_plans > 0 else 0
 
-            # 6. 캐시 확인 및 반환 로직
-            if not force_refresh and llm_life_guide and llm_life_guide.insights:
-                logger.info(f"Returning cached insights for user {user.id}")
-                return {"result": llm_life_guide.insights, "mission_rate": mission_rate}
-
             # 7. OpenAI 호출 (캐시가 없거나 force_refresh=True일 때만 실행)
             if not config.OPENAI_API_KEY:
                 logger.warning("OPENAI_API_KEY not set, returning fallback insights")
@@ -151,12 +146,6 @@ class DashboardService:
             raw_content = response.choices[0].message.content or ""
             insights_data = json.loads(raw_content)
             tips = insights_data.get("insights", ["", "", ""])
-
-            # 8. 생성된 인사이트 저장
-            if llm_life_guide:
-                llm_life_guide.insights = tips
-                await llm_life_guide.save()
-                logger.info(f"Saved generated insights for user {user.id}")
 
             return {"result": tips, "mission_rate": mission_rate}
 
