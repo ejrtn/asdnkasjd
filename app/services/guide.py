@@ -95,7 +95,7 @@ class GuideService:
             )
 
             # 4. 질환 및 건강수칙 누락 보정 및 저장
-            fixed_content = self._fix_missing_diseases(content_json, health_data["disease_list"])
+            fixed_content = await self._fix_missing_diseases(content_json, health_data["disease_list"])
             fixed_content = self._fix_missing_health_guides(fixed_content)
 
             data = {
@@ -281,25 +281,36 @@ class GuideService:
         }}
         """.strip()
 
-    def _fix_missing_diseases(self, content_json: dict, disease_list: list[str]) -> dict:
+    async def _fix_missing_diseases(self, content_json: dict, disease_list: list[str]) -> dict:
         try:
             sec2 = content_json.get("section2") or {}
             guides = sec2.get("disease_guides") or []
-            guide_names = {g.get("name") for g in guides if isinstance(g, dict)}
+
+            guide_names = {
+                self._normalize_disease_name(str(g.get("name")))
+                for g in guides
+                if isinstance(g, dict) and g.get("name")
+            }
 
             for dname in disease_list:
-                if dname not in guide_names:
+                normalized_name = self._normalize_disease_name(dname)
+
+                if normalized_name not in guide_names:
+                    fallback_tips = await self._generate_llm_fallback_tips(normalized_name)
+
                     guides.append(
                         {
                             "name": dname,
-                            "tips": ["(추가 입력 시 더 정확한 맞춤 가이드를 제공할 수 있어요.)"],
+                            "tips": fallback_tips,
                         }
                     )
 
             sec2["disease_guides"] = guides
             content_json["section2"] = sec2
-        except Exception:
-            pass
+
+        except Exception as e:
+            print(f"[FIX MISSING DISEASES ERROR] {e}")
+
         return content_json
 
     def _fix_missing_health_guides(self, content_json: dict) -> dict:
@@ -362,6 +373,70 @@ class GuideService:
             "activity": False,
             "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
         }
+
+    def _normalize_disease_name(self, name: str) -> str:
+        alias_map = {
+            "목감기": "감기",
+            "코감기": "감기",
+            "몸살감기": "감기",
+            "당뇨": "당뇨병",
+            "고지혈증": "이상지질혈증",
+        }
+        return alias_map.get((name or "").strip(), (name or "").strip())
+
+    async def _generate_llm_fallback_tips(self, disease_name: str) -> list[str]:
+        try:
+            prompt = f"""
+    사용자의 질환명은 '{disease_name}' 입니다.
+
+    이 질환에 대해 의료 진단이나 처방이 아닌,
+    일반적인 생활관리 가이드를 2개 작성하세요.
+
+    조건:
+    - 쉬운 한국어
+    - 과도한 단정 금지
+    - 휴식, 수분 섭취, 식사, 운동, 증상 악화 시 병원 권고 중심
+    - 반드시 JSON 형식으로만 답변
+
+    형식:
+    {{
+    "tips": ["가이드1", "가이드2"]
+    }}
+    """.strip()
+
+            result = await self.llm_service.generate_json(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "너는 안전한 건강생활 안내 도우미다. 반드시 JSON으로만 답변한다.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                model="gpt-4o-mini",
+                temperature=0.3,
+            )
+
+            # 정상 JSON 처리
+            if isinstance(result, dict):
+                tips = result.get("tips", [])
+                if isinstance(tips, list):
+                    cleaned = [str(t).strip() for t in tips if str(t).strip()]
+                    if cleaned:
+                        return cleaned[:2]
+
+            # 혹시 리스트로 오는 경우
+            if isinstance(result, list):
+                cleaned = [str(t).strip() for t in result if str(t).strip()]
+                if cleaned:
+                    return cleaned[:2]
+
+        except Exception as e:
+            print(f"[LLM FALLBACK ERROR] {e}")
+
+        return [
+            "해당 질환에 대한 일반 건강관리 가이드를 제공합니다.",
+            "증상이 지속되거나 악화되면 의료진과 상담하세요.",
+        ]
 
     async def get_saved_guide(self, user: User | None = None, background_tasks=None) -> dict:
         """
