@@ -234,6 +234,31 @@ async def check_and_send_snoozed_alarm_histories() -> None:
             logging.exception(f"[SCHEDULER] snoozed push failed history_id={history.id}: {e}")
 
 
+async def auto_snooze_ignored_alarms() -> None:
+    """
+    발송 후 1분 이상 지났으나 확인(is_confirmed)이나 미루기(snoozed_until) 처리가 되지 않은 알람을
+    서버측에서 자동으로 10분 뒤 재알람 예약함. (기기가 꺼져있거나 앱 종료 상태 대응)
+    """
+    from app.models.alarm_history import AlarmHistory
+
+    now_utc = datetime.now(tz=zoneinfo.ZoneInfo("UTC"))
+    ignored_threshold = now_utc - timedelta(minutes=1)
+
+    # sent_at이 1분 이상 지났고, 미확인이며, 아직 미루기 예약이 선점되지 않은 항목 대상
+    ignored_histories = await AlarmHistory.filter(
+        is_confirmed=False,
+        sent_at__lte=ignored_threshold,
+        snooze_count=0,
+        snoozed_until__isnull=True,
+    )
+
+    for history in ignored_histories:
+        # 10분 뒤로 재알람 예약
+        history.snoozed_until = now_utc + timedelta(minutes=10)
+        await history.save(update_fields=["snoozed_until"])
+        logging.info(f"[SCHEDULER] auto-snooze history_id={history.id} (no response for 1min)")
+
+
 async def sync_all_users_daily_plans() -> None:
     """모든 사용자의 일일 실행 플랜을 동기화 (자정 실행)"""
     logging.info("[SCHEDULER] Starting daily plan sync for all users")
@@ -288,6 +313,7 @@ async def run_alarm_scheduler() -> None:
             logging.info(f"⏳ 알람 체크 중... now={now.isoformat()}")
             await check_and_send_alarms()
             await check_and_send_snoozed_alarm_histories()
+            await auto_snooze_ignored_alarms()
 
             now_after = datetime.now(tz=tz)
             # 매일 자정: 일일 플랜 동기화
