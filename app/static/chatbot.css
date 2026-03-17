@@ -283,3 +283,62 @@
   color: #333;
   line-height: 1.5;
 }
+
+/* ===== Chatbot Mobile ===== */
+@media (max-width: 768px) {
+  .chatbot-button {
+    right: 16px;
+    bottom: 16px;
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    z-index: 1001;
+  }
+
+  .chatbot-container {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 82px;
+    top: auto;
+    width: auto;
+    height: min(62dvh, 520px);
+    border-radius: 20px;
+    z-index: 10000;
+    box-shadow: 0 18px 36px rgba(31, 23, 51, 0.22);
+    overflow: hidden;
+  }
+
+  .chatbot-header {
+    padding: 14px 16px;
+  }
+
+  .chatbot-header h3 {
+    font-size: 16px;
+  }
+
+  .chatbot-messages {
+    padding: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chatbot-input {
+    padding: 12px 14px;
+  }
+
+  .chatbot-input input {
+    font-size: 16px;
+  }
+
+  .chatbot-send {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .message-content {
+    max-width: 84%;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}

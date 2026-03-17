@@ -595,3 +595,40 @@
     text-align: center;
   }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .health-mode-tab {
+    font-size: 17px;
+  }
+  body.zoom-large .health-tab-icon {
+    font-size: 22px;
+  }
+  body.zoom-large .health-tab-title {
+    font-size: 22px;
+  }
+  body.zoom-large .health-tab-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .health-guide-card h5 {
+    font-size: 20px;
+  }
+  body.zoom-large .health-guide-card p {
+    font-size: 18px;
+  }
+  body.zoom-large .form-group label {
+    font-size: 17px;
+  }
+  body.zoom-large .form-group input,
+  body.zoom-large .form-group select,
+  body.zoom-large .form-group textarea {
+    font-size: 17px;
+    min-height: 46px;
+  }
+  body.zoom-large .med-guide-text {
+    font-size: 17px;
+  }
+  body.zoom-large .health-page .c9-badge {
+    font-size: 15px;
+  }
+}

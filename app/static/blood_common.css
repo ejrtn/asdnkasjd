@@ -545,3 +545,49 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .notebook-mode-tab {
+    font-size: 17px;
+  }
+  body.zoom-large .notebook-input {
+    font-size: 18px;
+    min-height: 46px;
+  }
+  body.zoom-large .notebook-chip {
+    font-size: 17px;
+    min-height: 42px;
+  }
+  body.zoom-large .notebook-submit-btn {
+    font-size: 18px;
+    min-height: 50px;
+  }
+  body.zoom-large .notebook-summary-label {
+    font-size: 16px;
+  }
+  body.zoom-large .notebook-summary-value {
+    font-size: 34px;
+  }
+  body.zoom-large .notebook-summary-sub {
+    font-size: 16px;
+  }
+  body.zoom-large .notebook-record-value {
+    font-size: 24px;
+  }
+  body.zoom-large .notebook-record-time {
+    font-size: 16px;
+  }
+  body.zoom-large .notebook-record-date {
+    font-size: 17px;
+  }
+  body.zoom-large .guide-section h4 {
+    font-size: 22px;
+  }
+  body.zoom-large .notebook-feedback {
+    font-size: 16px;
+  }
+  body.zoom-large .notebook-field label {
+    font-size: 17px;
+  }
+}

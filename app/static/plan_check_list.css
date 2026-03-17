@@ -295,3 +295,34 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large #success-rate {
+    font-size: 34px;
+  }
+  body.zoom-large .success-rate-caption {
+    font-size: 14px;
+  }
+  body.zoom-large .plan-text {
+    font-size: 18px;
+  }
+  body.zoom-large .plan-tag {
+    font-size: 14px;
+  }
+  body.zoom-large .btn-desc {
+    font-size: 14px;
+  }
+  body.zoom-large .sync-btn {
+    font-size: 17px;
+    min-height: 46px;
+  }
+  body.zoom-large .plan-input-group input {
+    font-size: 17px;
+    min-height: 46px;
+  }
+  body.zoom-large .add-btn {
+    font-size: 17px;
+    min-height: 46px;
+  }
+}

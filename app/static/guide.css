@@ -886,3 +886,61 @@
         justify-content: center;
     }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .guide-section-title {
+    font-size: 22px;
+  }
+  body.zoom-large .guide-section-body {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-note-title {
+    font-size: 16px;
+  }
+  body.zoom-large .guide-note-list {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-disease-title {
+    font-size: 19px;
+  }
+  body.zoom-large .guide-disease-list {
+    font-size: 16px;
+  }
+  body.zoom-large .guide-integrated-title {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-integrated-text {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-kicker {
+    font-size: 14px;
+  }
+  body.zoom-large .guide-value {
+    font-size: 19px;
+  }
+  body.zoom-large .guide-med-name {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-med-date {
+    font-size: 14px;
+  }
+  body.zoom-large .guide-check-title {
+    font-size: 22px;
+  }
+  body.zoom-large .guide-check-sub {
+    font-size: 18px;
+  }
+  body.zoom-large .guide-updated-at {
+    font-size: 14px;
+  }
+  body.zoom-large .guide-mode-tab {
+    font-size: 16px;
+  }
+  body.zoom-large .c9-subcard-title {
+    font-size: 16px;
+  }
+  body.zoom-large .guide-info-box {
+    font-size: 18px;
+  }
+}

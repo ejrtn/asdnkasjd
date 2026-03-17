@@ -183,28 +183,6 @@ function bindUserMenu() {
     });
 }
 
-function bindSearchUI() {
-    const searchBtn = document.getElementById('search-btn');
-    const searchInput = document.getElementById('search-input');
-
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function () {
-            const searchTerm = searchInput ? searchInput.value.trim() : '';
-            if (searchTerm) {
-                showAppToast(`"${searchTerm}" 검색 기능은 추후 추가될 예정입니다.`, "info", "검색");
-            }
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (searchBtn) searchBtn.click();
-            }
-        });
-    }
-}
 
 function applySavedZoomState() {
     const zoomBtn = document.getElementById('zoom-btn');
@@ -255,6 +233,147 @@ window.addEventListener('DOMContentLoaded', function () {
     applySavedZoomState();
     bindSessionToastEvents();
     bindUserMenu();
-    bindSearchUI();
     bindZoomUI();
+    bindMobileSidebar();
+    bindMobileExpandBtns();
 });
+
+/* ===== Mobile Sidebar Toggle ===== */
+function closeAllMobilePanels() {
+    document.querySelectorAll('.nav-item.mobile-open').forEach(item => {
+        item.classList.remove('mobile-open');
+    });
+    document.querySelectorAll('.mobile-expand-btn').forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+    });
+}
+
+function bindMobileSidebar() {
+    var menuBtn = document.getElementById('mobile-menu-btn');
+    var backdrop = document.getElementById('mobile-sidebar-backdrop');
+    var sidebar = document.querySelector('.sidebar');
+
+    if (!menuBtn || !backdrop || !sidebar) return;
+
+    var navigating = false;
+
+    function closeSidebar() {
+        document.body.classList.remove('sidebar-open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        closeAllMobilePanels();
+    }
+
+    function moveToHref(href) {
+        if (!href || href.startsWith('javascript:')) return;
+        if (navigating) return;
+
+        navigating = true;
+        closeSidebar();
+
+        setTimeout(function () {
+            window.location.href = href;
+        }, 120);
+    }
+
+    menuBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var userMenu = document.querySelector('.user-menu');
+        if (userMenu) userMenu.classList.remove('open');
+
+        var isOpen = document.body.classList.toggle('sidebar-open');
+        menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    backdrop.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    /* 1) 사이드바 메뉴 링크 직접 바인딩 */
+    sidebar.querySelectorAll('.sidebar-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            if (window.innerWidth > 768) return;
+
+            var href = this.getAttribute('href');
+            if (!href || href.startsWith('javascript:')) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            moveToHref(href);
+        });
+    });
+
+    /* 2) 메가패널 카드 링크 직접 바인딩 */
+    sidebar.querySelectorAll('.mega-card-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            if (window.innerWidth > 768) return;
+
+            var href = this.getAttribute('href');
+            if (!href || href.startsWith('javascript:')) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            moveToHref(href);
+        });
+    });
+
+    /* 3) 메가패널 설명영역 클릭 시 대표 페이지 이동 */
+    sidebar.querySelectorAll('.nav-item').forEach(function (item) {
+        var mainLink = item.querySelector('.sidebar-link');
+        var panel = item.querySelector('.mega-panel');
+
+        if (!mainLink || !panel) return;
+
+        panel.addEventListener('click', function (e) {
+            if (window.innerWidth > 768) return;
+
+            if (e.target.closest('.mega-card-link')) return;
+            if (e.target.closest('a')) return;
+            if (e.target.closest('button')) return;
+
+            var href = mainLink.getAttribute('href');
+            if (!href || href.startsWith('javascript:')) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            moveToHref(href);
+        });
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) {
+            navigating = false;
+            closeSidebar();
+            closeAllMobilePanels();
+        }
+    });
+}
+
+/* ===== Mobile Mega-Panel Accordion ===== */
+function bindMobileExpandBtns() {
+    document.querySelectorAll('.mobile-expand-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (window.innerWidth > 768) return;
+
+            const navItem = this.closest('.nav-item');
+            if (!navItem) return;
+
+            const wasOpen = navItem.classList.contains('mobile-open');
+
+            closeAllMobilePanels();
+
+            if (!wasOpen) {
+                navItem.classList.add('mobile-open');
+                this.setAttribute('aria-expanded', 'true');
+            } else {
+                this.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+}

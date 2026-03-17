@@ -705,3 +705,45 @@
     flex-wrap: wrap;
   }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .mypage-mode-tab {
+    font-size: 17px;
+  }
+  body.zoom-large .mypage-header-pill .pill-item {
+    font-size: 17px;
+  }
+  body.zoom-large .mypage-help {
+    font-size: 15px;
+  }
+  body.zoom-large .mypage-setting-title {
+    font-size: 19px;
+  }
+  body.zoom-large .mypage-setting-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .mypage-form-grid label {
+    font-size: 17px;
+  }
+  body.zoom-large .mypage-form-grid input,
+  body.zoom-large .mypage-form-grid select {
+    font-size: 17px;
+    min-height: 46px;
+  }
+  body.zoom-large .agreement-title {
+    font-size: 18px;
+  }
+  body.zoom-large .agreement-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .mypage-danger-text {
+    font-size: 17px;
+  }
+  body.zoom-large .mypage-summary-item p {
+    font-size: 17px;
+  }
+  body.zoom-large .mypage-inline-logout-copy p {
+    font-size: 16px;
+  }
+}

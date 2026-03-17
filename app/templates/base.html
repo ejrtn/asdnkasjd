@@ -12,407 +12,17 @@
     <link rel="stylesheet" href="{{ static_v('chatbot.css') }}">
 
     {% block head %}{% endblock %}
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-        }
-
-        body {
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            transition: height 0.3s ease;
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-        }
-
-        .user-menu {
-            position: relative;
-        }
-
-        .app-container {
-            display: flex;
-            height: calc(100vh - 64px);
-            width: 100%;
-            max-width: none;
-        }
-
-        .sidebar {
-            width: 240px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            overflow: visible;
-        }
-
-        .main {
-            flex: 1;
-            min-width: 0;
-            padding: 0;
-            overflow-y: auto;
-        }
-
-        /* 전체 확대 모드 */
-        body.zoom-large {
-            font-size: 18px;
-        }
-
-        body.zoom-large .header {
-            height: 80px;
-            padding: 0 24px;
-        }
-
-        body.zoom-large .header-left {
-            font-size: 24px;
-        }
-
-        body.zoom-large .search-input {
-            font-size: 16px;
-            padding: 8px 14px;
-        }
-
-        body.zoom-large .search-btn {
-            font-size: 16px;
-            padding: 8px 14px;
-        }
-
-        body.zoom-large .zoom-btn {
-            font-size: 18px;
-            padding: 10px 14px;
-        }
-
-        body.zoom-large .user-menu-btn {
-            font-size: 28px;
-        }
-
-        body.zoom-large .sidebar {
-            width: 280px;
-            padding: 24px 20px;
-        }
-
-        body.zoom-large .sidebar button {
-            font-size: 16px !important;
-            padding: 16px 20px !important;
-        }
-
-        body.zoom-large .app-container {
-            height: calc(100vh - 80px);
-        }
-
-        body.zoom-large .main {
-            font-size: 18px;
-        }
-
-        body.zoom-large h1 {
-            font-size: 32px;
-        }
-
-        body.zoom-large h2 {
-            font-size: 28px;
-        }
-
-        body.zoom-large h3 {
-            font-size: 24px;
-        }
-
-        body.zoom-large h4 {
-            font-size: 20px;
-        }
-
-        body.zoom-large h5 {
-            font-size: 18px;
-        }
-
-        body.zoom-large input,
-        body.zoom-large select,
-        body.zoom-large textarea {
-            font-size: 16px !important;
-            padding: 12px !important;
-        }
-
-        body.zoom-large button {
-            font-size: 16px !important;
-            padding: 12px 16px !important;
-        }
-
-        body.zoom-large a {
-            font-size: 16px;
-        }
-
-        body.zoom-large .user-dropdown {
-            font-size: 16px;
-        }
-
-        body.zoom-large .user-dropdown a {
-            padding: 16px 20px;
-            font-size: 16px;
-        }
-
-        /* 알람 페이지 확대 기능 */
-        body.zoom-large .page-title {
-            font-size: 28px;
-        }
-
-        body.zoom-large .tab-btn {
-            font-size: 18px;
-            padding: 18px;
-        }
-
-        body.zoom-large .tab-icon {
-            font-size: 28px;
-        }
-
-        body.zoom-large .box h4 {
-            font-size: 20px;
-        }
-
-        body.zoom-large .med-item {
-            font-size: 18px;
-            padding: 16px;
-        }
-
-        body.zoom-large .alarm-time-item {
-            font-size: 18px;
-            padding: 16px;
-        }
-
-        body.zoom-large .alarm-slot-info h5 {
-            font-size: 19px;
-        }
-
-        body.zoom-large .alarm-slot-info p {
-            font-size: 16px;
-        }
-
-        body.zoom-large .guide-card h5 {
-            font-size: 18px;
-        }
-
-        body.zoom-large .guide-card p,
-        body.zoom-large .guide-card li {
-            font-size: 17px;
-        }
-
-        body.zoom-large .normal-range-card h5 {
-            font-size: 18px;
-        }
-
-        body.zoom-large .range-item .label {
-            font-size: 16px;
-        }
-
-        body.zoom-large .range-item .value {
-            font-size: 18px;
-        }
-
-        body.zoom-large .btn-add-time {
-            font-size: 18px;
-            padding: 14px;
-        }
-
-        /* 혈압/혈당 알람 탭 확대 */
-        body.zoom-large .health-panel {
-            font-size: 20px;
-        }
-
-        body.zoom-large .alarm-slot {
-            padding: 20px 24px;
-        }
-
-        body.zoom-large .alarm-slot-right input[type="time"] {
-            font-size: 18px;
-            padding: 10px 14px;
-        }
-
-        body.zoom-large .toggle-switch {
-            width: 60px;
-            height: 32px;
-        }
-
-        body.zoom-large .toggle-switch::after {
-            width: 28px;
-            height: 28px;
-        }
-
-        body.zoom-large .toggle-switch.active::after {
-            left: 30px;
-        }
-
-        /* 생활 안내, 건강정보 확대 */
-        body.zoom-large .guide-page-container {
-            font-size: 20px;
-        }
-
-        body.zoom-large .text-xl {
-            font-size: 28px !important;
-        }
-
-        body.zoom-large .text-lg {
-            font-size: 24px !important;
-        }
-
-        body.zoom-large .text-sm {
-            font-size: 18px !important;
-        }
-
-        body.zoom-large .text-xs {
-            font-size: 16px !important;
-        }
-
-        body.zoom-large .text-\[10px\] {
-            font-size: 14px !important;
-        }
-
-        body.zoom-large .p-8 {
-            padding: 32px !important;
-        }
-
-        body.zoom-large .p-6 {
-            padding: 24px !important;
-        }
-
-        body.zoom-large .p-5 {
-            padding: 20px !important;
-        }
-
-        body.zoom-large .p-4 {
-            padding: 16px !important;
-        }
-
-        body.zoom-large .mb-6 {
-            margin-bottom: 24px !important;
-        }
-
-        body.zoom-large .mb-4 {
-            margin-bottom: 16px !important;
-        }
-
-        body.zoom-large .gap-6 {
-            gap: 24px !important;
-        }
-
-        body.zoom-large .gap-4 {
-            gap: 16px !important;
-        }
-
-        body.zoom-large .form-group label {
-            font-size: 18px !important;
-        }
-
-        body.zoom-large .form-group input,
-        body.zoom-large .form-group select,
-        body.zoom-large .form-group textarea {
-            font-size: 18px !important;
-            padding: 12px !important;
-        }
-
-        body.zoom-large .btn {
-            font-size: 18px !important;
-            padding: 14px 20px !important;
-        }
-
-        body.zoom-large .section-title {
-            font-size: 26px !important;
-        }
-
-        body.zoom-large .form-section h3 {
-            font-size: 22px !important;
-        }
-
-        body.zoom-large .checkbox-item label {
-            font-size: 18px !important;
-        }
-
-        body.zoom-large .radio-item label {
-            font-size: 18px !important;
-        }
-
-        body.zoom-large .mega-panel {
-            width: 600px;
-            padding: 20px;
-        }
-
-        body.zoom-large .mega-grid-alarm,
-        body.zoom-large .mega-grid-health {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        body.zoom-large .mega-title {
-            font-size: 18px;
-        }
-
-        body.zoom-large .mega-desc {
-            font-size: 15px;
-        }
-
-        body.zoom-large .mega-card-title {
-            font-size: 16px;
-        }
-
-        body.zoom-large .mega-card-desc {
-            font-size: 14px;
-        }
-
-        body.zoom-large .mega-hint {
-            font-size: 14px;
-        }
-
-        body.zoom-large .page-wrap {
-            padding: 32px 32px 48px;
-        }
-
-        body.zoom-large .c9-page-title {
-            font-size: 26px;
-        }
-
-        body.zoom-large .c9-page-header .c9-muted,
-        body.zoom-large .c9-page-copy {
-            font-size: 17px;
-        }
-
-        body.zoom-large .c9-section-title {
-            font-size: 20px;
-        }
-
-        body.zoom-large .c9-btn {
-            min-height: 48px;
-            font-size: 16px;
-            padding: 12px 18px;
-        }
-    </style>
 </head>
 
 <body>
 
     <header class="header">
-        <a href="/" class="header-left">☁️ Cloud9 Care</a>
+        <div class="header-start">
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+            <a href="/" class="header-left">☁️ Cloud9 Care</a>
+        </div>
 
         <div class="header-right">
-            <div class="search-container">
-                <input class="search-input" id="search-input" placeholder="검색어를 입력하세요">
-                <button class="search-btn" id="search-btn">🔍</button>
-            </div>
-
             <button class="zoom-btn" id="zoom-btn" title="글자 크기 조절">🔍</button>
 
             <div class="user-menu">
@@ -425,176 +35,212 @@
         </div>
     </header>
 
+    <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
+
     <div class="app-container">
         <aside class="sidebar">
             <div class="nav-item">
-                <a href="/guide">
-                    <button class="guide-btn {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내
-                        가이드</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/guide" class="sidebar-link {% if request.url.path == '/guide' %}nav-active{% endif %}">생활 안내 가이드</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">생활 안내 가이드</div>
                     <div class="mega-desc">진료 기록을 바탕으로, 오늘 실천할 수 있는 건강 가이드를 바로 확인해요.</div>
                     <div class="mega-grid">
-                        <div class="mega-card">
-                            <div class="mega-card-title">나의 건강 요약</div>
-                            <div class="mega-card-desc">질환·알레르기·복용약을 한눈에 정리하고, 핵심 주의사항을 빠르게 확인해요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">AI 맞춤 생활 안내 가이드</div>
-                            <div class="mega-card-desc">복약 안전, 생활습관 관리 포인트를 쉬운 문장으로 자동 생성해드려요.</div>
-                        </div>
+                        <a href="/guide" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">나의 건강 요약</div>
+                                <div class="mega-card-desc">질환·알레르기·복용약을 한눈에 정리하고, 핵심 주의사항을 빠르게 확인해요.</div>
+                            </div>
+                        </a>
+                        <a href="/guide" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">AI 맞춤 생활 안내 가이드</div>
+                                <div class="mega-card-desc">복약 안전, 생활습관 관리 포인트를 쉬운 문장으로 자동 생성해드려요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 자세히 볼 수 있어요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/alarm">
-                    <button class="alarm-btn {% if request.url.path == '/alarm' %}nav-active{% endif %}">알람</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/alarm" class="sidebar-link {% if request.url.path == '/alarm' %}nav-active{% endif %}">알람</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">알람</div>
                     <div class="mega-desc">복약, 혈압, 혈당 알람을 한 곳에서 설정하고 건강 루틴을 꾸준히 관리해보세요.</div>
                     <div class="mega-grid mega-grid-alarm">
-                        <div class="mega-card">
-                            <div class="mega-card-title">복약 알람</div>
-                            <div class="mega-card-desc">현재 복용 중인 약을 선택하고, 시간별 알람을 켜고 끌 수 있어요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">혈압 알람</div>
-                            <div class="mega-card-desc">아침/저녁 혈압 측정 시간과 체크를 규칙적으로 관리해요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">혈당 알람</div>
-                            <div class="mega-card-desc">공복, 식후, 취침 전 혈당 측정 시간을 놓치지 않도록 관리해요.</div>
-                        </div>
+                        <a href="/alarm" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">복약 알람</div>
+                                <div class="mega-card-desc">현재 복용 중인 약을 선택하고, 시간별 알람을 켜고 끌 수 있어요.</div>
+                            </div>
+                        </a>
+                        <a href="/alarm" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">혈압 알람</div>
+                                <div class="mega-card-desc">아침/저녁 혈압 측정 시간과 체크를 규칙적으로 관리해요.</div>
+                            </div>
+                        </a>
+                        <a href="/alarm" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">혈당 알람</div>
+                                <div class="mega-card-desc">공복, 식후, 취침 전 혈당 측정 시간을 놓치지 않도록 관리해요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 설정 화면으로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/prescription-upload">
-                    <button
-                        class="upload-btn {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전
-                        및 알약 업로드</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/prescription-upload" class="sidebar-link {% if request.url.path == '/prescription-upload' %}nav-active{% endif %}">처방전 및 알약 업로드</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">처방전 및 알약 업로드</div>
                     <div class="mega-desc">촬영 한 번으로 약 정보를 정리하고, 복약 안내까지 연결해요.</div>
-                    <div class="mega-grid">
-                        <div class="mega-card">
-                            <div class="mega-card-title">처방전 / 약봉투 촬영</div>
-                            <div class="mega-card-desc">처방 내용을 자동 추출하고 복용 시간/주의사항을 정리해요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">알약 이미지 촬영</div>
-                            <div class="mega-card-desc">알약 사진으로 약 정보를 빠르게 확인하고 복약으로 연결해요.</div>
-                        </div>
+                    <div class="mega-grid mega-grid-alarm">
+                        <a href="/prescription-upload" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">처방전 / 약봉투 촬영</div>
+                                <div class="mega-card-desc">처방 내용을 자동 추출하고 복용 시간/주의사항을 정리해요.</div>
+                            </div>
+                        </a>
+                        <a href="/prescription-upload" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">알약 이미지 촬영</div>
+                                <div class="mega-card-desc">알약 사진으로 약 정보를 빠르게 확인하고 복약으로 연결해요.</div>
+                            </div>
+                        </a>
+                        <a href="/prescription-upload" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">히스토리</div>
+                                <div class="mega-card-desc">이전에 업로드한 처방전과 약 정보를 날짜별로 확인하고 관리할 수 있어요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 업로드 화면으로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/health-profile">
-                    <button
-                        class="health-profile {% if request.url.path == '/health-profile' %}nav-active{% endif %}">건강정보</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/health-profile" class="sidebar-link {% if request.url.path == '/health-profile' %}nav-active{% endif %}">건강정보</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">건강정보</div>
                     <div class="mega-desc">건강 프로필, 알레르기, 질환, 복용 약물을 등록해 맞춤 가이드 정확도를 높여보세요.</div>
                     <div class="mega-grid mega-grid-health">
-                        <div class="mega-card">
-                            <div class="mega-card-title">건강 프로필</div>
-                            <div class="mega-card-desc">기본 신체정보와 생활습관을 등록하고 관리해요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">알레르기 · 질환</div>
-                            <div class="mega-card-desc">알레르기 정보와 만성질환 기록을 정리해 맞춤 가이드 정확도를 높여요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">현재 복용 약물</div>
-                            <div class="mega-card-desc">복용 중인 약물과 복용법을 등록해 안전한 건강 관리를 도와줘요.</div>
-                        </div>
+                        <a href="/health-profile" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">건강 프로필</div>
+                                <div class="mega-card-desc">언제든지 확인 가능한 기본 신체정보와 생활습관을 등록하고 관리해요.</div>
+                            </div>
+                        </a>
+                        <a href="/health-profile" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">알레르기 · 질환</div>
+                                <div class="mega-card-desc">알레르기 정보와 만성질환 기록을 정리해 맞춤 가이드 정확도를 높여요.</div>
+                            </div>
+                        </a>
+                        <a href="/health-profile" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">현재 복용 약물</div>
+                                <div class="mega-card-desc">복용 중인 약물과 복용법을 등록해 안전한 건강 관리를 도와줘요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 건강정보로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/blood-sugar">
-                    <button class="blood-sugar {% if request.url.path == '/blood-sugar' %}nav-active{% endif %}">혈당
-                        수첩</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/blood-sugar" class="sidebar-link {% if request.url.path == '/blood-sugar' %}nav-active{% endif %}">혈당 수첩</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">혈당 수첩</div>
                     <div class="mega-desc">혈당 기록을 저장하고 공복 · 식후 · 취침 전 패턴을 확인해 더 정확한 건강 관리를 이어가세요.</div>
                     <div class="mega-grid">
-                        <div class="mega-card">
-                            <div class="mega-card-title">기록 저장</div>
-                            <div class="mega-card-desc">공복 · 식후 · 취침 전 혈당을 빠르게 기록할 수 있어요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">기록 보기</div>
-                            <div class="mega-card-desc">최근 15일 혈당 기록과 변화 추이를 확인할 수 있어요.</div>
-                        </div>
+                        <a href="/blood-sugar" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">기록 저장</div>
+                                <div class="mega-card-desc">공복 · 식후 · 취침 전 혈당을 빠르게 기록할 수 있어요.</div>
+                            </div>
+                        </a>
+                        <a href="/blood-sugar" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">기록 보기</div>
+                                <div class="mega-card-desc">최근 15일 혈당 기록과 변화 추이를 확인할 수 있어요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 혈당 수첩으로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/blood-pressure">
-                    <button
-                        class="blood-pressure {% if request.url.path == '/blood-pressure' %}nav-active{% endif %}">혈압
-                        수첩</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/blood-pressure" class="sidebar-link {% if request.url.path == '/blood-pressure' %}nav-active{% endif %}">혈압 수첩</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">혈압 수첩</div>
                     <div class="mega-desc">아침 · 저녁 혈압 기록을 저장하고 최근 변화를 확인해 혈압 관리 루틴을 꾸준히 이어가세요.</div>
                     <div class="mega-grid">
-                        <div class="mega-card">
-                            <div class="mega-card-title">기록 저장</div>
-                            <div class="mega-card-desc">아침 · 저녁 혈압을 빠르게 기록할 수 있어요.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">기록 보기</div>
-                            <div class="mega-card-desc">최근 15일 혈압 변화와 패턴을 확인할 수 있어요.</div>
-                        </div>
+                        <a href="/blood-pressure" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">기록 저장</div>
+                                <div class="mega-card-desc">아침 · 저녁 혈압을 빠르게 기록할 수 있어요.</div>
+                            </div>
+                        </a>
+                        <a href="/blood-pressure" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">기록 보기</div>
+                                <div class="mega-card-desc">최근 15일 혈압 변화와 패턴을 확인할 수 있어요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 혈압 수첩으로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="/plan-check-list">
-                    <button
-                        class="plan-check-list {% if request.url.path == '/plan-check-list' %}nav-active{% endif %}">하루
-                        건강 미션</button>
-                </a>
+                <div class="nav-item-row">
+                    <a href="/plan-check-list" class="sidebar-link {% if request.url.path == '/plan-check-list' %}nav-active{% endif %}">하루 건강 미션</a>
+                    <button type="button" class="mobile-expand-btn" aria-label="설명 펼치기" aria-expanded="false">⌄</button>
+                </div>
                 <div class="mega-panel" aria-hidden="true">
                     <div class="mega-title">하루 건강 미션</div>
                     <div class="mega-desc">오늘 하루 건강 미션을 확인 합니다</div>
                     <div class="mega-grid">
-                        <div class="mega-card">
-                            <div class="mega-card-title">미션 저장</div>
-                            <div class="mega-card-desc">Cloud9 Care가 맞춤 미션을 생성해 드립니다.</div>
-                        </div>
-                        <div class="mega-card">
-                            <div class="mega-card-title">미션 체크</div>
-                            <div class="mega-card-desc">오늘의 미션을 잘 지켰는지 하나씩 표시해보세요.</div>
-                        </div>
+                        <a href="/plan-check-list" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">미션 저장</div>
+                                <div class="mega-card-desc">Cloud9 Care가 맞춤 미션을 생성해 드립니다.</div>
+                            </div>
+                        </a>
+                        <a href="/plan-check-list" class="mega-card-link">
+                            <div class="mega-card">
+                                <div class="mega-card-title">미션 체크</div>
+                                <div class="mega-card-desc">오늘의 미션을 잘 지켰는지 하나씩 표시해보세요.</div>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-hint">클릭하면 하루 건강 미션으로 이동해요 →</div>
                 </div>
             </div>
 
             <div class="sidebar-footer">
-                <a href="/mypage">
-                    <button class="{% if request.url.path == '/mypage' %}nav-active{% endif %}">👤 마이페이지</button>
-                </a>
+                <a href="/mypage" class="sidebar-link {% if request.url.path == '/mypage' %}nav-active{% endif %}">👤 마이페이지</a>
             </div>
         </aside>
 
@@ -657,9 +303,9 @@
         </div>
     </div>
 
-    <script src="/static/common.js?v=2"></script>
-    <script src="/static/chatbot.js"></script>
-    <script src="/static/base.js"></script>
+    <script src="{{ static_v('common.js') }}"></script>
+    <script src="{{ static_v('chatbot.js') }}"></script>
+    <script src="{{ static_v('base.js') }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>

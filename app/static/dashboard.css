@@ -582,6 +582,12 @@
     grid-template-columns: 1fr;
   }
 
+  .slide-content h2,
+  .slide-content p,
+  .card-header h4 {
+    word-break: keep-all;
+  }
+
   .hero-slider {
     padding: 24px;
     min-height: 300px;

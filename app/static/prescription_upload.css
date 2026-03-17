@@ -893,3 +893,55 @@
     right: 0;
   }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .prescription-tab-icon {
+    font-size: 22px;
+  }
+  body.zoom-large .prescription-tab-title {
+    font-size: 22px;
+  }
+  body.zoom-large .prescription-tab-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .upload-zone-icon {
+    font-size: 34px;
+  }
+  body.zoom-large .upload-zone-title {
+    font-size: 22px;
+  }
+  body.zoom-large .upload-zone-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .analysis-card-title {
+    font-size: 20px;
+  }
+  body.zoom-large .analysis-result-text {
+    font-size: 18px;
+  }
+  body.zoom-large .tree-title {
+    font-size: 18px;
+  }
+  body.zoom-large .tree-date-header {
+    font-size: 18px;
+  }
+  body.zoom-large .tree-time {
+    font-size: 16px;
+  }
+  body.zoom-large .inline-sync-text {
+    font-size: 18px;
+  }
+  body.zoom-large .main-upload-add-btn-text {
+    font-size: 18px;
+  }
+  body.zoom-large .drop-zone-text {
+    font-size: 19px;
+  }
+  body.zoom-large .drop-zone-subtext {
+    font-size: 16px;
+  }
+  body.zoom-large .prescription-mode-pill-item {
+    font-size: 16px;
+  }
+}

@@ -1041,3 +1041,63 @@ input:disabled {
     flex: 1;
   }
 }
+
+/* ===== 모바일 확대 전용 보정 ===== */
+@media (max-width: 768px) {
+  body.zoom-large .alarm-mode-tab {
+    font-size: 17px;
+  }
+  body.zoom-large .alarm-tab-icon {
+    font-size: 22px;
+  }
+  body.zoom-large .alarm-tab-title {
+    font-size: 22px;
+  }
+  body.zoom-large .alarm-tab-desc {
+    font-size: 16px;
+  }
+  body.zoom-large .med-name {
+    font-size: 22px;
+  }
+  body.zoom-large .med-meta {
+    font-size: 17px;
+  }
+  body.zoom-large .alarm-add-title {
+    font-size: 19px;
+  }
+  body.zoom-large .alarm-slot-info h5 {
+    font-size: 21px;
+  }
+  body.zoom-large .alarm-slot-info p {
+    font-size: 17px;
+  }
+  body.zoom-large .normal-range-card h5 {
+    font-size: 22px;
+  }
+  body.zoom-large .normal-range-card p {
+    font-size: 16px;
+  }
+  body.zoom-large .range-item .label {
+    font-size: 17px;
+  }
+  body.zoom-large .range-item .value {
+    font-size: 18px;
+  }
+  body.zoom-large .history-item-title {
+    font-size: 17px;
+  }
+  body.zoom-large .history-item-body {
+    font-size: 17px;
+  }
+  body.zoom-large .alarm-loading-text {
+    font-size: 18px;
+  }
+  body.zoom-large .btn-add-time {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  body.zoom-large .alarm-slot-right input[type="time"] {
+    font-size: 18px;
+    min-height: 46px;
+  }
+}
