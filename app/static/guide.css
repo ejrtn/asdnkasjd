@@ -472,11 +472,10 @@
     width: 100%;
     display: flex;
     align-items: center;
-    /* 세로 중앙 정렬 */
     justify-content: space-between;
     gap: 20px;
-    /* 제목과 버튼 사이 최소 간격 */
     margin-bottom: 0;
+    flex-wrap: wrap;
 }
 
 .guide-head-card .c9-section-title {
@@ -510,8 +509,13 @@
 }
 
 .guide-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
     flex-shrink: 0;
-    /* 제목이 길어져도 버튼 영역이 좁아지지 않음 */
 }
 
 .guide-head-card .c9-btn,
@@ -524,13 +528,16 @@
     line-height: 1;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     white-space: nowrap;
-    /* 버튼 텍스트 줄바꿈 방지 */
+    border: none;
+    cursor: pointer;
+    max-width: 100%;
 }
 
 .guide-head-card .guide-info-icon {
-    margin-left: 8px;
+    margin-left: 0px;
 }
 
 .success-rate-container {
@@ -626,13 +633,14 @@
     cursor: default;
     font-size: 14px;
     color: #94a3b8;
-    margin-left: 6px;
+    margin-left: 2px;
     width: 20px;
     height: 20px;
     border: 1.5px solid #cbd5e1;
     border-radius: 50%;
     font-weight: 800;
     z-index: 200;
+    transform: translateY(-1px);
     transition: all 0.2s ease;
 }
 
@@ -648,14 +656,19 @@
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: 400px;
+    max-width: min(400px, 90vw);
     padding: 18px;
     background: #ffffff;
     color: #475569;
     font-size: 12px;
     line-height: 1.7;
+    text-align: left;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
     opacity: 0;
     visibility: hidden;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -783,14 +796,31 @@
     background: #f59e0b;
 }
 
-@media (max-width: 1200px) {
+/* 공통 primary 버튼 (다운로드 + 음성 안내 공용) */
+.c9-btn-primary {
+    background: linear-gradient(135deg, #7c83fd, #a5b4fc);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(124, 131, 253, 0.25);
+    transition: all 0.2s ease;
+}
+
+.c9-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(124, 131, 253, 0.35);
+}
+
+.c9-btn-primary:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 1350px) {
     .guide-layout {
         grid-template-columns: 1fr;
     }
 
     .guide-disease-grid,
     .guide-loading-card-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .guide-section-card {
@@ -803,7 +833,7 @@
 
     .guide-head-card {
         min-height: auto;
-        padding: 20px 22px;
+        padding: 20px 28px;
     }
 
     .guide-plan-head {
@@ -827,32 +857,32 @@
     }
 }
 
-@media (max-width: 768px) {
-    .guide-head-card .c9-section-head {
-        flex-wrap: wrap;
-    }
-}
+@media (max-width: 1100px) {
 
-@media (max-width: 720px) {
+    .guide-disease-grid,
+    .guide-loading-card-grid {
+        grid-template-columns: 1fr;
+    }
+
     .guide-head-card .c9-section-head {
         flex-direction: column;
-        /* 세로 배치로 전환 */
         align-items: flex-start;
-        /* 왼쪽 정렬 */
         gap: 16px;
-        /* 세로 배치 시 제목과 버튼 사이 간격 */
-        flex-wrap: wrap;
-        /* 다시 줄바꿈 허용 */
+    }
+
+    .guide-head-card .c9-section-title {
+        white-space: normal;
     }
 
     .guide-head-actions {
         width: 100%;
-        /* 모바일에서 버튼 영역을 꽉 채우기 */
+        justify-content: flex-start;
+        gap: 10px;
     }
 
     .guide-head-actions .c9-btn {
-        width: 100%;
-        /* 가득 찬 버튼 */
+        flex: 1;
+        min-width: 140px;
         justify-content: center;
     }
 }

@@ -4,6 +4,7 @@
 
 {% block head %}
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <link rel="stylesheet" href="{{ static_v('guide.css') }}">
 {% endblock %}
 
@@ -141,9 +142,14 @@
                             </div>
 
                             <div class="guide-head-actions">
-                                <button id="tts-btn" class="c9-btn c9-btn-soft">
+                                <button id="download-btn" class="c9-btn c9-btn-primary" onclick="takeScreenshot()">
+                                    <span>⬇️</span>
+                                    <span>이미지로 저장</span>
+                                </button>
+
+                                <button id="tts-btn" class="c9-btn c9-btn-primary">
                                     <span id="tts-icon">🔊</span>
-                                    <span id="tts-text">가이드 음성 안내</span>
+                                    <span id="tts-text">음성 안내</span>
                                 </button>
                             </div>
                         </div>
@@ -262,4 +268,19 @@
 
 {% block scripts %}
 <script src="{{ static_v('guide.js') }}"></script>
+<script>
+    function takeScreenshot() {
+        // html2canvas가 특정 ID 영역을 스캔해서 canvas로 변환함
+        html2canvas(document.querySelector(".guide-layout")).then(canvas => {
+            // canvas를 이미지 데이터(URL)로 변환
+            const imgData = canvas.toDataURL("image/png");
+
+            // 다운로드 링크 생성 및 클릭
+            const link = document.createElement('a');
+            link.download = 'health-card.png';
+            link.href = imgData;
+            link.click();
+        });
+    }
+</script>
 {% endblock %}
