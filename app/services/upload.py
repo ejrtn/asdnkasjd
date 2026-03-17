@@ -5,6 +5,7 @@ import re
 import uuid
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import anyio
 from fastapi import UploadFile
@@ -432,10 +433,11 @@ class UploadService:
 
         history_map = {}
         for upload in uploads:
-            # 프론트엔드 렌더링에 필요한 날짜/시간 전체
-            created_datetime = upload.created_at.strftime("%Y-%m-%d %H:%M:%S")
-            # 분(minute) 단위까지 같고 타입이 같을 때 하나의 이력으로 묶음
-            group_time_key = upload.created_at.strftime("%Y-%m-%d %H:%M")
+            # UTC -> KST 변환 후 포맷
+            raw = upload.created_at.replace(tzinfo=None)
+            kst = raw.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Asia/Seoul"))
+            created_datetime = kst.strftime("%Y-%m-%d %H:%M:%S")
+            group_time_key = kst.strftime("%Y-%m-%d %H:%M")
 
             # 카테고리 (UI 표시용)
             if upload.category == "prescription":

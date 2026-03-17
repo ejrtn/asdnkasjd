@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from app.models.allergy import Allergy
 from app.models.blood_pressure_record import BloodPressureRecord
@@ -14,6 +15,14 @@ from app.services.llm_service import LLMService
 class GuideService:
     def __init__(self):
         self.llm_service = LLMService()
+
+    @staticmethod
+    def _to_kst_str(dt: datetime | None) -> str:
+        if not dt:
+            return ""
+        raw = dt.replace(tzinfo=None) # utc 로 간주하여 tzinfo 제거
+        utc = raw.replace(tzinfo=ZoneInfo("UTC")) # 명시적으로 UTC로 설정
+        return utc.astimezone(ZoneInfo("Asia/Seoul")).isoformat() # KST로 변환하여 ISO 포맷으로 반환
 
     # ==========================================
     # 필수 1: LLM 기반 안내 가이드 생성
@@ -55,7 +64,7 @@ class GuideService:
             "user_current_status": current.user_current_status if current else "가이드 생성 시작...",
             "generated_content": current.generated_content if current else {},
             "activity": True,
-            "created_at": current.created_at if current else datetime.now(),
+            "created_at": current.created_at if current else self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
         }
 
     async def _run_guide_generation_task(self, user_id: str | None) -> None:
@@ -92,7 +101,8 @@ class GuideService:
             data = {
                 "user_current_status": prompt,
                 "generated_content": fixed_content,
-                "activity": False,  # 생성 완료
+                "activity": False,
+                "created_at": datetime.now(tz=ZoneInfo("UTC")).replace(tzinfo=None),
             }
             await self.llm_service.update_or_create(user_id=user_id, data=data)
 
@@ -130,8 +140,8 @@ class GuideService:
                     ],
                 },
             },
-            "activity": False,  # 더미는 완료 상태로 표시
-            "created_at": datetime.now(),
+            "activity": False,
+            "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
         }
 
     async def update_loading_state(self, user_id: str | None) -> None:
@@ -350,7 +360,7 @@ class GuideService:
                 },
             },
             "activity": False,
-            "created_at": datetime.now(),
+            "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
         }
 
     async def get_saved_guide(self, user: User | None = None, background_tasks=None) -> dict:
@@ -370,14 +380,13 @@ class GuideService:
                     }
                 },
                 "activity": False,
-                "created_at": datetime.now(),
+                "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
             }
 
         saved = await self.llm_service.get_by_user_id(str(user.id))
 
         # 1. 저장된 가이드가 있고 '완료' 상태인 경우 즉시 반환
         if saved and saved.activity is False:
-            # 저장된 구버전 가이드도 4대 카테고리 보정 적용 (DB에 옛날 형식이 남아 있을 경우 대비)
             fixed_content = self._fix_missing_health_guides(saved.generated_content or {})
             return {
                 "user_current_status": saved.user_current_status,

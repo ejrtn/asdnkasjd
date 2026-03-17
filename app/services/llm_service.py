@@ -1,5 +1,7 @@
 import json
+from datetime import datetime
 from typing import Any, cast
+from zoneinfo import ZoneInfo
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel
@@ -67,6 +69,14 @@ class LLMService:
         content = response.choices[0].message.content or "{}"
         return dict(json.loads(content))
 
+    @staticmethod
+    def _to_kst_str(dt: datetime | None) -> str:
+        if not dt:
+            return ""
+        raw = dt.replace(tzinfo=None) # utc로 저장된 datetime에서 tzinfo 제거
+        utc = raw.replace(tzinfo=ZoneInfo("UTC")) # utc로 tzinfo 설정
+        return utc.astimezone(ZoneInfo("Asia/Seoul")).isoformat() # KST로 변환하여 ISO str 반환
+
     def _to_dto(self, model: Any) -> LlmLifeGuideResponse | None:
         if not model:
             return None
@@ -74,7 +84,7 @@ class LLMService:
             user_current_status=model.user_current_status,
             generated_content=model.generated_content,
             activity=model.activity,
-            created_at=model.created_at,
+            created_at=self._to_kst_str(model.created_at),
         )
 
     async def get_by_user_id(self, user_id: str) -> LlmLifeGuideResponse | None:

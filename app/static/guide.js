@@ -127,13 +127,11 @@ function renderGuideTimestamp() {
     }
     try {
         const d = new Date(guideCreatedAt);
-        // KST: UTC+9
-        const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-        const year = kst.getUTCFullYear();
-        const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(kst.getUTCDate()).padStart(2, '0');
-        const hour = String(kst.getUTCHours()).padStart(2, '0');
-        const min = String(kst.getUTCMinutes()).padStart(2, '0');
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hour = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
         el.innerHTML = `
         <span style="display:block;margin-left:45px;">
         <span class="guide-updated-at-dot"></span> 최근 건강 정보 반영 &nbsp; ${year}.${month}.${day} ${hour}:${min}
