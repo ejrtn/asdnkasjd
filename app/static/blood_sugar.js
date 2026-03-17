@@ -4,6 +4,28 @@ let sugarRecords = [];
 let activeSugarFilter = "공복";
 let activeSugarRecordFilter = "공복";
 
+let sugar_change_cnt = 0
+window.addEventListener('pagehide', () => {
+    if(sugar_change_cnt != 0){
+        const accessToken = localStorage.getItem("access_token");
+        
+        // fetchWithAuth의 핵심 로직(헤더 추가)만 수동으로 적용
+        const headers = {
+            "Content-Type": "application/json"
+        };
+        if (accessToken) {
+            headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+
+        // fetchWithAuth 대신 순수 fetch를 사용하고 keepalive를 켭니다.
+        fetch("/api/v1/guides", {
+            method: "POST",
+            headers: headers,
+            keepalive: true, // 👈 페이지가 닫혀도 전송을 보장함
+        });
+    }
+});
+
 function switchSugarMode(mode, button) {
   BloodNotebook.switchMode('sugar', mode, button);
 }
@@ -137,7 +159,7 @@ async function submitBloodSugar() {
   });
 
   BloodNotebook.showFeedback('sugar-save-feedback', "혈당 기록이 저장되었습니다.", "success");
-
+  sugar_change_cnt += 1
   await loadBloodSugarRecords();
 }
 
@@ -342,6 +364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await response.json();
         if (result.status === 'success') {
           await loadBloodSugarRecords();
+          sugar_change_cnt -= 1
         }
       }
     }
