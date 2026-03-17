@@ -65,7 +65,6 @@ app = [
     { name = "firebase-admin" },
     { name = "httpx" },
     { name = "motor" },
-    { name = "openai" },
     { name = "orjson" },
     { name = "passlib", extra = ["bcrypt"] },
     { name = "pyjwt" },
@@ -86,7 +85,6 @@ dev = [
 requires-dist = [
     { name = "anyio", specifier = ">=4.12.1" },
     { name = "chromadb", specifier = ">=0.5.0" },
-    { name = "chromadb", specifier = ">=1.5.5" },
     { name = "cryptography", specifier = ">=46.0.3" },
     { name = "fastapi-mail", specifier = ">=1.6.2" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -120,7 +118,6 @@ app = [
     { name = "firebase-admin", specifier = ">=6.0.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "motor", specifier = ">=3.6.0" },
-    { name = "openai", specifier = ">=2.0.0" },
     { name = "orjson", specifier = ">=3.11.5" },
     { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
     { name = "pyjwt", specifier = ">=2.10.1" },
