@@ -4,6 +4,8 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ static_v('prescription_upload.css') }}">
+<link rel="stylesheet" href="{{ static_v('upload_modal.css') }}">
+<link rel="stylesheet" href="{{ static_v('history_upload.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -200,5 +202,8 @@
         }
     }
 </script>
-<script src="{{ static_v('upload.js') }}"></script>
+<script src="{{ static_v('common_upload.js') }}"></script>
+<script src="{{ static_v('prescription_upload.js') }}"></script>
+<script src="{{ static_v('pill_upload.js') }}"></script>
+<script src="{{ static_v('history_upload.js') }}"></script>
 {% endblock %}

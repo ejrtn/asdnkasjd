@@ -1,0 +1,99 @@
+/**
+ * Styles for Upload History Tab
+ */
+
+.history-grid {
+    grid-template-columns: 320px 1fr !important;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.history-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #f8fafc;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 20px 16px;
+    height: 100%;
+}
+
+.history-filters {
+    display: flex;
+    gap: 8px;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.history-filter-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-filter-btn.is-active {
+    background: #fff;
+    color: #4f46e5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.history-search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 14px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 600px;
+    padding-right: 4px;
+}
+
+.history-list::-webkit-scrollbar { width: 6px; }
+.history-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Tree View Styles */
+.tree-date-group { margin-bottom: 16px; }
+.tree-date-header { font-size: 15px; font-weight: 800; color: #334155; margin-bottom: 8px; padding-left: 4px; }
+.tree-item { display: flex; align-items: center; padding: 8px 0; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+.tree-item:hover { background: #f1f5f9; }
+.tree-item.is-active { background: #eef2ff; }
+.tree-branch { color: #cbd5e1; font-family: monospace; font-size: 16px; margin-right: 8px; width: 16px; text-align: center; }
+.tree-time { font-size: 13px; color: #64748b; font-family: monospace; margin-right: 12px; }
+.tree-icon { font-size: 16px; margin-right: 8px; }
+.tree-title { font-size: 14px; font-weight: 600; color: #475569; }
+.tree-item.is-active .tree-title { color: #4f46e5; font-weight: 700; }
+
+.btn-reanalyze {
+    width: 100%;
+    padding: 14px;
+    margin-top: 24px;
+    background: #f8fafc;
+    color: #4f46e5;
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-reanalyze:hover { background: #eef2ff; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1); }

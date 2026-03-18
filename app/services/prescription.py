@@ -299,9 +299,9 @@ class PrescriptionService:
             med = await CurrentMed.create(
                 user=user,
                 medication_name=drug.standard_drug_name,
-                one_dose_amount=f"{drug.dosage_amount or ''}".strip(),
-                one_dose_count=str(drug.daily_frequency or ""),
-                total_days=str(drug.duration_days or ""),
+                one_dose_amount=None,
+                one_dose_count=None,
+                total_days=None,
                 instructions="",
             )
             # 연동 상태 업데이트 및 관계 설정 [FIX]
@@ -364,9 +364,9 @@ class PrescriptionService:
             await CurrentMed.create(
                 user=user,
                 medication_name=drug.standard_drug_name,
-                one_dose_amount=f"{drug.dosage_amount or ''}".strip(),
-                one_dose_count=str(drug.daily_frequency or ""),
-                total_days=str(drug.duration_days or ""),
+                one_dose_amount=None,
+                one_dose_count=None,
+                total_days=None,
                 instructions="",
             )
             return {"synced": True, "message": f"'{drug_name}'이(가) 복용 목록에 추가되었습니다."}
