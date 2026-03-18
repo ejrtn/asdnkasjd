@@ -278,6 +278,12 @@ document.addEventListener('DOMContentLoaded', () => {
             removeBtn.onclick = (e) => {
                 e.stopPropagation();
                 window.uploadedImages[type].splice(index, 1);
+                
+                // 처방전 분석 결과도 함께 삭제
+                if (type === 'prescription' && typeof window.removePrescriptionResult === 'function') {
+                    window.removePrescriptionResult(index);
+                }
+                
                 window.renderMainPreviews();
             };
 

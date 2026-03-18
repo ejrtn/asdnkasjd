@@ -259,3 +259,6 @@
     font-size: 32px;
     cursor: pointer;
 }
+#hidden-file-input {
+    display: none;
+}

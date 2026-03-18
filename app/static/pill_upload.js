@@ -42,6 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 window.uploadOverlay.classList.remove('show');
                 window.finishUpload();
+                
+                // 히스토리 리스트 갱신
+                if (typeof window.fetchUploadHistory === 'function') {
+                    window.fetchUploadHistory();
+                }
             }, 500);
 
         } catch (error) {

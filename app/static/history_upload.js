@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function fetchUploadHistory() {
+window.fetchUploadHistory = async function() {
     const container = document.getElementById('upload-history-list');
     if (!container) return;
 
@@ -81,7 +81,7 @@ function renderTreeHistory(container, historyList) {
         const parts = fullDate.split(' ');
         const dateStr = parts[0] || '날짜 미상';
         const timeStr = parts[1] ? parts[1].substring(0, 5) : '--:--';
-        const displayType = item.type === '처방전' ? '처방전' : '알약 분석';
+        const displayType = item.type === '처방전' ? '처방전' : '알약';
         const icon = displayType === '처방전' ? '📄' : '💊';
 
         if (!acc[dateStr]) acc[dateStr] = [];
@@ -104,12 +104,79 @@ function renderTreeHistory(container, historyList) {
                     <span class="tree-time">${item.time}</span>
                     <span class="tree-icon">${item.icon}</span>
                     <span class="tree-title">${item.displayType} 상세보기</span>
+                    <button class="tree-item-delete" onclick="window.deleteHistoryItem('${item.id}', event)">×</button>
                 </div>`;
         });
         html += `</div>`;
     });
     container.innerHTML = html;
 }
+
+window.deleteHistoryItem = function (uploadId, event) {
+    if (event) event.stopPropagation();
+
+    // 커스텀 컨펌 모달 생성 및 표시
+    let overlay = document.getElementById('confirm-modal-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'confirm-modal-overlay';
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML = `
+            <div class="confirm-modal">
+                <div class="confirm-icon">🗑️</div>
+                <div class="confirm-title">기록 삭제</div>
+                <div class="confirm-message">정말로 이 기록을 삭제하시겠습니까?<br>삭제된 데이터는 복구할 수 없습니다.</div>
+                <div class="confirm-buttons">
+                    <button class="confirm-btn confirm-btn-no" id="confirm-btn-no">아니오</button>
+                    <button class="confirm-btn confirm-btn-yes" id="confirm-btn-yes">네, 삭제합니다</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const yesBtn = overlay.querySelector('#confirm-btn-yes');
+    const noBtn = overlay.querySelector('#confirm-btn-no');
+
+    const closeModal = () => {
+        overlay.classList.remove('show');
+    };
+
+    yesBtn.onclick = async () => {
+        closeModal();
+        try {
+            const response = await fetchWithAuth(`/api/v1/uploads/${uploadId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                window.showToast("기록이 성공적으로 삭제되었습니다.");
+                // 로컬 데이터에서도 삭제 후 리렌더링
+                uploadHistoryData = uploadHistoryData.filter(item => item.id != uploadId);
+                filterHistory();
+
+                // 삭제된 항목이 현재 상세 보기 중이라면 상세창 초기화
+                const detailContainer = document.getElementById('history-detail-content');
+                if (detailContainer) {
+                    detailContainer.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 100px 0;">상세 내용을 보려면 왼쪽 기록을 선택해주세요.</div>`;
+                    detailContainer.classList.add('analysis-result-empty');
+                }
+            } else {
+                const error = await response.json();
+                if (typeof showAppToast === 'function') showAppToast(`삭제 실패: ${error.detail || '알 수 없는 오류'}`, "warn", "오류");
+            }
+        } catch (e) {
+            console.error("삭제 요청 중 에러:", e);
+            if (typeof showAppToast === 'function') showAppToast("삭제 중 오류가 발생했습니다.", "warn", "오류");
+        }
+    };
+
+    noBtn.onclick = closeModal;
+    overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+
+    // 모달 표시
+    setTimeout(() => overlay.classList.add('show'), 10);
+};
 
 window.showHistoryAnalysis = async function(uploadId, element, type) {
     document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('is-active'));
