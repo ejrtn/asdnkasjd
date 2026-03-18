@@ -175,10 +175,10 @@ class GuideService:
         {{
             "title": "질환 및 알러지 관리 가이드",
             "disease_guides": [
-                {{ 
-                  "name": "규칙에 따른 명칭", 
-                  "type": "disease 또는 allergy", 
-                  "tips": ["지침1", "지침2"] 
+                {{
+                  "name": "규칙에 따른 명칭",
+                  "type": "disease 또는 allergy",
+                  "tips": ["지침1", "지침2"]
                 }}
             ],
             "integrated_point": "..."
