@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>☁️ Cloud9 Care - 건강한 일상의 시작</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <style>
@@ -231,8 +232,22 @@
 
     <script>
         // 로그인 상태면 랜딩에 머물지 않고 대시보드로
-        const token = localStorage.getItem('access_token');
-        if (token) window.location.replace('/dashboard');
+        (async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+            try {
+                const res = await fetch('/api/v1/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    window.location.replace('/dashboard');
+                } else {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user_id');
+                }
+            } catch {}
+        })();
     </script>
 </body>
 </html>

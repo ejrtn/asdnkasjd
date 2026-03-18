@@ -27,10 +27,23 @@ function syncTokensFromCookies() {
 syncTokensFromCookies();
 
 // 로그인 후 대시보드로 리다이렉트
-function redirectToDashboardAfterLogin() {
+async function redirectToDashboardAfterLogin() {
     const token = localStorage.getItem('access_token');
-    if (token && window.location.pathname === '/login') {
-        window.location.href = '/dashboard';
+    if (!token || window.location.pathname !== '/login') return;
+
+    try {
+        const res = await fetch('/api/v1/users/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            window.location.href = '/dashboard';
+        } else {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_id');
+        }
+    } catch {
+        // 네트워크 오류 시 무시
     }
 }
 
@@ -534,6 +547,7 @@ document.getElementById('app-toast-close')?.addEventListener('click', () => {
 // 웹 폴링 백업
 // =====================
 async function pollDueAlarms() {
+    if (typeof __sessionExpiredMode !== 'undefined' && __sessionExpiredMode) return;
     try {
         const response = await fetchWithAuth('/api/v1/alarms/due', {
             method: 'GET',

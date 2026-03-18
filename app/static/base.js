@@ -8,6 +8,9 @@ function clearClientSession() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
     localStorage.removeItem('auth_token');
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+    document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+    document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
 }
 
 function showSessionToast() {
@@ -40,6 +43,7 @@ function handleSessionExpired() {
     __sessionExpiredMode = true;
 
     clearClientSession();
+    stopAllPolling();
 
     if (PUBLIC_PATHS.includes(window.location.pathname)) {
         window.location.replace('/');
@@ -51,6 +55,21 @@ function handleSessionExpired() {
     __sessionToastTimer = setTimeout(() => {
         window.location.replace('/');
     }, 5000);
+}
+
+function stopAllPolling() {
+    if (typeof __dueAlarmPollTimer !== 'undefined' && __dueAlarmPollTimer) {
+        clearInterval(__dueAlarmPollTimer);
+        __dueAlarmPollTimer = null;
+    }
+    if (typeof __dueAlarmPollStarter !== 'undefined' && __dueAlarmPollStarter) {
+        clearTimeout(__dueAlarmPollStarter);
+        __dueAlarmPollStarter = null;
+    }
+    if (typeof __healthProfilePollInterval !== 'undefined' && __healthProfilePollInterval) {
+        clearInterval(__healthProfilePollInterval);
+        __healthProfilePollInterval = null;
+    }
 }
 
 async function fetchWithAuth(url, options = {}) {
