@@ -755,3 +755,38 @@ body.auth-body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== App Toast (auth pages) ===== */
+@keyframes toastIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes toastOut {
+    from { transform: translateY(0);     opacity: 1; }
+    to   { transform: translateY(-10px); opacity: 0; }
+}
+
+.app-toast {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 99998;
+    width: min(380px, calc(100vw - 36px));
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(79,70,229,.14);
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(15,23,42,.16);
+    backdrop-filter: blur(10px);
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+}
+.app-toast.show { animation: toastIn 220ms ease-out forwards; pointer-events: auto; }
+.app-toast.hide { animation: toastOut 180ms ease-in forwards; pointer-events: none; }
+.app-toast-inner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; }
+.app-toast-badge { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; font-size: 18px; background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+.app-toast-content { flex: 1; min-width: 0; }
+.app-toast-title { font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 4px; }
+.app-toast-message { font-size: 13px; color: #475569; line-height: 1.5; word-break: keep-all; }
+.app-toast-close { appearance: none; border: none; background: transparent; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; color: #64748b; font-size: 18px; }
+.app-toast-close:hover { background: rgba(15,23,42,.06); color: #0f172a; }

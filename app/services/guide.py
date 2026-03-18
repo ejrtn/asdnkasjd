@@ -69,7 +69,7 @@ class GuideService:
 
     async def _get_guide_record(self, user_id: str) -> LLMLifeGuide:
         """최신 가이드 레코드를 가져오거나 생성합니다."""
-        guide = await LLMLifeGuide.filter(user_id=user_id).order_by("-created_at").first()
+        guide = cast(LLMLifeGuide | None, await LLMLifeGuide.filter(user_id=user_id).order_by("-created_at").first())
         if not guide:
             guide = cast(LLMLifeGuide, await LLMLifeGuide.create(user_id=user_id, user_current_status="가이드 생성 중"))
         return guide

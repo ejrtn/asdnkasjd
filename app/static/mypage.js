@@ -241,10 +241,14 @@ async function changePassword() {
   });
 
   if (response && response.ok) {
-    mypageToast("success", "비밀번호가 변경되었습니다.");
-    document.getElementById('old_password').value = "";
-    document.getElementById('new_password').value = "";
-    setMyPageMode('main');
+    mypageToast("success", "비밀번호가 변경되었습니다. 다시 로그인해주세요.");
+    clearClientSession();
+    stopAllPolling();
+    __sessionExpiredMode = true;
+    setTimeout(() => {
+      window.location.replace('/login');
+    }, 1500);
+    return;
   } else if (response) {
     const err = await response.json();
     mypageToast("error", "변경 실패: " + (err.detail || "정보를 확인해주세요."));
