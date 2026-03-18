@@ -464,9 +464,8 @@ class UploadService:
             if key not in history_map:
                 p_id = None
                 if upload.category == "prescription":
-                    # prefetch_related가 안되어 있을 수 있으므로 직접 조회하거나 모델 속성 확인
-                    # 여기서는 간단하게 prescription_id 속성이 있으면 사용 (tortoise foreign key 필드 이름)
-                    p_id = getattr(upload, "prescription_id", None)
+                    p = getattr(upload, "prescription", None)
+                    p_id = p.id if p else None
 
                 history_map[key] = {
                     "id": upload.id,
@@ -523,9 +522,9 @@ class UploadService:
                 else:
                     groups[base]["back"] = upload
             else:
-                # [BUG FIX] 처방전인 경우 prescription_id를 명시적으로 최상위에 노출시켜 404 에러 방지
                 if upload.category == "prescription":
-                    upload.prescription_id = getattr(upload, "prescription_id", None)
+                    p = getattr(upload, "prescription", None)
+                    upload.prescription_id = p.id if p else None
                 others.append(upload)
         return groups, others
 

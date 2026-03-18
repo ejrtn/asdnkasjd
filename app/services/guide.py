@@ -3,7 +3,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 from app.models.allergy import Allergy
@@ -71,7 +71,7 @@ class GuideService:
         """최신 가이드 레코드를 가져오거나 생성합니다."""
         guide = await LLMLifeGuide.filter(user_id=user_id).order_by("-created_at").first()
         if not guide:
-            guide = await LLMLifeGuide.create(user_id=user_id, user_current_status="가이드 생성 중")
+            guide = cast(LLMLifeGuide, await LLMLifeGuide.create(user_id=user_id, user_current_status="가이드 생성 중"))
         return guide
 
     async def _run_medication_guide_task(self, user_id: str) -> None:

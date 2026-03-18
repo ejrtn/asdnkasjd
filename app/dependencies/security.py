@@ -36,8 +36,8 @@ async def get_request_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     )
     try:
         payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.JWT_ALGORITHM])
-        user_email: str = payload.get("user_id")
-        token_type: str = payload.get("type")
+        user_email: str | None = payload.get("user_id")
+        token_type: str | None = payload.get("type")
 
         if user_email is None or token_type != "access":
             raise credentials_exception

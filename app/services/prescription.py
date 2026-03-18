@@ -9,6 +9,8 @@ from openai import AsyncOpenAI
 from app.core import config
 from app.models.current_med import CurrentMed
 from app.models.ocr_history import OCRHistory
+from app.models.prescription import Prescription
+from app.models.prescription_drug import PrescriptionDrug
 from app.models.upload import Upload
 from app.models.user import User
 from app.repositories.prescription import PrescriptionRepository
@@ -315,59 +317,56 @@ class PrescriptionService:
 
     async def toggle_med_sync(self, prescription_id: int, user: User, drug_name: str) -> dict[str, Any]:
         """
-        처방전의 특정 약물을 복용 목록에 추가하거나 이미 있으면 제거(토글)합니다.
+        처방전의 특정 약물을 current_meds에 추가하거나 제거합니다(토글).
+        - prescriptions / prescription_drugs / ocr_history 는 LLM 분석 시 1회 저장 전용이므로 절대 수정하지 않음.
+        - current_meds 테이블만 추가/삭제합니다.
         """
-        # [ID 보정] 전달된 ID가 Prescription ID가 아니라 Upload ID일 경우를 대비해 한번 더 확인합니다.
-        prescription = await self.repo.get_by_id(prescription_id)
+        # 1. 처방전 조회 (user 조건 포함하여 권한 검증)
+        prescription = await Prescription.filter(id=prescription_id, user=user).first()
 
-        if not prescription or prescription.user_id != user.id:
-            # 반대로 조회: Upload ID로 처방전 찾기
-            upload = await Upload.filter(id=prescription_id, user_id=user.id).prefetch_related("prescription").first()
-            if upload and hasattr(upload, "prescription") and upload.prescription:
-                prescription = upload.prescription
-            else:
-                logger.error(f"[toggle_med_sync] Prescription not found for user {user.id} and ID {prescription_id}")
+        if not prescription:
+            # Upload ID로 잘못 전달된 경우 보정
+            upload = await Upload.filter(id=prescription_id, user=user).first()
+            if upload:
+                prescription = await Prescription.filter(upload=upload, user=user).first()
+
+            if not prescription:
+                logger.error(f"[toggle_med_sync] Prescription not found: user={user.id}, id={prescription_id}")
                 raise ValueError("처방전을 찾을 수 없거나 권한이 없습니다.")
 
-        # 1. 해당 처방전에서 drug_name에 해당하는 PrescriptionDrug 찾기
-        # [성능/안정성] 검색 시 공백 제거 등 유연하게 처리
+        # 2. 해당 처방전의 약물 조회 (prescription_drugs는 읽기 전용)
         drug_name_cleaned = drug_name.strip()
-        drug = await prescription.drugs.filter(standard_drug_name=drug_name_cleaned).first()
-
-        # [Fallback] 만약 못 찾았다면 이름이 정확히 일치하지 않을 수 있으므로 원본 그대로 시도
+        drug = await PrescriptionDrug.filter(
+            prescription=prescription,
+            standard_drug_name=drug_name_cleaned,
+        ).first()
         if not drug:
-            drug = await prescription.drugs.filter(standard_drug_name=drug_name).first()
-
+            drug = await PrescriptionDrug.filter(
+                prescription=prescription,
+                standard_drug_name=drug_name,
+            ).first()
         if not drug:
-            logger.error(f"Drug not found: {drug_name} in prescription {prescription_id}")
-            raise ValueError(f"처방전에서 '{drug_name}' 약물을 찾을 수 없습니다. (ID: {prescription_id})")
+            logger.error(f"[toggle_med_sync] Drug not found: '{drug_name}' in prescription {prescription_id}")
+            raise ValueError(f"처방전에서 '{drug_name}' 약물을 찾을 수 없습니다.")
 
-        # [Logic 보정] 연동 상태와 current_med_id가 모두 있어야 '연동됨'으로 판단
-        if drug.is_linked_to_meds and drug.current_med_id:
-            # 이미 있으면 삭제 (토글 오프)
-            target_med = await drug.current_med
-            if target_med:
-                await target_med.delete()
+        # 3. current_meds에서 현재 등록 여부 확인 (user + medication_name 기준)
+        existing_med = await CurrentMed.filter(
+            user=user,
+            medication_name=drug.standard_drug_name,
+        ).first()
 
-            drug.is_linked_to_meds = False
-            drug.current_med = None
-            await drug.save()
-
+        if existing_med:
+            # 토글 오프: current_meds에서 삭제만 (prescription_drugs 건드리지 않음)
+            await existing_med.delete()
             return {"synced": False, "message": f"'{drug_name}'이(가) 복용 목록에서 제거되었습니다."}
         else:
-            # 없으면 추가 (토글 온)
-            # 만약 current_med_id만 없고 is_linked_to_meds만 True인 상태(버그)라면 여기서 보정됨
-            new_med = await CurrentMed.create(
+            # 토글 온: current_meds에 추가만 (prescription_drugs 건드리지 않음)
+            await CurrentMed.create(
                 user=user,
-                medication_name=drug.standard_drug_name,  # 원본 저장된 이름 사용
+                medication_name=drug.standard_drug_name,
                 one_dose_amount=f"{drug.dosage_amount or ''}".strip(),
                 one_dose_count=str(drug.daily_frequency or ""),
                 total_days=str(drug.duration_days or ""),
                 instructions="",
             )
-
-            drug.is_linked_to_meds = True
-            drug.current_med = new_med
-            await drug.save()
-
             return {"synced": True, "message": f"'{drug_name}'이(가) 복용 목록에 추가되었습니다."}
