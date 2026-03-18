@@ -9,6 +9,8 @@ from app.repositories.alarm import AlarmHistoryRepository, AlarmRepository
 from app.repositories.blood_pressure_record import BloodPressureRecordRepository
 from app.repositories.blood_sugar_record import BloodSugarRecordRepository
 from app.repositories.chat_memory_repository import ChatMemoryRepository
+from app.repositories.current_med import CurrentMedRepository
+from app.repositories.health_profile import HealthProfileRepository
 from app.repositories.llm_life_guide import LLMLifeGuideRepository
 from app.services.llm_service import LLMService
 
@@ -23,6 +25,8 @@ class ChatService:
         self.bs_repo = BloodSugarRecordRepository()
         self.alarm_repo = AlarmRepository()
         self.alarm_history_repo = AlarmHistoryRepository()
+        self.current_med_repo = CurrentMedRepository()
+        self.health_profile_repo = HealthProfileRepository()
 
     def detect_emergency(self, text: str) -> bool:
         """응급 상황 감지"""
@@ -33,10 +37,23 @@ class ChatService:
         """질문 분류"""
         if any(word in text for word in ["약", "복용", "복약", "처방"]):
             return "복약"
+        elif any(word in text for word in ["알람", "알림", "리마인더", "설정된"]):
+            return "알람"
         elif any(word in text for word in ["증상", "아프", "통증", "아픔"]):
             return "증상"
         else:
             return "일반"
+
+    @staticmethod
+    def _format_guide_section(section: dict | None, fallback: str) -> str:
+        """JSON 가이드 섹션을 읽기 좋은 문자열로 변환"""
+        if not section:
+            return fallback
+        import json
+
+        if isinstance(section, dict):
+            return json.dumps(section, ensure_ascii=False, indent=2)
+        return str(section)
 
     @staticmethod
     def _format_alarm_time(alarm_time: object) -> str:
@@ -65,10 +82,12 @@ class ChatService:
                 return None
 
             # 병렬 데이터 조회 실행
-            life_guide, bp_records, bs_records = await asyncio.gather(
+            life_guide, bp_records, bs_records, current_meds, health_profile = await asyncio.gather(
                 self.llm_life_guide_repo.get_by_user_id(user_id),
                 self.bp_repo.get_by_user_id(user_id),
                 self.bs_repo.get_by_user_id(user_id),
+                self.current_med_repo.get_by_user_id(user_id),
+                self.health_profile_repo.get_by_user_id(user_id),
             )
 
             recent_bp = bp_records[:5]
@@ -84,20 +103,69 @@ class ChatService:
                 for record in recent_bs
             ] or ["- 최근 혈당 기록 없음"]
 
-            guide_status = life_guide.user_current_status if life_guide else "저장된 생활안내 가이드 상태 정보 없음"
-            guide_content = life_guide.generated_content if life_guide else "저장된 생활안내 가이드 내용 없음"
+            med_lines = []
+            for med in current_meds:
+                parts = [f"- {med.medication_name}"]
+                if med.one_dose_amount:
+                    parts.append(f"{med.one_dose_amount}")
+                if med.instructions:
+                    parts.append(f"({med.instructions})")
+                med_lines.append(" ".join(parts))
+            med_lines = med_lines or ["- 등록된 복용 약물 없음"]
+
+            # 건강 프로필 정보
+            if health_profile:
+                profile_lines = [
+                    f"- 키: {health_profile.height_cm}cm / 몸무게: {health_profile.weight_kg}kg",
+                    f"- 최근 체중 변화: {health_profile.weight_change}",
+                    f"- 수면: {health_profile.sleep_hours}시간 / 변화: {health_profile.sleep_change}"
+                    if health_profile.sleep_hours
+                    else f"- 수면 변화: {health_profile.sleep_change}",
+                    f"- 흡연: {health_profile.smoking_status}",
+                    f"- 음주: {health_profile.drinking_status}",
+                    f"- 운동: {health_profile.exercise_frequency}",
+                    f"- 식습관: {health_profile.diet_type}",
+                    f"- 가족력: {health_profile.family_history}",
+                ]
+            else:
+                profile_lines = ["- 등록된 건강 프로필 없음"]
+
+            # 생활안내 가이드 섹션별 파싱
+            guide_status = life_guide.user_current_status if life_guide else "저장된 상태 정보 없음"
+            medication_guide = self._format_guide_section(
+                life_guide.medication_guide if life_guide else None, "복약/알레르기 가이드 없음"
+            )
+            disease_guide = self._format_guide_section(
+                life_guide.disease_guide if life_guide else None, "기저질환 가이드 없음"
+            )
+            profile_guide = self._format_guide_section(
+                life_guide.profile_guide if life_guide else None, "생활습관 가이드 없음"
+            )
 
             # 알람 정보 및 히스토리 조회 병렬 실행
             alarm_lines_task = self._build_alarm_lines(user_id)
             history_lines_task = self._build_alarm_history_lines(user_id)
             alarm_lines, history_lines = await asyncio.gather(alarm_lines_task, history_lines_task)
 
-            return f"""[사용자 맞춤 건강 정보]
-사용자 상태 요약:
+            return f"""[사용자 맞춤 건강 정보 — 이 데이터는 실제 DB에서 조회한 사용자의 정보입니다. 사용자가 관련 질문을 하면 반드시 이 데이터를 기반으로 답변하세요.]
+
+사용자 상태 요약 (기저질환+알러지+현재약물):
 {guide_status}
 
-저장된 생활안내 가이드:
-{guide_content}
+AI 생활안내 가이드 - 복약 및 알레르기:
+{medication_guide}
+
+AI 생활안내 가이드 - 기저질환 지침:
+{disease_guide}
+
+AI 생활안내 가이드 - 생활습관 (혈압/혈당 포함):
+{profile_guide}
+
+사용자 건강 프로필 (키/몸무게/생활습관):
+{chr(10).join(profile_lines)}
+
+현재 복용 중인 약물:
+{chr(10).join(med_lines)}
 
 최근 혈압 기록:
 {chr(10).join(bp_lines)}
@@ -204,9 +272,21 @@ class ChatService:
 사용자의 복약 관리, 건강 상담, 증상 문의에 친절하고 정확하게 답변해주세요.
 의학적 진단은 하지 말고, 필요시 전문의와 상담을 권유하세요.
 답변은 간결하고 친근하게 작성해주세요.
-사용자 맞춤 건강 정보가 있더라도, 사용자가 묻지 않은 건강 상태를 먼저 길게 나열하지 마세요.
-질문과 직접 관련된 경우에만 사용자 맞춤 정보를 활용해 답변하세요.
-응급이 의심되는 표현이 있으면 즉시 119 또는 응급실 방문을 우선 권고하세요."""
+
+중요 규칙:
+- 아래에 [사용자 맞춤 건강 정보]가 제공됩니다. 이것은 실제 DB에서 조회한 이 사용자의 데이터입니다.
+- 사용자가 약, 복용 약물, 먹는 약을 물어보면 → '현재 복용 중인 약물' 데이터와 'AI 생활안내 가이드 - 복약 및 알레르기' 데이터를 기반으로 답변하세요.
+- 사용자가 혈압을 물어보면 → '최근 혈압 기록'과 'AI 생활안내 가이드 - 생활습관' 데이터를 기반으로 답변하세요.
+- 사용자가 혈당을 물어보면 → '최근 혈당 기록'과 'AI 생활안내 가이드 - 생활습관' 데이터를 기반으로 답변하세요.
+- 사용자가 질환, 기저질환을 물어보면 → '사용자 상태 요약'과 'AI 생활안내 가이드 - 기저질환 지침' 데이터를 기반으로 답변하세요.
+- 사용자가 건강 상태, 생활습관을 물어보면 → 모든 AI 생활안내 가이드 섹션을 종합적으로 활용하세요.
+- 사용자가 키, 몸무게, BMI, 체중, 수면, 흡연, 음주, 운동, 식습관을 물어보면 → '사용자 건강 프로필' 데이터를 기반으로 답변하세요.
+- 사용자가 알람, 알림을 물어보면 → '현재 활성 알람'과 '오늘 알람 발송 내역' 데이터를 기반으로 답변하세요.
+- 절대로 "정보를 가지고 있지 않다", "접근할 수 없다"고 답변하지 마세요. 데이터가 제공되어 있습니다.
+- 사용자가 묻지 않은 건강 상태를 먼저 길게 나열하지 마세요.
+- 응급이 의심되는 표현이 있으면 즉시 119 또는 응급실 방문을 우선 권고하세요.
+- 건강 정보 답변 시 [참고 의료 정보]로 제공된 질병관리청/국가건강정보포털 기반 자료를 우선적으로 활용하고, 답변 마지막에 출처를 간략히 안내하세요 (예: "질병관리청 건강정보 기준").
+- 참고 자료에 없는 내용은 임의로 지어내지 말고, "정확한 정보는 담당 의료진과 상담해주세요"라고 안내하세요."""
 
             messages = [{"role": "system", "content": system_prompt}]
 

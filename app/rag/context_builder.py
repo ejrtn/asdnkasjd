@@ -32,9 +32,16 @@ def extract_unique_documents(results_list: list[dict[str, Any]]) -> list[dict[st
 def sort_documents_by_distance(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     distance 기준으로 문서를 정렬한다.
-    distance가 작을수록 더 유사한 문서다.
+    공공기관 출처 문서를 우선하고, distance가 작을수록 더 유사한 문서다.
     """
-    return sorted(documents, key=lambda x: x.get("distance", 999999))
+    priority_sources = {"국가건강정보포털", "질병관리청"}
+
+    def sort_key(x: dict[str, Any]) -> tuple[int, float]:
+        source = x.get("metadata", {}).get("source", "")
+        is_priority = 0 if source in priority_sources else 1
+        return (is_priority, x.get("distance", 999999))
+
+    return sorted(documents, key=sort_key)
 
 
 def filter_documents_by_disease(
