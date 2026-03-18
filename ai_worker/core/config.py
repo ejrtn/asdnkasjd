@@ -100,7 +100,7 @@ class Config(BaseSettings):
     MFDS_IDNT03_API_URL: str = "https://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03"
     MFDS_E_DRUG_API_URL: str = "https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"
 
-    UPLOAD_DIR: str = ""
+    UPLOAD_DIR: str = "uploads"
 
 
 config = Config()
