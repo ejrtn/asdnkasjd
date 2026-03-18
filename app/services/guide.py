@@ -251,21 +251,35 @@ class GuideService:
         dumped = json.dumps(data, sort_keys=True, ensure_ascii=False)
         return hashlib.md5(dumped.encode("utf-8")).hexdigest()
 
-    async def update_loading_state(self, user_id: str | None, section_type: str, is_active: bool) -> None:
+    async def update_loading_state(self, user_id: str, section_type: str, is_active: bool) -> None:
         try:
-            saved = await self.llm_service.get_by_user_id(user_id)
-            data_to_update = {
-                f"activity_{section_type.lower()}": is_active,
-                "user_current_status": "AI가 맞춤 가이드를 생성 중입니다..."
-                if getattr(saved, "activity", False) or is_active
-                else "가이드 생성 완료",
-            }
-            await self.llm_service.update_or_create(
-                user_id=user_id,
-                data=data_to_update,
-            )
-        except Exception:
-            pass
+            # 1. 특정 유저의 가장 최신 가이드 레코드를 하나만 타겟팅합니다.
+            guide = await LLMLifeGuide.filter(user_id=user_id).order_by("-created_at").first()
+            if not guide: return
+
+            field_name = f"activity_{section_type.lower()}"
+            
+            # 2. 현재 상태 업데이트
+            update_data = {field_name: is_active}
+            
+            # 모든 activity 플래그가 False가 되는지 체크하여 status 변경
+            if is_active is False:
+                # 다른 플래그들도 확인 (이것 때문에 상태가 안 변했을 수 있음)
+                # 현재 저장될 값 외에 다른 필드들의 값을 확인
+                others_active = []
+                if section_type != "MEDICATION": others_active.append(guide.activity_medication)
+                if section_type != "DISEASE": others_active.append(guide.activity_disease)
+                if section_type != "PROFILE": others_active.append(guide.activity_profile)
+                
+                if not any(others_active):
+                    update_data["user_current_status"] = "가이드 생성 완료"
+            else:
+                update_data["user_current_status"] = "AI가 맞춤 가이드를 생성 중입니다..."
+
+            # Tortoise ORM의 update 기능을 사용하여 해당 레코드만 정확히 수정
+            await LLMLifeGuide.filter(id=guide.id).update(**update_data)
+        except Exception as e:
+            logger.error(f"Error updating loading state: {e}")
 
     async def _fetch_user_health_data(self, user_id: str | None) -> dict:
         try:
@@ -400,47 +414,40 @@ class GuideService:
         }
 
     async def get_saved_guide(self, user: User | None = None, background_tasks=None) -> dict:
-        """
-        저장된 생활가이드를 조회합니다.
-        - 저장된 가이드가 있으면 그대로 반환
-        - 없으면 백그라운드 생성 트리거 후 '생성 중' 상태 반환
-        """
         if not user:
-            return {
-                "user_current_status": "로그인이 필요합니다.",
-                "generated_content": {},
-                "activity": False,
-                "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
-            }
+            return {"user_current_status": "로그인이 필요합니다.", "activity": False}
 
-        saved = await LLMLifeGuide.filter(user_id=str(user.id)).order_by("-created_at").first()
+        user_id_str = str(user.id)
+        
+        # [수정] 1. 태스크 시작 전에 '하나의 레코드'를 확실히 먼저 가져오거나 생성합니다.
+        # 이렇게 하면 Race Condition을 방지할 수 있습니다.
+        guide = await self._get_guide_record(user_id_str)
 
-        # 1. 저장된 가이드가 있는 경우, 모듈화된 컬럼들을 합쳐서 반환
-        if saved:
-            merged_content = {}
-            if saved.medication_guide:
-                merged_content["section1"] = saved.medication_guide
-            if saved.disease_guide:
-                merged_content["section2"] = saved.disease_guide
-            if saved.profile_guide:
-                merged_content["section3"] = saved.profile_guide
+        # 2. 이미 데이터가 다 있고 생성 중이 아니라면 바로 반환
+        if guide.medication_guide and guide.disease_guide and guide.profile_guide:
+            # 모든 작업이 완료되었는지 확인 (활동 플래그가 모두 False인지)
+            is_any_active = any([guide.activity_medication, guide.activity_disease, guide.activity_profile])
+            if not is_any_active:
+                merged_content = {
+                    "section1": guide.medication_guide,
+                    "section2": guide.disease_guide,
+                    "section3": guide.profile_guide
+                }
+                fixed_content = self._fix_missing_health_guides(merged_content)
+                return {
+                    "user_current_status": guide.user_current_status,
+                    "generated_content": fixed_content,
+                    "activity": False,
+                    "created_at": self._to_kst_str(guide.created_at),
+                }
 
-            # 꿀팁: 프론트에서 activity=True면 계속 로딩 아이콘을 띄우므로,
-            # 모든 섹션이 채워져 있거나 생성 중이 아닐 때 적절히 False 반환
-            fixed_content = self._fix_missing_health_guides(merged_content)
-            return {
-                "user_current_status": saved.user_current_status,
-                "generated_content": fixed_content,
-                "activity": bool(saved.activity_medication or saved.activity_disease or saved.activity_profile),
-                "created_at": self._to_kst_str(saved.created_at),
-            }
-
-        # 2. 저장된 가이드가 전혀 없는 경우 최초 생성 트리거 (전체 섹션)
+        # [수정] 3. 전체 섹션 생성 트리거 (guide 객체를 직접 활용)
         async def _trigger_all():
+            # 병렬 실행하되, 각각의 태스크 내부에서 레코드를 새로 생성하지 않도록 합니다.
             await asyncio.gather(
-                self.generate_modular_guide(str(user.id), "MEDICATION"),
-                self.generate_modular_guide(str(user.id), "DISEASE"),
-                self.generate_modular_guide(str(user.id), "PROFILE"),
+                self.generate_modular_guide(user_id_str, "MEDICATION"),
+                self.generate_modular_guide(user_id_str, "DISEASE"),
+                self.generate_modular_guide(user_id_str, "PROFILE"),
             )
 
         if background_tasks:
@@ -449,8 +456,8 @@ class GuideService:
             await _trigger_all()
 
         return {
-            "user_current_status": "가이드 생성 시작...",
+            "user_current_status": "가이드 생성 중...",
             "generated_content": {},
             "activity": True,
-            "created_at": self._to_kst_str(datetime.now(ZoneInfo("UTC"))),
+            "created_at": self._to_kst_str(guide.created_at),
         }
