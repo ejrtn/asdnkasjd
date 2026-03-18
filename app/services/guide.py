@@ -261,7 +261,7 @@ class GuideService:
             field_name = f"activity_{section_type.lower()}"
 
             # 2. 현재 상태 업데이트
-            update_data = {field_name: is_active}
+            update_data: dict[str, Any] = {field_name: is_active}
 
             # 모든 activity 플래그가 False가 되는지 체크하여 status 변경
             if is_active is False:
