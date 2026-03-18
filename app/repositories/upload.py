@@ -38,7 +38,7 @@ class UploadRepository:
         """
         사용자의 모든 업로드 기록을 최신순으로 정렬하여 반환합니다.
         """
-        return await self._model.filter(user_id=user_id).order_by("-created_at")
+        return await self._model.filter(user_id=user_id).order_by("-created_at").prefetch_related("prescription")
 
     async def delete_upload(self, upload_id: int, user_id: str) -> bool:
         """
