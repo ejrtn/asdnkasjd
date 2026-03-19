@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.formparsers import MultiPartParser
 from tortoise import Tortoise  # 추가됨
 
 from app.apis.v1 import api_v1_router
@@ -14,6 +15,10 @@ from app.core.config import config
 from app.core.http_client import http_client
 from app.core.mongodb import close_mongo_connection, connect_to_mongo
 from app.db.databases import TORTOISE_ORM
+
+# 파일 업로드 최대 크기: 10MB (Starlette 기본값 1MB)
+MultiPartParser.max_part_size = 1024 * 1024 * 10  # 10MB
+MultiPartParser.spool_max_size = 1024 * 1024 * 10  # 10MB
 
 logger = logging.getLogger("seed")
 logging.basicConfig(level=logging.INFO)

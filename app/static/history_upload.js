@@ -246,16 +246,19 @@ function generatePrescriptionDetailHtml(data) {
 }
 
 function generatePillDetailHtml(data) {
+    const ai = data.ai_extracted || {};
+    const img1 = ai.image1 || {};
+    const img2 = ai.image2 || {};
     const appearance = {
-        'text': (data.ai_extracted.image1.text || '-') + " , " + (data.ai_extracted.image2.text || '-'),
-        'color': data.ai_extracted.image1.color + " , " + data.ai_extracted.image2.color,
-        'shape': data.ai_extracted.image1.shape,
-        'formulation': data.ai_extracted.image1.formulation,
+        'text': (img1.text || '-') + " , " + (img2.text || '-'),
+        'color': (img1.color || '-') + " , " + (img2.color || '-'),
+        'shape': img1.shape || '-',
+        'formulation': img1.formulation || '-',
     };
     if (!data.candidates || data.candidates.length === 0) return `<div style="color: #64748b; padding: 20px 0;">분석된 처방전 데이터가 없습니다.</div>`;
     let html = `
         <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-            ${data.upload.map(u => `
+            ${(data.upload || []).filter(u => u && u.file_path).map(u => `
                 <img src="${u.file_path.replace("/app", "")}" 
                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: zoom-in;" 
                      onclick="window.showZoomModal(this.src)">

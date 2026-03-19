@@ -8,7 +8,7 @@ class DrugMaster(models.Model):
     """
 
     item_seq = fields.CharField(max_length=20, pk=True)  # 품목일련번호
-    item_name = fields.CharField(max_length=255)  # 품목명
+    item_name = fields.CharField(max_length=500)  # 품목명
     entp_name = fields.CharField(max_length=255)  # 업소명
 
     # 낱알식별 정보 관련 필드
