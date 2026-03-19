@@ -427,7 +427,12 @@ class GuideService:
 
     async def get_saved_guide(self, user: User | None = None, background_tasks=None) -> dict:
         if not user:
-            return {"user_current_status": "로그인이 필요합니다.", "activity": False}
+            return {
+                "user_current_status": "로그인이 필요합니다.",
+                "generated_content": {},
+                "activity": False,
+                "created_at": "",
+            }
 
         user_id_str = str(user.id)
 

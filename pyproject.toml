@@ -41,6 +41,11 @@ app = [
     "tortoise-orm>=0.25.3",
     "uvicorn>=0.40.0",
 ]
+ai = [
+    "firebase-admin>=6.0.0",
+    "tortoise-orm>=0.25.3",
+    "asyncmy>=0.2.11",
+]
 dev = [
     "coverage>=7.13.2",
     "mypy>=1.19.1",

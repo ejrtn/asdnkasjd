@@ -57,6 +57,11 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+ai = [
+    { name = "asyncmy" },
+    { name = "firebase-admin" },
+    { name = "tortoise-orm" },
+]
 app = [
     { name = "aerich" },
     { name = "asyncmy" },
@@ -105,6 +110,11 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+ai = [
+    { name = "asyncmy", specifier = ">=0.2.11" },
+    { name = "firebase-admin", specifier = ">=6.0.0" },
+    { name = "tortoise-orm", specifier = ">=0.25.3" },
+]
 app = [
     { name = "aerich", specifier = ">=0.9.2" },
     { name = "asyncmy", specifier = ">=0.2.11" },

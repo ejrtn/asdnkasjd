@@ -54,19 +54,14 @@ async def sync_drug_data_background():
         _cleanup_old_logs(log_dir)  # 7일 초과 로그 자동 삭제
         log_path = os.path.join(log_dir, f"drug_sync_{date.today().strftime('%Y%m%d')}.log")
 
-        # Windows에서 콘솔 창 없이 백그라운드 실행
-        creation_flags = 0
-        if os.name == "nt":
-            creation_flags = 0x08000000  # CREATE_NO_WINDOW
-
         log_file = open(log_path, "a", encoding="utf-8")
         proc = subprocess.Popen(
             [sys.executable, script_path],
             stdout=log_file,
             stderr=log_file,
             stdin=subprocess.DEVNULL,
-            close_fds=True,
-            creationflags=creation_flags,
+            cwd=os.getcwd(),
+            env={**os.environ, "PYTHONPATH": os.getcwd()},
         )
         log_file.close()  # Python 쪽 핸들은 닫아도 subprocess는 독립 fd 유지
 
