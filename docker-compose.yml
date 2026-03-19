@@ -44,15 +44,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2-1. MongoDB (챗봇 메시지 저장용)
+# 2-1. MongoDB (챗봇 메시지 저장용)
   mongodb:
     image: mongo:7
     container_name: mongodb
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ozcoding_chat
-      MONGO_INITDB_ROOT_PASSWORD: passwordpassword!@
-      MONGO_INITDB_DATABASE: ai_health_chat
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       TZ: 'Asia/Seoul'
     ports:
       - "27017:27017"
@@ -65,9 +65,9 @@ services:
         [
           "CMD",
           "mongosh",
-          "--host", "localhost",
-          "-u", "ozcoding_chat",
-          "-p", "passwordpassword!@",
+          "--host", "{MONGO_HOST}",
+          "-u", "{MONGO_INITDB_ROOT_USERNAME}",
+          "-p", "{MONGO_INITDB_ROOT_PASSWORD}",
           "--authenticationDatabase", "admin",
           "--eval", "db.adminCommand('ping')"
         ]

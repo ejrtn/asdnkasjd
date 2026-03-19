@@ -43,6 +43,38 @@ services:
       timeout: 5s
       retries: 5
 
+# 2-1. MongoDB (챗봇 메시지 저장용)
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      TZ: 'Asia/Seoul'
+    ports:
+      - "27017:27017"
+    networks:
+      - ws
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--host", "${MONGO_HOST}",
+          "-u", "${MONGO_INITDB_ROOT_USERNAME}",
+          "-p", "${MONGO_INITDB_ROOT_PASSWORD}",
+          "--authenticationDatabase", "admin",
+          "--eval", "db.adminCommand('ping')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   # 3. API Server (FastAPI)
   fastapi:
     container_name: fastapi
@@ -50,7 +82,7 @@ services:
     env_file: .env
     volumes:
       - static_volume:/app/templates
-      - media_volume:/app/media
+      - ./uploads:/app/uploads
     restart: always
     ports:
       - "8000:8000"
@@ -60,6 +92,8 @@ services:
       mysql:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      mongodb:
         condition: service_healthy
 
   # 4. AI Worker (Model 학습 및 추론)
@@ -109,6 +143,8 @@ services:
 volumes:
   mysql_data:
     name: mysql_data
+  mongodb_data:
+    name: mongodb_data
   static_volume:
     name: static_volume
   media_volume:
