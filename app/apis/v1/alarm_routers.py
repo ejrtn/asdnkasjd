@@ -22,6 +22,14 @@ from app.services.alarm import AlarmService
 alarm_router = APIRouter(prefix="/alarms", tags=["alarm"])
 
 
+def _to_kst_iso(dt: datetime | None) -> str | None:
+    if not dt:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    return dt.astimezone(ZoneInfo("Asia/Seoul")).isoformat()
+
+
 @alarm_router.get("", response_model=list[AlarmResponse])
 async def get_alarms(
     user: Annotated[User, Depends(get_request_user)],
@@ -160,6 +168,9 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
             title = "알람"
             body = "알람 시간이 되었습니다."
 
+        sent_at_kst = _to_kst_iso(history.sent_at)
+        snoozed_until_kst = _to_kst_iso(history.snoozed_until)
+
         items.append(
             {
                 "history_id": history.id,
@@ -167,8 +178,8 @@ async def get_due_alarms(user: Annotated[User, Depends(get_request_user)]) -> li
                 "alarm_type": alarm.alarm_type,
                 "title": title,
                 "body": body,
-                "sent_at": history.sent_at.isoformat() if history.sent_at else None,
-                "snoozed_until": history.snoozed_until.isoformat() if history.snoozed_until else None,
+                "sent_at": sent_at_kst,
+                "snoozed_until": snoozed_until_kst,
                 "snooze_count": history.snooze_count,
             }
         )

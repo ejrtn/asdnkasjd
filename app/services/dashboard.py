@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from openai import AsyncOpenAI
 
@@ -152,6 +153,8 @@ class DashboardService:
             bp_records, bs_records = await asyncio.gather(bp_task, bs_task)
 
             def is_today_kst(dt):
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=ZoneInfo("UTC"))
                 return dt.astimezone(KST).date() == today_kst
 
             today_bp = [r for r in bp_records if r.measure_type != "임의" and is_today_kst(r.created_at)]

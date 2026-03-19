@@ -1,6 +1,7 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from app.models.health_profile import (
     DietType,
@@ -58,6 +59,12 @@ class BloodPressureRecordResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_serializer("created_at")
+    def serialize_created_at(self, v: datetime, _info) -> str:
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=ZoneInfo("UTC"))
+        return v.astimezone(ZoneInfo("Asia/Seoul")).isoformat()
+
 
 class BloodSugarRecordResponse(BaseModel):
     id: int
@@ -66,6 +73,12 @@ class BloodSugarRecordResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, v: datetime, _info) -> str:
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=ZoneInfo("UTC"))
+        return v.astimezone(ZoneInfo("Asia/Seoul")).isoformat()
 
 
 class CurrentMedResponse(BaseModel):

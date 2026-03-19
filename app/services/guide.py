@@ -28,9 +28,9 @@ class GuideService:
     def _to_kst_str(dt: datetime | None) -> str:
         if not dt:
             return ""
-        raw = dt.replace(tzinfo=None)  # utc 로 간주하여 tzinfo 제거
-        utc = raw.replace(tzinfo=ZoneInfo("UTC"))  # 명시적으로 UTC로 설정
-        return utc.astimezone(ZoneInfo("Asia/Seoul")).isoformat()  # KST로 변환하여 ISO 포맷으로 반환
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+        return dt.astimezone(ZoneInfo("Asia/Seoul")).isoformat()
 
     # ==========================================
     # 모듈형 가이드 생성 (MEDICATION / DISEASE / PROFILE)
@@ -124,9 +124,8 @@ class GuideService:
     async def _save_modular_result(self, guide: LLMLifeGuide, field_name: str, content: dict) -> None:
         """모듈화된 결과를 특정 컬럼에 저장합니다."""
         setattr(guide, field_name, content)
-        # 모든 섹션이 채워졌는지 확인하여 activity 상태를 조정할 수도 있지만,
-        # 여기서는 단순히 섹션만 업데이트합니다.
-        await guide.save(update_fields=[field_name])
+        guide.updated_at = datetime.now(ZoneInfo("UTC"))
+        await guide.save(update_fields=[field_name, "updated_at"])
 
     async def _run_disease_guide_task(self, user_id: str) -> None:
         """질환 및 알레르기 가이드(section2) 생성"""
@@ -455,7 +454,7 @@ class GuideService:
                     "user_current_status": guide.user_current_status,
                     "generated_content": fixed_content,
                     "activity": False,
-                    "created_at": self._to_kst_str(guide.created_at),
+                    "created_at": self._to_kst_str(guide.updated_at),
                 }
 
         # [수정] 3. 전체 섹션 생성 트리거 (guide 객체를 직접 활용)

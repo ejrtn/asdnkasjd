@@ -51,7 +51,7 @@ TORTOISE_ORM = {
         },
     },
     "use_tz": True,
-    "timezone": "Asia/Seoul",
+    "timezone": "UTC",
 }
 
 
@@ -75,7 +75,7 @@ def initialize_tortoise(app: FastAPI) -> None:
             "connections": {"default": "sqlite://:memory:"},
             "apps": {"models": {"models": TORTOISE_APP_MODELS}},
             "use_tz": True,
-            "timezone": "Asia/Seoul",
+            "timezone": "UTC",
         }
         register_tortoise(
             app,
