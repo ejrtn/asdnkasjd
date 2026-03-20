@@ -70,12 +70,12 @@ class Config(BaseSettings):
     # Naver Social Login
     NAVER_CLIENT_ID: str = ""
     NAVER_CLIENT_SECRET: str = ""
-    NAVER_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/naver/callback"
+    NAVER_REDIRECT_URI: str = ""
 
     # Google Social Login
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str = ""
 
     # Security & Encryption
     AES_SECRET_KEY: str = f"aes-default-secret-{uuid.uuid4().hex[:16]}"

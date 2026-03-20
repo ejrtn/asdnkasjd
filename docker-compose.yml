@@ -65,9 +65,9 @@ services:
         [
           "CMD",
           "mongosh",
-          "--host", "{MONGO_HOST}",
-          "-u", "{MONGO_INITDB_ROOT_USERNAME}",
-          "-p", "{MONGO_INITDB_ROOT_PASSWORD}",
+          "--host", "${MONGO_HOST}",
+          "-u", "${MONGO_INITDB_ROOT_USERNAME}",
+          "-p", "${MONGO_INITDB_ROOT_PASSWORD}",
           "--authenticationDatabase", "admin",
           "--eval", "db.adminCommand('ping')"
         ]
