@@ -592,6 +592,64 @@ window.addEventListener('load', () => {
     // 3. 알람 폴링 (FCM 백업)
     startDueAlarmPolling();
 });
+
+// =====================
+// 공통 앱 컨펌 (커스텀 모달)
+// =====================
+/**
+ * 브라우저 기본 confirm()을 대체하는 커스텀 컨펌 모달
+ * @param {string} message 표시할 메시지
+ * @param {function} onConfirm '네' 클릭 시 콜백
+ * @param {function} onCancel '아니오' 또는 닫기 시 콜백 (선택)
+ * @param {string} title 제목 (기본: '확인')
+ */
+window.showAppConfirm = function(message, onConfirm = null, onCancel = null, title = '확인') {
+    const overlay = document.getElementById('app-confirm');
+    const titleEl = document.getElementById('app-confirm-title');
+    const messageEl = document.getElementById('app-confirm-message');
+    const yesBtn = document.getElementById('app-confirm-yes');
+    const noBtn = document.getElementById('app-confirm-no');
+
+    if (!overlay || !titleEl || !messageEl || !yesBtn || !noBtn) return Promise.resolve(false);
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    // 기존 이벤트 제거 (클론 방식)
+    const newYesBtn = yesBtn.cloneNode(true);
+    const newNoBtn = noBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+    noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+    const closeConfirm = () => {
+        overlay.classList.remove('show');
+    };
+
+    return new Promise((resolve) => {
+        newYesBtn.addEventListener('click', () => {
+            closeConfirm();
+            if (typeof onConfirm === 'function') onConfirm();
+            resolve(true);
+        });
+
+        const handleCancel = () => {
+            closeConfirm();
+            if (typeof onCancel === 'function') onCancel();
+            resolve(false);
+        };
+
+        newNoBtn.addEventListener('click', handleCancel);
+
+        overlay.classList.add('show');
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                handleCancel();
+            }
+        };
+    });
+};
+
 // =====================
 // 화면 노출 시 오디오 리셋 (모바일 백그라운드 전환 등 방지 안정화)
 // =====================

@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   recordList.addEventListener("click", async (e) => {
     if (e.target.classList.contains('data-del')) {
-      if (confirm("정말 삭제하시겠습니까?")) {
+      showAppConfirm("정말 삭제하시겠습니까?", async () => {
         const response = await BloodNotebook.fetchWithAuthSafe('/api/v1/health/blood-sugar/' + e.target.title, {
           method: 'DELETE',
         });
@@ -358,9 +358,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await response.json();
         if (result.status === 'success') {
           await loadBloodSugarRecords();
-          sugar_change_cnt -= 1
+          sugar_change_cnt -= 1;
         }
-      }
+      }, null, '혈당 기록 삭제');
     }
   });
 });

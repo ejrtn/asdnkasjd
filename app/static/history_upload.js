@@ -115,42 +115,19 @@ function renderTreeHistory(container, historyList) {
 window.deleteHistoryItem = function (uploadId, event) {
     if (event) event.stopPropagation();
 
-    // 커스텀 컨펌 모달 생성 및 표시
-    let overlay = document.getElementById('confirm-modal-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'confirm-modal-overlay';
-        overlay.className = 'confirm-overlay';
-        overlay.innerHTML = `
-            <div class="confirm-modal">
-                <div class="confirm-icon">🗑️</div>
-                <div class="confirm-title">기록 삭제</div>
-                <div class="confirm-message">정말로 이 기록을 삭제하시겠습니까?<br>삭제된 데이터는 복구할 수 없습니다.</div>
-                <div class="confirm-buttons">
-                    <button class="confirm-btn confirm-btn-no" id="confirm-btn-no">아니오</button>
-                    <button class="confirm-btn confirm-btn-yes" id="confirm-btn-yes">네, 삭제합니다</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-    }
-
-    const yesBtn = overlay.querySelector('#confirm-btn-yes');
-    const noBtn = overlay.querySelector('#confirm-btn-no');
-
-    const closeModal = () => {
-        overlay.classList.remove('show');
-    };
-
-    yesBtn.onclick = async () => {
-        closeModal();
+    showAppConfirm("정말로 이 기록을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.", async () => {
         try {
             const response = await fetchWithAuth(`/api/v1/uploads/${uploadId}`, {
                 method: 'DELETE'
             });
 
             if (response.ok) {
-                window.showToast("기록이 성공적으로 삭제되었습니다.");
+                if (typeof window.showToast === 'function') {
+                    window.showToast("기록이 성공적으로 삭제되었습니다.");
+                } else {
+                    showAppToast("기록이 삭제되었습니다.", "success", "히스토리");
+                }
+                
                 // 로컬 데이터에서도 삭제 후 리렌더링
                 uploadHistoryData = uploadHistoryData.filter(item => item.id != uploadId);
                 filterHistory();
@@ -169,13 +146,7 @@ window.deleteHistoryItem = function (uploadId, event) {
             console.error("삭제 요청 중 에러:", e);
             if (typeof showAppToast === 'function') showAppToast("삭제 중 오류가 발생했습니다.", "warn", "오류");
         }
-    };
-
-    noBtn.onclick = closeModal;
-    overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
-
-    // 모달 표시
-    setTimeout(() => overlay.classList.add('show'), 10);
+    }, null, "기록 삭제");
 };
 
 window.showHistoryAnalysis = async function(uploadId, element, type) {

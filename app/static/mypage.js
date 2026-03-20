@@ -262,7 +262,7 @@ async function withdraw() {
     return;
   }
 
-  if (confirm("정말로 탈퇴하시겠습니까? 데이터는 복구되지 않습니다.")) {
+  showAppConfirm("정말로 탈퇴하시겠습니까? 데이터는 복구되지 않습니다.", async () => {
     const response = await fetchWithAuth('/api/v1/users/me', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -279,7 +279,7 @@ async function withdraw() {
     } else if (response) {
       mypageToast("error", "비밀번호가 올바르지 않습니다.");
     }
-  }
+  }, null, '회원 탈퇴');
 }
 
 document.querySelectorAll(".mypage_container .mypage-move").forEach((item) => {
