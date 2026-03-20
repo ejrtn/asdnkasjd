@@ -646,19 +646,19 @@ async function deleteAlarm(alarmId) {
         return;
     }
 
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    showAppConfirm('정말 삭제하시겠습니까?', async () => {
+        const response = await fetchWithAuth(`/api/v1/alarms/${alarmId}`, { method: 'DELETE' });
+        if (!response) return;
 
-    const response = await fetchWithAuth(`/api/v1/alarms/${alarmId}`, { method: 'DELETE' });
-    if (!response) return;
-
-    if (response.ok) {
-        await loadAlarms();
-        if (selectedMedId) showMedDetail(selectedMedId);
-        renderMeds();
-        showAppToast('복약 알람이 삭제되었어요.', 'success', '복약 알람');
-    } else {
-        showAppToast('복약 알람을 삭제할 수 없습니다.', 'warn', '복약 알람');
-    }
+        if (response.ok) {
+            await loadAlarms();
+            if (selectedMedId) showMedDetail(selectedMedId);
+            renderMeds();
+            showAppToast('복약 알람이 삭제되었어요.', 'success', '복약 알람');
+        } else {
+            showAppToast('복약 알람을 삭제할 수 없습니다.', 'warn', '복약 알람');
+        }
+    }, null, '복약 알람');
 }
 
 async function toggleHealthAlarm(type, prefix) {

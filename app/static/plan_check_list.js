@@ -69,7 +69,7 @@
     // 아이템 삭제 함수
     async function deleteItem(btn) {
         const msg = "정말 삭제하시겠습니까?\n\n(삭제된 항목은 '알람 동기화' 또는 'AI 추천 다시 받기' 버튼으로 다시 불러올 수 있습니다.)";
-        if (confirm(msg)) {
+        showAppConfirm(msg, async () => {
             const itemId = btn.closest('.plan-item').dataset.id;
             const response = await fetchWithAuth('/api/v1/plan_check_list/' + itemId, {
                 method: 'DELETE',
@@ -80,7 +80,7 @@
             }
             btn.closest('.plan-item').remove();
             updateProgress();
-        }
+        }, null, '미션 삭제');
     }
 
     // 알람 동기화 함수
@@ -94,10 +94,10 @@
                 method: 'POST'
             });
             if (response && response.ok) {
-                alert('알람 동기화가 완료되었습니다.');
+                showAppToast('알람 동기화가 완료되었습니다.', 'success', '알람 동기화');
                 loadItems();
             } else {
-                alert('동기화에 실패했습니다.');
+                showAppToast('동기화에 실패했습니다.', 'warn', '알람 동기화');
             }
         } catch (e) {
             console.error(e);
@@ -118,10 +118,10 @@
                 method: 'POST'
             });
             if (response && response.ok) {
-                alert('AI 추천 플랜이 새롭게 생성되었습니다.');
+                showAppToast('AI 추천 플랜이 새롭게 생성되었습니다.', 'success', 'AI 추천');
                 loadItems();
             } else {
-                alert('추천 플랜 생성에 실패했습니다.');
+                showAppToast('추천 플랜 생성에 실패했습니다.', 'warn', 'AI 추천');
             }
         } catch (e) {
             console.error(e);

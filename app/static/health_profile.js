@@ -20,56 +20,7 @@ function showToast(message, type = "info") {
 }
 
 function openConfirmModal(message = "건강정보를 저장하시겠습니까?") {
-  const modal = document.getElementById("health-confirm-modal");
-  const messageEl = document.getElementById("health-confirm-message");
-  const okBtn = document.getElementById("health-confirm-ok");
-  const cancelBtn = document.getElementById("health-confirm-cancel");
-
-  if (!modal || !messageEl || !okBtn || !cancelBtn) {
-    return Promise.resolve(window.confirm(message));
-  }
-
-  messageEl.textContent = message;
-  modal.hidden = false;
-
-  return new Promise((resolve) => {
-    const cleanup = () => {
-      modal.hidden = true;
-      okBtn.removeEventListener("click", handleOk);
-      cancelBtn.removeEventListener("click", handleCancel);
-      modal.removeEventListener("click", handleBackdrop);
-      document.removeEventListener("keydown", handleKeydown);
-    };
-
-    const handleOk = () => {
-      cleanup();
-      resolve(true);
-    };
-
-    const handleCancel = () => {
-      cleanup();
-      resolve(false);
-    };
-
-    const handleBackdrop = (e) => {
-      if (e.target === modal) {
-        cleanup();
-        resolve(false);
-      }
-    };
-
-    const handleKeydown = (e) => {
-      if (e.key === "Escape") {
-        cleanup();
-        resolve(false);
-      }
-    };
-
-    okBtn.addEventListener("click", handleOk);
-    cancelBtn.addEventListener("click", handleCancel);
-    modal.addEventListener("click", handleBackdrop);
-    document.addEventListener("keydown", handleKeydown);
-  });
+  return window.showAppConfirm(message, null, null, "건강정보 저장");
 }
 
 // 탭 전환 함수

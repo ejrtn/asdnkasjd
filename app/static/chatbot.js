@@ -329,44 +329,42 @@ function addEmergencyAlert() {
 
 // 챗 종료 기능
 async function endChat() {
-  if (!confirm('챗을 종료하시겠습니까? 모든 대화 내용이 삭제됩니다.')) {
-    return;
-  }
-
-  // 백엔드 세션 종료 API 호출
-  try {
-    const token = getAuthToken();
-    if (chatbot.sessionId && token) {
-      await fetch('/api/v1/chat/end', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          session_id: chatbot.sessionId,
-        }),
-      });
+  showAppConfirm('챗을 종료하시겠습니까? 모든 대화 내용이 삭제됩니다.', async () => {
+    // 백엔드 세션 종료 API 호출
+    try {
+      const token = getAuthToken();
+      if (chatbot.sessionId && token) {
+        await fetch('/api/v1/chat/end', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            session_id: chatbot.sessionId,
+          }),
+        });
+      }
+    } catch (error) {
+      console.error('챗 종료 오류:', error);
     }
-  } catch (error) {
-    console.error('챗 종료 오류:', error);
-  }
 
-  // 프론트 상태 초기화
-  chatbot.sessionId = null;
-  chatbot.messages = [];
-  localStorage.removeItem('chatbot_session_id');
+    // 프론트 상태 초기화
+    chatbot.sessionId = null;
+    chatbot.messages = [];
+    localStorage.removeItem('chatbot_session_id');
 
-  // 메시지 창 초기화
-  const messagesContainer = document.getElementById('chatbot-messages');
-  if (messagesContainer) {
-    messagesContainer.innerHTML = '';
-  }
+    // 메시지 창 초기화
+    const messagesContainer = document.getElementById('chatbot-messages');
+    if (messagesContainer) {
+      messagesContainer.innerHTML = '';
+    }
 
-  // 환영 메시지 다시 표시
-  addMessage('assistant', '안녕하세요! 👋 Cloud9 Care 챗봇입니다. 무엇을 도와드릴까요?');
+    // 환영 메시지 다시 표시
+    addMessage('assistant', '안녕하세요! 👋 Cloud9 Care 챗봇입니다. 무엇을 도와드릴까요?');
 
-  showAppToast('챗이 종료되었습니다.', 'info', '챗봇');
+    showAppToast('챗이 종료되었습니다.', 'info', '챗봇');
+  }, null, '챗 종료');
 }
 
 // TTS 토글 (최신 답변만 읽기)
