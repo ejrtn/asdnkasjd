@@ -36,7 +36,8 @@
         <section class="c9-soft-card mypage-card">
           <div class="c9-section-head">
             <h3 class="c9-section-title">
-              <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);">👤</span>
+              <span class="c9-section-title-icon"
+                style="background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);">👤</span>
               기본 회원 정보
             </h3>
             <span class="c9-badge c9-badge-primary">프로필</span>
@@ -88,7 +89,8 @@
           <section class="c9-soft-card mypage-card">
             <div class="c9-section-head">
               <h3 class="c9-section-title">
-                <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);">🔔</span>
+                <span class="c9-section-title-icon"
+                  style="background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);">🔔</span>
                 수신 및 동의 설정
               </h3>
               <span class="c9-badge c9-badge-primary">알림 설정</span>
@@ -102,11 +104,7 @@
                 </div>
                 <div class="mypage-alarm-toggle" id="alarm-toggle-wrap">
                   <span class="mypage-alarm-status" id="alarm-toggle-status">ON</span>
-                  <button
-                    type="button"
-                    class="mypage-switch is-on"
-                    id="alarm-toggle-btn"
-                    aria-pressed="true"
+                  <button type="button" class="mypage-switch is-on" id="alarm-toggle-btn" aria-pressed="true"
                     aria-label="알람 전체 실행 켜기/끄기">
                   </button>
                   <input type="checkbox" id="alarm_tf_checkbox" style="display:none;">
@@ -138,7 +136,8 @@
 
                 <div class="agreement-item">
                   <div class="agreement-main">
-                    <input type="checkbox" class="is_marketing_agreed" id="is_marketing_agreed" name="is_marketing_agreed">
+                    <input type="checkbox" class="is_marketing_agreed" id="is_marketing_agreed"
+                      name="is_marketing_agreed">
                     <div class="agreement-copy">
                       <div class="agreement-title">마케팅 정보 수신 동의(선택)</div>
                       <div class="agreement-desc">이벤트, 신규 기능, 추천 정보를 받아볼 수 있어요.</div>
@@ -149,7 +148,8 @@
 
                 <div class="agreement-item">
                   <div class="agreement-main">
-                    <input type="checkbox" class="agree-item is_alarm_agreed" id="is_alarm_agreed" name="is_alarm_agreed">
+                    <input type="checkbox" class="agree-item is_alarm_agreed" id="is_alarm_agreed"
+                      name="is_alarm_agreed">
                     <div class="agreement-copy">
                       <div class="agreement-title">약 복용 알람 정보 수신 동의(선택)</div>
                       <div class="agreement-desc">복약 관련 알림과 건강 루틴 안내를 받아볼 수 있어요.</div>
@@ -158,14 +158,16 @@
                   <span class="item-open">보기</span>
                 </div>
               </div>
+
+              <div class="mypage-box-actions">
+                <button type="submit" form="profileForm" class="mypage-box-action mypage-box-action-primary">정보
+                  수정하기</button>
+                <button type="button" class="mypage-box-action mypage-box-action-neutral"
+                  onclick="logout()">로그아웃</button>
+              </div>
             </div>
           </section>
         </div>
-      </div>
-      <!-- 하단 액션 버튼 영역 -->
-      <div class="mypage-footer-actions">
-        <button type="submit" form="profileForm" class="mypage-box-action mypage-box-action-primary">정보 수정하기</button>
-        <button type="button" class="mypage-box-action mypage-box-action-neutral" onclick="logout()">로그아웃</button>
       </div>
     </div>
 
@@ -173,7 +175,8 @@
       <section class="c9-soft-card mypage-card">
         <div class="c9-section-head">
           <h3 class="c9-section-title">
-            <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">🔑</span>
+            <span class="c9-section-title-icon"
+              style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">🔑</span>
             비밀번호 변경
           </h3>
           <span class="c9-badge c9-badge-primary">보안 설정</span>
@@ -195,7 +198,8 @@
           <p class="mypage-help">안전한 비밀번호를 위해 영문, 숫자, 특수문자 조합 사용을 권장합니다.</p>
 
           <div class="mypage-box-actions">
-            <button type="button" class="mypage-box-action mypage-box-action-primary" onclick="changePassword()">비밀번호 변경</button>
+            <button type="button" class="mypage-box-action mypage-box-action-primary" onclick="changePassword()">비밀번호
+              변경</button>
             <button type="button" class="mypage-box-action mypage-box-action-neutral mypage-move">마이페이지로 돌아가기</button>
           </div>
         </div>
@@ -206,7 +210,8 @@
       <section class="c9-soft-card mypage-card">
         <div class="c9-section-head">
           <h3 class="c9-section-title">
-            <span class="c9-section-title-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">⚠️</span>
+            <span class="c9-section-title-icon"
+              style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">⚠️</span>
             회원 탈퇴
           </h3>
           <span class="c9-badge c9-badge-danger">주의</span>

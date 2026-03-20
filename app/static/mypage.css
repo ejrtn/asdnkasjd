@@ -105,11 +105,12 @@
   align-items: start;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1360px) {
   .mypage-grid {
     grid-template-columns: 1fr;
   }
 }
+
 
 .mypage-card {
   padding: 28px;

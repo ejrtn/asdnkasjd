@@ -10,6 +10,21 @@
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="{{ static_v('base.css') }}">
     <link rel="stylesheet" href="{{ static_v('chatbot.css') }}">
+    <style>
+        .app-footer {
+            margin-top: 60px;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+            color: rgba(91, 85, 111, 0.4);
+            font-size: 12px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+        .app-footer .footer-info {
+            margin-bottom: 4px;
+        }
+    </style>
 
     {% block head %}{% endblock %}
 </head>
@@ -246,6 +261,15 @@
 
         <main class="main">
             {% block content %}{% endblock %}
+
+            <footer class="app-footer">
+                <div class="footer-info">
+                    오즈시 에메랄드구 구름로 404 (마법동) &nbsp;&nbsp;&nbsp;&nbsp; 대표전화 031-AI-CARE
+                </div>
+                <div class="copyright">
+                    COPYRIGHT(C) CLOUD9_CARE. ALL RIGHT RESERVED.
+                </div>
+            </footer>
         </main>
     </div>
 
