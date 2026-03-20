@@ -212,5 +212,16 @@
 
 @media (max-width: 768px) {
     .c9-page-title, .c9-muted { text-align: left !important; width: 100%; }
+    .prescription-card { padding: 16px; } /* 카드 여백 축소 */
+    .c9-section-title { font-size: 1.1rem; flex-wrap: wrap; } /* 제목 줄바꿈 허용 */
     body.zoom-large { font-size: 1.2em; }
+}
+
+@media (max-width: 480px) {
+    .prescription-card { padding: 12px; }
+    .c9-page-title { font-size: 1.25rem; }
+    .prescription-tabs { gap: 8px; }
+    .prescription-tab { padding: 15px 10px; min-height: 90px; }
+    .prescription-tab-title { font-size: 15px; }
+    .prescription-tab-icon { font-size: 24px; }
 }

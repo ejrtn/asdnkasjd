@@ -24,7 +24,8 @@
 #success-rate {
     font-size: 28px;
     font-weight: 900;
-    color: #6366f1; /* 테마 색상 (Indigo Blue) */
+    color: #6366f1;
+    /* 테마 색상 (Indigo Blue) */
     line-height: 1;
 }
 
@@ -138,9 +139,11 @@
 .plan-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .plan-list::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .plan-list::-webkit-scrollbar-thumb {
     background: #e2e8f0;
     border-radius: 10px;
@@ -265,6 +268,7 @@
     font-size: 15px;
     outline: none;
     transition: border-color 0.2s;
+    min-width: 0;
 }
 
 #new-plan-input:focus {
@@ -298,31 +302,38 @@
 
 /* ===== 모바일 확대 전용 보정 ===== */
 @media (max-width: 768px) {
-  body.zoom-large #success-rate {
-    font-size: 34px;
-  }
-  body.zoom-large .success-rate-caption {
-    font-size: 14px;
-  }
-  body.zoom-large .plan-text {
-    font-size: 18px;
-  }
-  body.zoom-large .plan-tag {
-    font-size: 14px;
-  }
-  body.zoom-large .btn-desc {
-    font-size: 14px;
-  }
-  body.zoom-large .sync-btn {
-    font-size: 17px;
-    min-height: 46px;
-  }
-  body.zoom-large .plan-input-group input {
-    font-size: 17px;
-    min-height: 46px;
-  }
-  body.zoom-large .add-btn {
-    font-size: 17px;
-    min-height: 46px;
-  }
+    body.zoom-large #success-rate {
+        font-size: 34px;
+    }
+
+    body.zoom-large .success-rate-caption {
+        font-size: 14px;
+    }
+
+    body.zoom-large .plan-text {
+        font-size: 18px;
+    }
+
+    body.zoom-large .plan-tag {
+        font-size: 14px;
+    }
+
+    body.zoom-large .btn-desc {
+        font-size: 14px;
+    }
+
+    body.zoom-large .sync-btn {
+        font-size: 17px;
+        min-height: 46px;
+    }
+
+    body.zoom-large .plan-input-group input {
+        font-size: 17px;
+        min-height: 46px;
+    }
+
+    body.zoom-large .add-btn {
+        font-size: 17px;
+        min-height: 46px;
+    }
 }

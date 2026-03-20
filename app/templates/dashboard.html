@@ -131,6 +131,8 @@
     font-size: 15px;
     min-height: 42px;
     padding: 0 42px 0 16px;
+    width: auto;
+    min-width: 100px;
   }
 
   #insight-1,
@@ -277,7 +279,9 @@
       font-size: 16px;
       min-height: 46px;
       padding: 0 40px 0 14px;
-      max-width: 110px;
+      width: auto;
+      min-width: 110px;
+      max-width: 140px;
     }
   }
 </style>
@@ -457,7 +461,7 @@
     const res = await fetchWithAuth('/api/v1/ocr/last-prescription', { method: 'GET' });
     if (res.ok) {
       data = await res.json()
-      if(data.length == 0){
+      if (data.length == 0) {
         document.querySelector(".hospital-name").innerHTML = '데이터가 존재하지 않습니다.'
         return;
       }
@@ -496,7 +500,7 @@
         document.getElementById('insight-1').textContent = data.result[0];
         document.getElementById('insight-2').textContent = data.result[1];
         document.getElementById('insight-3').textContent = data.result[2];
-        document.getElementById('insight-0').style.display='none'
+        document.getElementById('insight-0').style.display = 'none'
         document.getElementById('insight-1').classList.add("open")
         document.getElementById('insight-2').classList.add("open")
         document.getElementById('insight-3').classList.add("open")
